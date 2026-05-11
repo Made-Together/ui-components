@@ -2,6 +2,7 @@
 
 # Dependencies
 node_modules
+.pnpm-store
 .pnp
 .pnp.js
 
@@ -17,6 +18,9 @@ coverage
 
 # Turbo
 .turbo
+
+# Biome
+.biome
 
 # Vercel
 .vercel
