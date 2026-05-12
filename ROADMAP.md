@@ -11,4 +11,5 @@
 - [ ] Swappable
 - [ ] TextReveal
 - [ ] TextSplit
+- [ ] NumberFlow
 - [ ] FixedScrollableArea
