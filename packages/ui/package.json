@@ -9,8 +9,9 @@
   ],
   "exports": {
     "./*": {
-      "types": "./dist/*.d.mts",
-      "import": "./dist/*.mjs"
+      "types": "./dist/*/index.d.mts",
+      "import": "./dist/*/index.mjs",
+      "require": "./dist/*/index.cjs"
     }
   },
   "scripts": {

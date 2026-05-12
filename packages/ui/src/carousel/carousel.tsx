@@ -28,10 +28,6 @@ type CarouselAutoplay = boolean | AutoplayOptionsType;
 interface CarouselContextValue {
   emblaRef: EmblaRef;
   emblaApi: EmblaApi;
-  selectedIndex: number;
-  scrollSnaps: number[];
-  canScrollPrev: boolean;
-  canScrollNext: boolean;
   scrollPrev: () => void;
   scrollNext: () => void;
   scrollTo: (index: number) => void;
@@ -47,6 +43,72 @@ function useCarousel() {
     );
   }
   return ctx;
+}
+
+/**
+ * Subscribes to embla events and returns whether the given snap index is the
+ * selected one. The component only re-renders on the two transitions
+ * (becoming active / becoming inactive), not on every slide change.
+ */
+function useIsSelectedSnap(index: number | undefined): boolean {
+  const { emblaApi } = useCarousel();
+  const [selected, setSelected] = useState(() => index === 0);
+  useEffect(() => {
+    if (!emblaApi || index === undefined) return;
+    const update = () => setSelected(emblaApi.selectedScrollSnap() === index);
+    update();
+    emblaApi.on("select", update);
+    emblaApi.on("reInit", update);
+    return () => {
+      emblaApi.off("select", update);
+      emblaApi.off("reInit", update);
+    };
+  }, [emblaApi, index]);
+  return selected;
+}
+
+/**
+ * Subscribes to embla events for `canScrollPrev`/`canScrollNext`. Components
+ * only re-render when the flag actually flips (typically only at the edges).
+ */
+function useCanScroll(direction: "prev" | "next"): boolean {
+  const { emblaApi } = useCarousel();
+  const [can, setCan] = useState(false);
+  useEffect(() => {
+    if (!emblaApi) return;
+    const read =
+      direction === "prev"
+        ? () => emblaApi.canScrollPrev()
+        : () => emblaApi.canScrollNext();
+    const update = () => setCan(read());
+    update();
+    emblaApi.on("select", update);
+    emblaApi.on("reInit", update);
+    return () => {
+      emblaApi.off("select", update);
+      emblaApi.off("reInit", update);
+    };
+  }, [emblaApi, direction]);
+  return can;
+}
+
+/**
+ * Subscribes to embla `reInit` for the scroll snap list (the only event that
+ * can change snap count/positions).
+ */
+function useScrollSnaps(): number[] {
+  const { emblaApi } = useCarousel();
+  const [snaps, setSnaps] = useState<number[]>([]);
+  useEffect(() => {
+    if (!emblaApi) return;
+    const update = () => setSnaps(emblaApi.scrollSnapList());
+    update();
+    emblaApi.on("reInit", update);
+    return () => {
+      emblaApi.off("reInit", update);
+    };
+  }, [emblaApi]);
+  return snaps;
 }
 
 interface CarouselRootProps extends ComponentPropsWithoutRef<"div"> {
@@ -84,10 +146,6 @@ const Root = forwardRef<HTMLDivElement, CarouselRootProps>(
     }, [plugins, autoplay]);
 
     const [emblaRef, emblaApi] = useEmblaCarousel(options, resolvedPlugins);
-    const [selectedIndex, setSelectedIndex] = useState(0);
-    const [scrollSnaps, setScrollSnaps] = useState<number[]>([]);
-    const [canScrollPrev, setCanScrollPrev] = useState(false);
-    const [canScrollNext, setCanScrollNext] = useState(false);
 
     const scrollPrev = useCallback(() => emblaApi?.scrollPrev(), [emblaApi]);
     const scrollNext = useCallback(() => emblaApi?.scrollNext(), [emblaApi]);
@@ -95,23 +153,6 @@ const Root = forwardRef<HTMLDivElement, CarouselRootProps>(
       (index: number) => emblaApi?.scrollTo(index),
       [emblaApi],
     );
-
-    useEffect(() => {
-      if (!emblaApi) return;
-      const sync = () => {
-        setSelectedIndex(emblaApi.selectedScrollSnap());
-        setScrollSnaps(emblaApi.scrollSnapList());
-        setCanScrollPrev(emblaApi.canScrollPrev());
-        setCanScrollNext(emblaApi.canScrollNext());
-      };
-      sync();
-      emblaApi.on("select", sync);
-      emblaApi.on("reInit", sync);
-      return () => {
-        emblaApi.off("select", sync);
-        emblaApi.off("reInit", sync);
-      };
-    }, [emblaApi]);
 
     useEffect(() => {
       if (!emblaApi) return;
@@ -123,20 +164,13 @@ const Root = forwardRef<HTMLDivElement, CarouselRootProps>(
       onApiChange?.(emblaApi);
     }, [emblaApi, onApiChange]);
 
+    const contextValue = useMemo<CarouselContextValue>(
+      () => ({ emblaRef, emblaApi, scrollPrev, scrollNext, scrollTo }),
+      [emblaRef, emblaApi, scrollPrev, scrollNext, scrollTo],
+    );
+
     return (
-      <CarouselContext.Provider
-        value={{
-          emblaRef,
-          emblaApi,
-          selectedIndex,
-          scrollSnaps,
-          canScrollPrev,
-          canScrollNext,
-          scrollPrev,
-          scrollNext,
-          scrollTo,
-        }}
-      >
+      <CarouselContext.Provider value={contextValue}>
         <div
           ref={ref}
           data-slot="carousel-root"
@@ -181,8 +215,7 @@ interface CarouselSlideProps extends ComponentPropsWithoutRef<"div"> {
 
 const Slide = forwardRef<HTMLDivElement, CarouselSlideProps>(
   function CarouselSlide({ index, ...rest }, ref) {
-    const { selectedIndex } = useCarousel();
-    const isActive = index !== undefined && index === selectedIndex;
+    const isActive = useIsSelectedSnap(index);
     return (
       <div
         ref={ref}
@@ -200,7 +233,8 @@ const Previous = forwardRef<
   HTMLButtonElement,
   ComponentPropsWithoutRef<"button">
 >(function CarouselPrevious({ onClick, disabled, type, ...rest }, ref) {
-  const { scrollPrev, canScrollPrev } = useCarousel();
+  const { scrollPrev } = useCarousel();
+  const canScrollPrev = useCanScroll("prev");
   return (
     <button
       ref={ref}
@@ -220,7 +254,8 @@ const Previous = forwardRef<
 
 const Next = forwardRef<HTMLButtonElement, ComponentPropsWithoutRef<"button">>(
   function CarouselNext({ onClick, disabled, type, ...rest }, ref) {
-    const { scrollNext, canScrollNext } = useCarousel();
+    const { scrollNext } = useCarousel();
+    const canScrollNext = useCanScroll("next");
     return (
       <button
         ref={ref}
@@ -254,7 +289,7 @@ const Navigation = forwardRef<HTMLElement, CarouselNavigationProps>(
     { children, "aria-label": ariaLabel = "Carousel navigation", ...rest },
     ref,
   ) {
-    const { scrollSnaps } = useCarousel();
+    const scrollSnaps = useScrollSnaps();
     return (
       <nav
         ref={ref}
@@ -284,8 +319,8 @@ const NavigationItem = forwardRef<
   { index, onClick, children, type, "aria-label": ariaLabel, ...rest },
   ref,
 ) {
-  const { selectedIndex, scrollTo } = useCarousel();
-  const selected = index === selectedIndex;
+  const { scrollTo } = useCarousel();
+  const selected = useIsSelectedSnap(index);
   return (
     <button
       ref={ref}
