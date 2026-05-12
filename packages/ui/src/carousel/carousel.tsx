@@ -1,5 +1,8 @@
 "use client";
 
+import Autoplay, {
+  type AutoplayOptionsType,
+} from "embla-carousel-autoplay";
 import useEmblaCarousel, {
   type UseEmblaCarouselType,
 } from "embla-carousel-react";
@@ -11,6 +14,7 @@ import {
   useCallback,
   useContext,
   useEffect,
+  useMemo,
   useState,
 } from "react";
 
@@ -18,6 +22,7 @@ type EmblaRef = UseEmblaCarouselType[0];
 type EmblaApi = UseEmblaCarouselType[1];
 type EmblaOptions = Parameters<typeof useEmblaCarousel>[0];
 type EmblaPlugins = Parameters<typeof useEmblaCarousel>[1];
+type CarouselAutoplay = boolean | AutoplayOptionsType;
 
 interface CarouselContextValue {
   emblaRef: EmblaRef;
@@ -45,15 +50,38 @@ function useCarousel() {
 interface CarouselRootProps extends ComponentPropsWithoutRef<"div"> {
   options?: EmblaOptions;
   plugins?: EmblaPlugins;
+  /**
+   * Autoplay configuration. Defaults to `true` (autoplay enabled with the
+   * plugin's defaults). Pass `false` to disable, or an options object to
+   * override individual settings. If you supply your own `Autoplay()` instance
+   * via the `plugins` prop, it takes precedence and this prop is ignored.
+   */
+  autoplay?: CarouselAutoplay;
   onApiChange?: (api: EmblaApi) => void;
 }
 
 const Root = forwardRef<HTMLDivElement, CarouselRootProps>(
   function CarouselRoot(
-    { options, plugins, onApiChange, children, ...rest },
+    {
+      options,
+      plugins,
+      autoplay = true,
+      onApiChange,
+      children,
+      ...rest
+    },
     ref,
   ) {
-    const [emblaRef, emblaApi] = useEmblaCarousel(options, plugins);
+    const resolvedPlugins = useMemo(() => {
+      const list = plugins ? [...plugins] : [];
+      const userHasAutoplay = list.some((p) => p?.name === "autoplay");
+      if (autoplay !== false && !userHasAutoplay) {
+        list.push(Autoplay(typeof autoplay === "object" ? autoplay : {}));
+      }
+      return list;
+    }, [plugins, autoplay]);
+
+    const [emblaRef, emblaApi] = useEmblaCarousel(options, resolvedPlugins);
     const [selectedIndex, setSelectedIndex] = useState(0);
     const [canScrollPrev, setCanScrollPrev] = useState(false);
     const [canScrollNext, setCanScrollNext] = useState(false);
@@ -80,6 +108,12 @@ const Root = forwardRef<HTMLDivElement, CarouselRootProps>(
         emblaApi.off("reInit", sync);
       };
     }, [emblaApi]);
+
+    useEffect(() => {
+      if (!emblaApi) return;
+      if (autoplay === false) return;
+      emblaApi.plugins().autoplay?.play();
+    }, [emblaApi, autoplay]);
 
     useEffect(() => {
       onApiChange?.(emblaApi);
@@ -211,6 +245,7 @@ export const Carousel = {
 
 export { useCarousel };
 export type {
+  CarouselAutoplay,
   CarouselRootProps,
   CarouselSlideProps,
   EmblaApi as CarouselApi,
