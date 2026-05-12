@@ -130,6 +130,9 @@ importers:
       '@types/react-dom':
         specifier: 19.2.2
         version: 19.2.2(@types/react@19.2.2)
+      embla-carousel:
+        specifier: ^8.6.0
+        version: 8.6.0
       tsdown:
         specifier: ^0.22.0
         version: 0.22.0(typescript@6.0.3)(unrun@0.3.0)
