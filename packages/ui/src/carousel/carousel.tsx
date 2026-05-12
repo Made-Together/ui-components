@@ -45,11 +45,6 @@ function useCarousel() {
   return ctx;
 }
 
-/**
- * Subscribes to embla events and returns whether the given snap index is the
- * selected one. The component only re-renders on the two transitions
- * (becoming active / becoming inactive), not on every slide change.
- */
 function useIsSelectedSnap(index: number | undefined): boolean {
   const { emblaApi } = useCarousel();
   const [selected, setSelected] = useState(() => index === 0);
@@ -67,10 +62,6 @@ function useIsSelectedSnap(index: number | undefined): boolean {
   return selected;
 }
 
-/**
- * Subscribes to embla events for `canScrollPrev`/`canScrollNext`. Components
- * only re-render when the flag actually flips (typically only at the edges).
- */
 function useCanScroll(direction: "prev" | "next"): boolean {
   const { emblaApi } = useCarousel();
   const [can, setCan] = useState(false);
@@ -92,10 +83,6 @@ function useCanScroll(direction: "prev" | "next"): boolean {
   return can;
 }
 
-/**
- * Subscribes to embla `reInit` for the scroll snap list (the only event that
- * can change snap count/positions).
- */
 function useScrollSnaps(): number[] {
   const { emblaApi } = useCarousel();
   const [snaps, setSnaps] = useState<number[]>([]);
@@ -112,18 +99,55 @@ function useScrollSnaps(): number[] {
 }
 
 interface CarouselRootProps extends ComponentPropsWithoutRef<"div"> {
+  /**
+   * Optional Embla carousel options.
+   * 
+   * @see https://www.embla-carousel.com/docs/api/options
+   */
   options?: EmblaOptions;
+  /**
+   * Optional Embla carousel plugins.
+   * 
+   * @see https://www.embla-carousel.com/docs/plugins
+   */
   plugins?: EmblaPlugins;
   /**
    * Autoplay configuration. Defaults to `true` (autoplay enabled with the
    * plugin's defaults). Pass `false` to disable, or an options object to
    * override individual settings. If you supply your own `Autoplay()` instance
    * via the `plugins` prop, it takes precedence and this prop is ignored.
+   * 
+   * @default true
    */
   autoplay?: CarouselAutoplay;
+  /**
+   * Callback function that is called when the Embla API changes.
+   * 
+   * @param api - The new Embla API.
+   */
   onApiChange?: (api: EmblaApi) => void;
 }
 
+/**
+ * Root component for the Carousel.
+ * 
+ * @example
+ * 
+ * ```tsx
+ * <Carousel.Root>
+ *   <Carousel.Viewport>
+ *     <Carousel.Container>
+ *       <Carousel.Slide>
+ *         <div>Slide 1</div>
+ *         <div>Slide 2</div>
+ *         <div>Slide 3</div>
+ *         { ... }
+ *       </Carousel.Slide>
+ *     </Carousel.Container>
+ *   </Carousel.Viewport>
+ * </Carousel.Root>
+ * ```
+ */
 const Root = forwardRef<HTMLDivElement, CarouselRootProps>(
   function CarouselRoot(
     {
@@ -184,6 +208,9 @@ const Root = forwardRef<HTMLDivElement, CarouselRootProps>(
   },
 );
 
+/**
+ * Viewport component for the Carousel.
+ */
 const Viewport = forwardRef<HTMLDivElement, ComponentPropsWithoutRef<"div">>(
   function CarouselViewport({ children, ...rest }, ref) {
     const { emblaRef } = useCarousel();
@@ -203,6 +230,9 @@ const Viewport = forwardRef<HTMLDivElement, ComponentPropsWithoutRef<"div">>(
   },
 );
 
+/**
+ * Container component for the Carousel.
+ */
 const Container = forwardRef<HTMLDivElement, ComponentPropsWithoutRef<"div">>(
   function CarouselContainer(props, ref) {
     return <div ref={ref} data-slot="carousel-container" {...props} />;
@@ -213,6 +243,11 @@ interface CarouselSlideProps extends ComponentPropsWithoutRef<"div"> {
   index?: number;
 }
 
+/**
+ * Slide component for the Carousel.
+ * 
+ * Use for the individual slides of the Carousel.
+ */
 const Slide = forwardRef<HTMLDivElement, CarouselSlideProps>(
   function CarouselSlide({ index, ...rest }, ref) {
     const isActive = useIsSelectedSnap(index);
@@ -229,6 +264,9 @@ const Slide = forwardRef<HTMLDivElement, CarouselSlideProps>(
   },
 );
 
+/**
+ * Previous button component for navigating to the previous slide in the Carousel.
+ */
 const Previous = forwardRef<
   HTMLButtonElement,
   ComponentPropsWithoutRef<"button">
@@ -252,6 +290,9 @@ const Previous = forwardRef<
   );
 });
 
+/**
+ * Next button component for navigating to the next slide in the Carousel.
+ */
 const Next = forwardRef<HTMLButtonElement, ComponentPropsWithoutRef<"button">>(
   function CarouselNext({ onClick, disabled, type, ...rest }, ref) {
     const { scrollNext } = useCarousel();
@@ -284,6 +325,21 @@ interface CarouselNavigationProps
   children?: ReactNode;
 }
 
+/**
+ * Navigation wrapper component for the Carousel.
+ * 
+ * May be used to render a custom navigation UI instead of the default `NavigationItem` list.
+ * 
+ * @example
+ * 
+ * ```tsx
+ * <Carousel.Navigation>
+ *   <Carousel.NavigationItem index={0} />
+ *   <Carousel.NavigationItem index={1} />
+ *   <Carousel.NavigationItem index={2} />
+ * </Carousel.Navigation>
+ * ```
+ */
 const Navigation = forwardRef<HTMLElement, CarouselNavigationProps>(
   function CarouselNavigation(
     { children, "aria-label": ariaLabel = "Carousel navigation", ...rest },
@@ -312,6 +368,9 @@ interface CarouselNavigationItemProps
   index: number;
 }
 
+/**
+ * Navigation item component for navigating to a specific slide in the Carousel.
+ */
 const NavigationItem = forwardRef<
   HTMLButtonElement,
   CarouselNavigationItemProps
