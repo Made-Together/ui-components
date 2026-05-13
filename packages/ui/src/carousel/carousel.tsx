@@ -205,16 +205,48 @@ interface CarouselSlideProps extends react.ComponentPropsWithoutRef<"div"> {
 }
 
 const Slide = react.forwardRef<HTMLDivElement, CarouselSlideProps>(
-  function CarouselSlide({ index, ...rest }, ref) {
-    const isActive = useIsSelectedSnap(index);
+  function CarouselSlide({ index, ...rest }, forwardedRef) {
+    const { emblaApi } = useCarousel();
+    const nodeRef = react.useRef<HTMLDivElement>(null);
+
+    const setRef = react.useCallback(
+      (node: HTMLDivElement | null) => {
+        nodeRef.current = node;
+        if (typeof forwardedRef === "function") forwardedRef(node);
+        else if (forwardedRef) forwardedRef.current = node;
+      },
+      [forwardedRef],
+    );
+
+    // Drive `data-state` from the DOM rather than React state so a slide
+    // transition doesn't re-render the slide (and its subtree). Each slide
+    // subscribes once and mutates its own attribute on `select`/`reInit`.
+    react.useEffect(() => {
+      const node = nodeRef.current;
+      if (!node || !emblaApi || index === undefined) return;
+      const update = () => {
+        node.dataset.state =
+          emblaApi.selectedScrollSnap() === index ? "active" : "inactive";
+      };
+      update();
+      emblaApi.on("select", update);
+      emblaApi.on("reInit", update);
+      return () => {
+        emblaApi.off("select", update);
+        emblaApi.off("reInit", update);
+      };
+    }, [emblaApi, index]);
+
     return (
       // biome-ignore lint/a11y/useSemanticElements: we need to use a div to be able to use the data-state attribute
       <div
-        ref={ref}
+        ref={setRef}
         role="group"
         aria-roledescription="slide"
         data-slot="carousel-slide"
-        data-state={isActive ? "active" : "inactive"}
+        // Initial value matches SSR; the effect above takes over once embla
+        // is mounted so this attribute never round-trips through React again.
+        data-state={index === 0 ? "active" : "inactive"}
         {...rest}
       />
     );
@@ -344,9 +376,6 @@ type CarouselComposition = {
    *   <Carousel.Viewport>
    *     <Carousel.Container>
    *       <Carousel.Slide>
-   *         <div>Slide 1</div>
-   *         <div>Slide 2</div>
-   *         <div>Slide 3</div>
    *         { ... }
    *       </Carousel.Slide>
    *     </Carousel.Container>
