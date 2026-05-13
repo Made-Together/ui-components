@@ -1,23 +1,10 @@
 "use client";
 
-import Autoplay, {
-  type AutoplayOptionsType,
-} from "embla-carousel-autoplay";
+import Autoplay, { type AutoplayOptionsType } from "embla-carousel-autoplay";
 import useEmblaCarousel, {
   type UseEmblaCarouselType,
 } from "embla-carousel-react";
-import {
-  type ComponentPropsWithoutRef,
-  type MouseEvent,
-  type ReactNode,
-  createContext,
-  forwardRef,
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useState,
-} from "react";
+import react from "react";
 
 type EmblaRef = UseEmblaCarouselType[0];
 type EmblaApi = UseEmblaCarouselType[1];
@@ -33,14 +20,14 @@ interface CarouselContextValue {
   scrollTo: (index: number) => void;
 }
 
-const CarouselContext = createContext<CarouselContextValue | null>(null);
+const CarouselContext = react.createContext<CarouselContextValue | null>(null);
 
 /**
  * Returns Embla handles and scroll helpers from the nearest `Carousel.Root`.
  * Must be used from a descendant of `Carousel.Root`.
  */
 function useCarousel() {
-  const ctx = useContext(CarouselContext);
+  const ctx = react.useContext(CarouselContext);
   if (!ctx) {
     throw new Error(
       "Carousel sub-components must be rendered inside <Carousel.Root>.",
@@ -51,8 +38,8 @@ function useCarousel() {
 
 function useIsSelectedSnap(index: number | undefined): boolean {
   const { emblaApi } = useCarousel();
-  const [selected, setSelected] = useState(() => index === 0);
-  useEffect(() => {
+  const [selected, setSelected] = react.useState(() => index === 0);
+  react.useEffect(() => {
     if (!emblaApi || index === undefined) return;
     const update = () => setSelected(emblaApi.selectedScrollSnap() === index);
     update();
@@ -68,8 +55,8 @@ function useIsSelectedSnap(index: number | undefined): boolean {
 
 function useCanScroll(direction: "prev" | "next"): boolean {
   const { emblaApi } = useCarousel();
-  const [can, setCan] = useState(false);
-  useEffect(() => {
+  const [can, setCan] = react.useState(false);
+  react.useEffect(() => {
     if (!emblaApi) return;
     const read =
       direction === "prev"
@@ -89,8 +76,8 @@ function useCanScroll(direction: "prev" | "next"): boolean {
 
 function useScrollSnaps(): number[] {
   const { emblaApi } = useCarousel();
-  const [snaps, setSnaps] = useState<number[]>([]);
-  useEffect(() => {
+  const [snaps, setSnaps] = react.useState<number[]>([]);
+  react.useEffect(() => {
     if (!emblaApi) return;
     const update = () => setSnaps(emblaApi.scrollSnapList());
     update();
@@ -102,16 +89,16 @@ function useScrollSnaps(): number[] {
   return snaps;
 }
 
-interface CarouselRootProps extends ComponentPropsWithoutRef<"div"> {
+interface CarouselRootProps extends react.ComponentPropsWithoutRef<"div"> {
   /**
    * Optional Embla carousel options.
-   * 
+   *
    * @see https://www.embla-carousel.com/docs/api/options
    */
   options?: EmblaOptions;
   /**
    * Optional Embla carousel plugins.
-   * 
+   *
    * @see https://www.embla-carousel.com/docs/plugins
    */
   plugins?: EmblaPlugins;
@@ -120,31 +107,24 @@ interface CarouselRootProps extends ComponentPropsWithoutRef<"div"> {
    * plugin's defaults). Pass `false` to disable, or an options object to
    * override individual settings. If you supply your own `Autoplay()` instance
    * via the `plugins` prop, it takes precedence and this prop is ignored.
-   * 
+   *
    * @default true
    */
   autoplay?: CarouselAutoplay;
   /**
    * Callback function that is called when the Embla API changes.
-   * 
+   *
    * @param api - The new Embla API.
    */
   onApiChange?: (api: EmblaApi) => void;
 }
 
-const Root = forwardRef<HTMLDivElement, CarouselRootProps>(
+const Root = react.forwardRef<HTMLDivElement, CarouselRootProps>(
   function CarouselRoot(
-    {
-      options,
-      plugins,
-      autoplay = true,
-      onApiChange,
-      children,
-      ...rest
-    },
+    { options, plugins, autoplay = true, onApiChange, children, ...rest },
     ref,
   ) {
-    const resolvedPlugins = useMemo(() => {
+    const resolvedPlugins = react.useMemo(() => {
       const list = plugins ? [...plugins] : [];
       const userHasAutoplay = list.some((p) => p?.name === "autoplay");
       if (autoplay !== false && !userHasAutoplay) {
@@ -155,36 +135,37 @@ const Root = forwardRef<HTMLDivElement, CarouselRootProps>(
 
     const [emblaRef, emblaApi] = useEmblaCarousel(options, resolvedPlugins);
 
-    const scrollPrev = useCallback(() => emblaApi?.scrollPrev(), [emblaApi]);
-    const scrollNext = useCallback(() => emblaApi?.scrollNext(), [emblaApi]);
-    const scrollTo = useCallback(
+    const scrollPrev = react.useCallback(
+      () => emblaApi?.scrollPrev(),
+      [emblaApi],
+    );
+    const scrollNext = react.useCallback(
+      () => emblaApi?.scrollNext(),
+      [emblaApi],
+    );
+    const scrollTo = react.useCallback(
       (index: number) => emblaApi?.scrollTo(index),
       [emblaApi],
     );
 
-    useEffect(() => {
+    react.useEffect(() => {
       if (!emblaApi) return;
       if (autoplay === false) return;
       emblaApi.plugins().autoplay?.play();
     }, [emblaApi, autoplay]);
 
-    useEffect(() => {
+    react.useEffect(() => {
       onApiChange?.(emblaApi);
     }, [emblaApi, onApiChange]);
 
-    const contextValue = useMemo<CarouselContextValue>(
+    const contextValue = react.useMemo<CarouselContextValue>(
       () => ({ emblaRef, emblaApi, scrollPrev, scrollNext, scrollTo }),
       [emblaRef, emblaApi, scrollPrev, scrollNext, scrollTo],
     );
 
     return (
       <CarouselContext.Provider value={contextValue}>
-        <div
-          ref={ref}
-          data-slot="carousel-root"
-          aria-roledescription="carousel"
-          {...rest}
-        >
+        <div ref={ref} data-slot="carousel-root" {...rest}>
           {children}
         </div>
       </CarouselContext.Provider>
@@ -192,39 +173,42 @@ const Root = forwardRef<HTMLDivElement, CarouselRootProps>(
   },
 );
 
-const Viewport = forwardRef<HTMLDivElement, ComponentPropsWithoutRef<"div">>(
-  function CarouselViewport({ children, ...rest }, ref) {
-    const { emblaRef } = useCarousel();
-    return (
-      <div
-        ref={(node) => {
-          emblaRef(node);
-          if (typeof ref === "function") ref(node);
-          else if (ref) ref.current = node;
-        }}
-        data-slot="carousel-viewport"
-        {...rest}
-      >
-        {children}
-      </div>
-    );
-  },
-);
+const Viewport = react.forwardRef<
+  HTMLDivElement,
+  react.ComponentPropsWithoutRef<"div">
+>(function CarouselViewport({ children, ...rest }, ref) {
+  const { emblaRef } = useCarousel();
+  return (
+    <div
+      ref={(node) => {
+        emblaRef(node);
+        if (typeof ref === "function") ref(node);
+        else if (ref) ref.current = node;
+      }}
+      data-slot="carousel-viewport"
+      {...rest}
+    >
+      {children}
+    </div>
+  );
+});
 
-const Container = forwardRef<HTMLDivElement, ComponentPropsWithoutRef<"div">>(
-  function CarouselContainer(props, ref) {
-    return <div ref={ref} data-slot="carousel-container" {...props} />;
-  },
-);
+const Container = react.forwardRef<
+  HTMLDivElement,
+  react.ComponentPropsWithoutRef<"div">
+>(function CarouselContainer(props, ref) {
+  return <div ref={ref} data-slot="carousel-container" {...props} />;
+});
 
-interface CarouselSlideProps extends ComponentPropsWithoutRef<"div"> {
+interface CarouselSlideProps extends react.ComponentPropsWithoutRef<"div"> {
   index?: number;
 }
 
-const Slide = forwardRef<HTMLDivElement, CarouselSlideProps>(
+const Slide = react.forwardRef<HTMLDivElement, CarouselSlideProps>(
   function CarouselSlide({ index, ...rest }, ref) {
     const isActive = useIsSelectedSnap(index);
     return (
+      // biome-ignore lint/a11y/useSemanticElements: we need to use a div to be able to use the data-state attribute
       <div
         ref={ref}
         role="group"
@@ -237,9 +221,9 @@ const Slide = forwardRef<HTMLDivElement, CarouselSlideProps>(
   },
 );
 
-const Previous = forwardRef<
+const Previous = react.forwardRef<
   HTMLButtonElement,
-  ComponentPropsWithoutRef<"button">
+  react.ComponentPropsWithoutRef<"button">
 >(function CarouselPrevious({ onClick, disabled, type, ...rest }, ref) {
   const { scrollPrev } = useCarousel();
   const canScrollPrev = useCanScroll("prev");
@@ -251,7 +235,7 @@ const Previous = forwardRef<
       data-disabled={!canScrollPrev}
       aria-label="Previous slide"
       disabled={disabled ?? !canScrollPrev}
-      onClick={(event: MouseEvent<HTMLButtonElement>) => {
+      onClick={(event: react.MouseEvent<HTMLButtonElement>) => {
         onClick?.(event);
         if (!event.defaultPrevented) scrollPrev();
       }}
@@ -260,39 +244,40 @@ const Previous = forwardRef<
   );
 });
 
-const Next = forwardRef<HTMLButtonElement, ComponentPropsWithoutRef<"button">>(
-  function CarouselNext({ onClick, disabled, type, ...rest }, ref) {
-    const { scrollNext } = useCarousel();
-    const canScrollNext = useCanScroll("next");
-    return (
-      <button
-        ref={ref}
-        type={type ?? "button"}
-        data-slot="carousel-next"
-        data-disabled={!canScrollNext}
-        aria-label="Next slide"
-        disabled={disabled ?? !canScrollNext}
-        onClick={(event: MouseEvent<HTMLButtonElement>) => {
-          onClick?.(event);
-          if (!event.defaultPrevented) scrollNext();
-        }}
-        {...rest}
-      />
-    );
-  },
-);
+const Next = react.forwardRef<
+  HTMLButtonElement,
+  react.ComponentPropsWithoutRef<"button">
+>(function CarouselNext({ onClick, disabled, type, ...rest }, ref) {
+  const { scrollNext } = useCarousel();
+  const canScrollNext = useCanScroll("next");
+  return (
+    <button
+      ref={ref}
+      type={type ?? "button"}
+      data-slot="carousel-next"
+      data-disabled={!canScrollNext}
+      aria-label="Next slide"
+      disabled={disabled ?? !canScrollNext}
+      onClick={(event: react.MouseEvent<HTMLButtonElement>) => {
+        onClick?.(event);
+        if (!event.defaultPrevented) scrollNext();
+      }}
+      {...rest}
+    />
+  );
+});
 
 interface CarouselNavigationProps
-  extends Omit<ComponentPropsWithoutRef<"nav">, "children"> {
+  extends Omit<react.ComponentPropsWithoutRef<"nav">, "children"> {
   /**
    * Custom children for full control over item rendering. When provided, the
    * default per-snap `NavigationItem` list is replaced. When omitted, one
    * `NavigationItem` is rendered per scroll snap.
    */
-  children?: ReactNode;
+  children?: react.ReactNode;
 }
 
-const Navigation = forwardRef<HTMLElement, CarouselNavigationProps>(
+const Navigation = react.forwardRef<HTMLElement, CarouselNavigationProps>(
   function CarouselNavigation(
     { children, "aria-label": ariaLabel = "Carousel navigation", ...rest },
     ref,
@@ -316,11 +301,11 @@ const Navigation = forwardRef<HTMLElement, CarouselNavigationProps>(
 );
 
 interface CarouselNavigationItemProps
-  extends ComponentPropsWithoutRef<"button"> {
+  extends react.ComponentPropsWithoutRef<"button"> {
   index: number;
 }
 
-const NavigationItem = forwardRef<
+const NavigationItem = react.forwardRef<
   HTMLButtonElement,
   CarouselNavigationItemProps
 >(function CarouselNavigationItem(
@@ -337,7 +322,7 @@ const NavigationItem = forwardRef<
       aria-label={ariaLabel ?? `Go to slide ${index + 1}`}
       data-slot="carousel-navigation-item"
       data-state={selected ? "active" : "inactive"}
-      onClick={(event: MouseEvent<HTMLButtonElement>) => {
+      onClick={(event: react.MouseEvent<HTMLButtonElement>) => {
         onClick?.(event);
         if (!event.defaultPrevented) scrollTo(index);
       }}
@@ -370,12 +355,12 @@ type CarouselComposition = {
    * ```
    */
   Root: typeof Root;
-  /** 
-   * Viewport component for the Carousel. 
+  /**
+   * Viewport component for the Carousel.
    */
   Viewport: typeof Viewport;
-  /** 
-   * Container component for the Carousel. 
+  /**
+   * Container component for the Carousel.
    */
   Container: typeof Container;
   /**
@@ -384,12 +369,12 @@ type CarouselComposition = {
    * Use for the individual slides of the Carousel.
    */
   Slide: typeof Slide;
-  /** 
-   * Previous button for navigating to the previous slide. 
+  /**
+   * Previous button for navigating to the previous slide.
    */
   Previous: typeof Previous;
-  /** 
-   * Next button for navigating to the next slide. 
+  /**
+   * Next button for navigating to the next slide.
    */
   Next: typeof Next;
   /**
@@ -406,8 +391,8 @@ type CarouselComposition = {
    * ```
    */
   Navigation: typeof Navigation;
-  /** 
-   * Button that jumps to a specific slide index. 
+  /**
+   * Button that jumps to a specific slide index.
    */
   NavigationItem: typeof NavigationItem;
 };
@@ -423,7 +408,6 @@ export const Carousel: CarouselComposition = {
   NavigationItem,
 };
 
-export { useCarousel };
 export type {
   CarouselAutoplay,
   CarouselNavigationItemProps,
@@ -434,3 +418,4 @@ export type {
   EmblaOptions as CarouselOptions,
   EmblaPlugins as CarouselPlugins,
 };
+export { useCarousel };

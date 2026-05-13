@@ -1,6 +1,5 @@
 export {
   Carousel,
-  useCarousel,
   type CarouselApi,
   type CarouselAutoplay,
   type CarouselNavigationItemProps,
@@ -9,4 +8,5 @@ export {
   type CarouselPlugins,
   type CarouselRootProps,
   type CarouselSlideProps,
+  useCarousel,
 } from "./carousel.js";

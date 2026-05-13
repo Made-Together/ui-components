@@ -7,9 +7,6 @@ import {
   type CarouselPlugins,
 } from "./carousel.js";
 
-const CONTEXT_ERROR =
-  /Carousel sub-components must be rendered inside <Carousel\.Root>/;
-
 function silenceConsoleError() {
   return vi.spyOn(console, "error").mockImplementation(() => {});
 }
@@ -56,7 +53,6 @@ function makeMockAutoplay() {
 }
 
 describe("Carousel — context / composition integrity", () => {
-
   it("renders Carousel.Root without a Viewport without crashing", () => {
     expect(() =>
       render(
@@ -188,7 +184,9 @@ describe("Carousel — initialization & lifecycle", () => {
     );
     const latestApi = onApiChange.mock.calls.at(-1)?.[0];
     expect(latestApi).toBeTruthy();
-    expect((latestApi as CarouselApi)?.internalEngine()?.options.loop).toBe(true);
+    expect((latestApi as CarouselApi)?.internalEngine()?.options.loop).toBe(
+      true,
+    );
     expect(latestApi).toBe(initialApi);
   });
 
