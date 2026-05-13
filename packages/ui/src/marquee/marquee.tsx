@@ -1,9 +1,19 @@
 "use client";
 
 import type { ComponentPropsWithoutRef, ReactNode } from "react";
-import { forwardRef, useId } from "react";
+import {
+  forwardRef,
+  useEffect,
+  useId,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from "react";
 
 import { cn } from "../lib/utils.js";
+
+const useIsoLayoutEffect =
+  typeof window !== "undefined" ? useLayoutEffect : useEffect;
 
 /** Sanitize `useId()` for use in CSS selectors and keyframe names. */
 function cssScopeToken(raw: string): string {
@@ -18,33 +28,37 @@ function cssScopeToken(raw: string): string {
 }
 
 function marqueeScopedCss(scope: string): string {
-  return `@keyframes bt-marquee-x {
+  return `@keyframes bt-marquee-x-${scope} {
   from {
-    transform: translateX(0);
+    transform: translate3d(0, 0, 0);
   }
   to {
-    transform: translateX(calc(-100% - var(--gap)));
+    transform: translate3d(calc(-1 * var(--bt-shift, 100%)), 0, 0);
   }
 }
-@keyframes bt-marquee-y {
+@keyframes bt-marquee-y-${scope} {
   from {
-    transform: translateY(0);
+    transform: translate3d(0, 0, 0);
   }
   to {
-    transform: translateY(calc(-100% - var(--gap)));
+    transform: translate3d(0, calc(-1 * var(--bt-shift, 100%)), 0);
   }
 }
 [data-marquee-instance="${scope}"][data-marquee-vertical="false"] > [data-marquee-track] {
-  animation: bt-marquee-x var(--duration) infinite linear;
+  animation: bt-marquee-x-${scope} var(--duration) infinite linear;
 }
 [data-marquee-instance="${scope}"][data-marquee-vertical="true"] > [data-marquee-track] {
-  animation: bt-marquee-y var(--duration) linear infinite;
+  animation: bt-marquee-y-${scope} var(--duration) linear infinite;
 }
 [data-marquee-instance="${scope}"][data-marquee-reverse="true"] > [data-marquee-track] {
   animation-direction: reverse;
 }
 [data-marquee-instance="${scope}"][data-marquee-pause-hover="true"]:hover > [data-marquee-track] {
   animation-play-state: paused;
+}
+[data-marquee-instance="${scope}"] > [data-marquee-track] {
+  will-change: transform;
+  backface-visibility: hidden;
 }
 [data-marquee-instance="${scope}"] [data-marquee-item] {
   flex-shrink: 0;
@@ -72,7 +86,7 @@ export interface MarqueeRootProps extends ComponentPropsWithoutRef<"div"> {
    */
   pauseOnHover?: boolean;
   /**
-   * One or more `Marquee.Item` nodes (or other content) rendered inside each scrolling track
+   * One or more `Marquee.Item` nodes (or other content) rendered inside each scrolling copy
    */
   children?: ReactNode;
   /**
@@ -81,7 +95,9 @@ export interface MarqueeRootProps extends ComponentPropsWithoutRef<"div"> {
    */
   vertical?: boolean;
   /**
-   * Number of identical tracks to render for a seamless loop
+   * Minimum number of identical children copies inside the scrolling track.
+   * The component renders more if the viewport is larger than the rendered
+   * content so the loop reset stays seamless.
    * @default 4
    */
   repeat?: number;
@@ -100,13 +116,58 @@ export const Root = forwardRef<HTMLDivElement, MarqueeRootProps>(
       repeat = 4,
       ...props
     },
-    ref,
+    forwardedRef,
   ) => {
     const scope = cssScopeToken(useId());
+    const rootRef = useRef<HTMLDivElement>(null);
+    const trackRef = useRef<HTMLDivElement>(null);
+    const copyRef = useRef<HTMLDivElement>(null);
+    const [copies, setCopies] = useState(repeat);
+
+    const setRootRef = (el: HTMLDivElement | null) => {
+      rootRef.current = el;
+      if (typeof forwardedRef === "function") {
+        forwardedRef(el);
+      } else if (forwardedRef) {
+        forwardedRef.current = el;
+      }
+    };
+
+    useIsoLayoutEffect(() => {
+      const root = rootRef.current;
+      const track = trackRef.current;
+      const copy = copyRef.current;
+      if (!root || !track || !copy) return;
+
+      const update = () => {
+        const rootSize = vertical ? root.clientHeight : root.clientWidth;
+        const copySize = vertical ? copy.offsetHeight : copy.offsetWidth;
+        if (!rootSize || !copySize) return;
+        const gap =
+          Number.parseFloat(getComputedStyle(track).gap || "0") || 0;
+        // Fixed pixel shift = one copy + one gap. Setting it on the track means
+        // adding more copies later doesn't change the animation distance, so
+        // the loop reset stays perfectly seamless.
+        track.style.setProperty("--bt-shift", `${copySize + gap}px`);
+        // Enough copies so visible content covers the viewport even at the
+        // end of a cycle: (n - 1) * (copy + gap) >= viewport + gap.
+        const needed = Math.ceil((rootSize + gap) / (copySize + gap)) + 1;
+        setCopies((prev) => {
+          const next = Math.max(repeat, needed);
+          return next === prev ? prev : next;
+        });
+      };
+
+      update();
+      const ro = new ResizeObserver(update);
+      ro.observe(root);
+      ro.observe(copy);
+      return () => ro.disconnect();
+    }, [repeat, vertical]);
 
     return (
       <div
-        ref={ref}
+        ref={setRootRef}
         data-marquee-root=""
         data-marquee-instance={scope}
         data-marquee-vertical={vertical ? "true" : "false"}
@@ -114,7 +175,7 @@ export const Root = forwardRef<HTMLDivElement, MarqueeRootProps>(
         data-marquee-pause-hover={pauseOnHover ? "true" : "false"}
         {...props}
         className={cn(
-          "group flex gap-(--gap) overflow-hidden p-2 [--duration:40s] [--gap:1rem]",
+          "group flex overflow-hidden p-2 [--duration:40s] [--gap:1rem]",
           {
             "flex-row": !vertical,
             "flex-col": vertical,
@@ -123,19 +184,30 @@ export const Root = forwardRef<HTMLDivElement, MarqueeRootProps>(
         )}
       >
         <style>{marqueeScopedCss(scope)}</style>
-        {Array.from({ length: repeat }, (_, i) => (
-          <div
-            // biome-ignore lint/suspicious/noArrayIndexKey: index is the key
-            key={i}
-            data-marquee-track=""
-            className={cn("flex shrink-0 justify-around gap-(--gap)", {
-              "flex-row": !vertical,
-              "flex-col": vertical,
-            })}
-          >
-            {children}
-          </div>
-        ))}
+        <div
+          ref={trackRef}
+          data-marquee-track=""
+          className={cn("flex h-max w-max gap-(--gap)", {
+            "flex-row": !vertical,
+            "flex-col": vertical,
+          })}
+        >
+          {Array.from({ length: copies }, (_, i) => (
+            <div
+              // biome-ignore lint/suspicious/noArrayIndexKey: index is the key
+              key={i}
+              ref={i === 0 ? copyRef : undefined}
+              data-marquee-copy=""
+              aria-hidden={i > 0 ? "true" : undefined}
+              className={cn("flex shrink-0 justify-around gap-(--gap)", {
+                "flex-row": !vertical,
+                "flex-col": vertical,
+              })}
+            >
+              {children}
+            </div>
+          ))}
+        </div>
       </div>
     );
   },
