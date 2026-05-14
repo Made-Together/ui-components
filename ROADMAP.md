@@ -2,9 +2,9 @@
 
 ## Components
 
-- [ ] Carousel
-- [ ] Marquee
-- [ ] Accordion
+- [x] Carousel
+- [x] Marquee
+- [x] Accordion
 - [ ] Tabs
 - [ ] AutoScrollText
 - [ ] StackedContent
