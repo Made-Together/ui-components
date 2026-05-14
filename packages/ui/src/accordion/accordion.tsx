@@ -462,7 +462,10 @@ const Trigger = forwardRef<HTMLButtonElement, AccordionTriggerProps>(
         data-disabled={isDisabled ? "" : undefined}
         onClick={handleClick}
         onKeyDown={handleKeyDown}
-        className={className}
+        className={cn(
+          "cursor-pointer transition-colors duration-150 ease-out disabled:cursor-not-allowed motion-reduce:transition-none",
+          className,
+        )}
         {...rest}
       >
         {children}
@@ -471,35 +474,28 @@ const Trigger = forwardRef<HTMLButtonElement, AccordionTriggerProps>(
   },
 );
 
-interface AccordionContentProps extends ComponentPropsWithoutRef<"section"> {
-  /**
-   * Keeps the content mounted in the DOM when collapsed. The element is still
-   * hidden from assistive tech and not focusable, but rendered for animations
-   * or to preserve state.
-   * @default false
-   */
-  forceMount?: boolean;
-}
+type AccordionContentProps = ComponentPropsWithoutRef<"div">;
 
 const Content = forwardRef<HTMLDivElement, AccordionContentProps>(
-  function AccordionContent(
-    { forceMount = false, className, children, ...rest },
-    ref,
-  ) {
+  function AccordionContent({ className, children, ...rest }, ref) {
     const item = useAccordionItem("Accordion.Content");
-    if (!(item.open || forceMount)) return null;
     return (
-      <div
-        ref={ref}
+      <section
         id={item.contentId}
-        hidden={!item.open}
+        aria-labelledby={item.triggerId}
+        inert={!item.open}
         data-slot="accordion-content"
         data-state={item.open ? "open" : "closed"}
-        className={className}
-        {...rest}
+        className="grid grid-rows-[0fr] opacity-0 transition-[grid-template-rows,opacity] duration-300 ease-out data-[state=open]:grid-rows-[1fr] data-[state=open]:opacity-100 motion-reduce:transition-none"
       >
-        {children}
-      </div>
+        <div
+          ref={ref}
+          className={cn("min-h-0 overflow-hidden", className)}
+          {...rest}
+        >
+          {children}
+        </div>
+      </section>
     );
   },
 );
@@ -517,7 +513,10 @@ const Indicator = forwardRef<HTMLSpanElement, AccordionIndicatorProps>(
         aria-hidden="true"
         data-slot="accordion-indicator"
         data-state={item.open ? "open" : "closed"}
-        className={cn("inline-flex shrink-0", className)}
+        className={cn(
+          "inline-flex shrink-0 transition-transform duration-200 ease-out data-[state=open]:-rotate-180 motion-reduce:transition-none",
+          className,
+        )}
         {...rest}
       >
         {children}
