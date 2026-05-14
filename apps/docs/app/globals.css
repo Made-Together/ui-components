@@ -125,7 +125,7 @@
     @apply scroll-smooth;
 
     /* Nextra theme overrides */
-    --nextra-navbar-height: 52px;
+    --nextra-navbar-height: 50px !important;
   }
 
 }
@@ -163,6 +163,15 @@
   }
   .nextra-border,
   .nextra-border:where(.dark *) {
-    border-color: transparent;
+    border-color: transparent !important;
+    border-width: 0 !important;
   }
+  .nextra-callout p {
+    font-size: 14px;
+    line-height: calc(var(--x-spacing) * 5.315);
+  }
+  div[data-slot="component-showcase"] .nextra-code > pre {
+    --tw-ring-color: transparent;
+  }
+
 }
