@@ -321,16 +321,14 @@ const Root = forwardRef<HTMLDivElement, AutoScrollTextRootProps>(
 
     return (
       <AutoScrollTextContext.Provider value={ctx}>
+        <style>{AUTOSCROLL_TEXT_BEHAVIORAL_CSS}</style>
         <div
           ref={setContainerRef}
           aria-live="polite"
           data-slot="autoscroll-text-root"
           data-state="idle"
           data-overflowing={isOverflowing ? "" : undefined}
-          className={cn(
-            "relative overflow-hidden whitespace-nowrap",
-            className,
-          )}
+          className={cn(className)}
           style={{
             width: containerWidth ? `${containerWidth}px` : undefined,
             transition: `-webkit-mask-image ${fadeTransitionDuration}ms ease-out, mask-image ${fadeTransitionDuration}ms ease-out`,
@@ -379,7 +377,7 @@ const Content = forwardRef<HTMLSpanElement, AutoScrollTextContentProps>(
       <span
         ref={setRef}
         data-slot="autoscroll-text-content"
-        className={cn("inline-block", className)}
+        className={cn(className)}
         style={{
           willChange: isOverflowing ? "transform" : undefined,
           ...style,
@@ -391,6 +389,17 @@ const Content = forwardRef<HTMLSpanElement, AutoScrollTextContentProps>(
     );
   },
 );
+
+const AUTOSCROLL_TEXT_BEHAVIORAL_CSS = `
+[data-slot="autoscroll-text-root"] {
+  position: relative;
+  overflow: hidden;
+  white-space: nowrap;
+}
+[data-slot="autoscroll-text-content"] {
+  display: inline-block;
+}
+`;
 
 type AutoScrollTextComposition = {
   /**

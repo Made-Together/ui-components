@@ -262,15 +262,12 @@ const Root = forwardRef<HTMLDivElement, TabsRootProps>(function TabsRoot(
 
   return (
     <TabsContext.Provider value={ctx}>
+      <style>{TABS_BEHAVIORAL_CSS}</style>
       <div
         ref={ref}
         data-slot="tabs-root"
         data-orientation={orientation}
-        className={cn(
-          "flex gap-2",
-          orientation === "horizontal" ? "flex-col" : "flex-row",
-          className,
-        )}
+        className={cn(className)}
         {...rest}
       >
         {children}
@@ -278,6 +275,72 @@ const Root = forwardRef<HTMLDivElement, TabsRootProps>(function TabsRoot(
     </TabsContext.Provider>
   );
 });
+
+const TABS_BEHAVIORAL_CSS = `
+[data-slot="tabs-root"] {
+  display: flex;
+  gap: 0.5rem;
+}
+[data-slot="tabs-root"][data-orientation="horizontal"] {
+  flex-direction: column;
+}
+[data-slot="tabs-root"][data-orientation="vertical"] {
+  flex-direction: row;
+}
+[data-slot="tabs-list-container"] {
+  position: relative;
+}
+[data-slot="tabs-list"] {
+  display: inline-flex;
+  padding: 0.25rem;
+}
+[data-slot="tabs-list"][data-orientation="horizontal"] {
+  width: 100%;
+  flex-direction: row;
+}
+[data-slot="tabs-list"][data-orientation="vertical"] {
+  flex-direction: column;
+  gap: 0.25rem;
+}
+[data-slot="tabs-trigger"] {
+  position: relative;
+  z-index: 1;
+  cursor: pointer;
+}
+[data-slot="tabs-trigger"]:disabled {
+  cursor: not-allowed;
+}
+[data-slot="tabs-indicator"] {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+}
+[data-slot="tabs-separator"] {
+  pointer-events: none;
+  position: absolute;
+  transition: opacity 150ms ease-out;
+}
+[data-slot="tabs-trigger"][data-state="active"] [data-slot="tabs-separator"] {
+  opacity: 0;
+}
+[data-slot="tabs-list"][data-orientation="horizontal"] [data-slot="tabs-separator"] {
+  top: 25%;
+  left: 0;
+  height: 50%;
+  width: 1px;
+}
+[data-slot="tabs-list"][data-orientation="vertical"] [data-slot="tabs-separator"] {
+  top: 0;
+  left: 5%;
+  height: 1px;
+  width: 90%;
+}
+@media (prefers-reduced-motion: reduce) {
+  [data-slot="tabs-separator"] {
+    transition: none;
+  }
+}
+`;
 
 type TabsContainerProps = ComponentPropsWithoutRef<"div">;
 
@@ -287,7 +350,7 @@ const Container = forwardRef<HTMLDivElement, TabsContainerProps>(
       <div
         ref={ref}
         data-slot="tabs-list-container"
-        className={cn("relative", className)}
+        className={cn(className)}
         {...rest}
       />
     );
@@ -308,13 +371,7 @@ const List = forwardRef<HTMLDivElement, TabsListProps>(function TabsList(
       aria-orientation={root.orientation}
       data-slot="tabs-list"
       data-orientation={root.orientation}
-      className={cn(
-        "inline-flex p-1",
-        root.orientation === "horizontal"
-          ? "w-full flex-row"
-          : "flex-col gap-1",
-        className,
-      )}
+      className={cn(className)}
       {...rest}
     >
       {children}
@@ -435,9 +492,7 @@ const Trigger = forwardRef<HTMLButtonElement, TabsTriggerProps>(
           onKeyDown={handleKeyDown}
           onFocus={handleFocus}
           className={cn(
-            // Tab is positioned (z-1) so the absolutely-positioned Indicator
-            // sits behind the label via its own negative z-index.
-            "group/tab relative z-[1] inline-flex h-8 min-w-0 cursor-pointer items-center justify-center rounded-3xl px-4 text-center text-sm font-medium text-neutral-500 outline-none transition-colors duration-150 ease-out hover:text-neutral-700 focus-visible:ring-2 focus-visible:ring-neutral-900 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-40 data-[state=active]:text-neutral-900 motion-reduce:transition-none",
+            "inline-flex h-8 min-w-0 items-center justify-center rounded-3xl px-4 text-center text-sm font-medium text-neutral-500 outline-none transition-colors duration-150 ease-out hover:text-neutral-700 focus-visible:ring-2 focus-visible:ring-neutral-900 focus-visible:ring-offset-2 disabled:opacity-40 data-[state=active]:text-neutral-900 motion-reduce:transition-none",
             className,
           )}
           {...rest}
@@ -480,7 +535,7 @@ const Indicator = forwardRef<HTMLSpanElement, TabsIndicatorProps>(
               })
         }
         className={cn(
-          "-z-[1] absolute inset-0 rounded-3xl bg-white shadow-sm ring-1 ring-black/5",
+          "rounded-3xl bg-white shadow-sm ring-1 ring-black/5",
           className,
         )}
         {...rest}
@@ -493,19 +548,12 @@ type TabsSeparatorProps = ComponentPropsWithoutRef<"span">;
 
 const Separator = forwardRef<HTMLSpanElement, TabsSeparatorProps>(
   function TabsSeparator({ className, ...rest }, ref) {
-    const root = useTabs("Tabs.Separator");
     return (
       <span
         ref={ref}
         aria-hidden="true"
         data-slot="tabs-separator"
-        className={cn(
-          "pointer-events-none absolute rounded-sm bg-neutral-300/60 transition-opacity duration-150 ease-out group-data-[state=active]/tab:opacity-0 motion-reduce:transition-none",
-          root.orientation === "horizontal"
-            ? "top-1/4 left-0 h-1/2 w-px"
-            : "top-0 left-[5%] h-px w-[90%]",
-          className,
-        )}
+        className={cn("rounded-sm bg-neutral-300/60", className)}
         {...rest}
       />
     );

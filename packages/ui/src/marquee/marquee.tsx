@@ -28,7 +28,44 @@ function cssScopeToken(raw: string): string {
 }
 
 function marqueeScopedCss(scope: string): string {
-  return `@keyframes bt-marquee-x-${scope} {
+  return `[data-marquee-instance="${scope}"] {
+  --duration: 40s;
+  --gap: 1rem;
+  display: flex;
+  overflow: hidden;
+  padding: 0.5rem;
+}
+[data-marquee-instance="${scope}"][data-marquee-vertical="false"] {
+  flex-direction: row;
+}
+[data-marquee-instance="${scope}"][data-marquee-vertical="true"] {
+  flex-direction: column;
+}
+[data-marquee-instance="${scope}"] > [data-marquee-track] {
+  display: flex;
+  height: max-content;
+  width: max-content;
+  gap: var(--gap);
+}
+[data-marquee-instance="${scope}"][data-marquee-vertical="false"] > [data-marquee-track] {
+  flex-direction: row;
+}
+[data-marquee-instance="${scope}"][data-marquee-vertical="true"] > [data-marquee-track] {
+  flex-direction: column;
+}
+[data-marquee-instance="${scope}"] [data-marquee-copy] {
+  display: flex;
+  flex-shrink: 0;
+  justify-content: space-around;
+  gap: var(--gap);
+}
+[data-marquee-instance="${scope}"][data-marquee-vertical="false"] [data-marquee-copy] {
+  flex-direction: row;
+}
+[data-marquee-instance="${scope}"][data-marquee-vertical="true"] [data-marquee-copy] {
+  flex-direction: column;
+}
+@keyframes bt-marquee-x-${scope} {
   from {
     transform: translate3d(0, 0, 0);
   }
@@ -174,24 +211,10 @@ export const Root = forwardRef<HTMLDivElement, MarqueeRootProps>(
         data-marquee-reverse={reverse ? "true" : "false"}
         data-marquee-pause-hover={pauseOnHover ? "true" : "false"}
         {...props}
-        className={cn(
-          "group flex overflow-hidden p-2 [--duration:40s] [--gap:1rem]",
-          {
-            "flex-row": !vertical,
-            "flex-col": vertical,
-          },
-          className,
-        )}
+        className={cn("group", className)}
       >
         <style>{marqueeScopedCss(scope)}</style>
-        <div
-          ref={trackRef}
-          data-marquee-track=""
-          className={cn("flex h-max w-max gap-(--gap)", {
-            "flex-row": !vertical,
-            "flex-col": vertical,
-          })}
-        >
+        <div ref={trackRef} data-marquee-track="">
           {Array.from({ length: copies }, (_, i) => (
             <div
               // biome-ignore lint/suspicious/noArrayIndexKey: index is the key
@@ -199,10 +222,6 @@ export const Root = forwardRef<HTMLDivElement, MarqueeRootProps>(
               ref={i === 0 ? copyRef : undefined}
               data-marquee-copy=""
               aria-hidden={i > 0 ? "true" : undefined}
-              className={cn("flex shrink-0 justify-around gap-(--gap)", {
-                "flex-row": !vertical,
-                "flex-col": vertical,
-              })}
             >
               {children}
             </div>

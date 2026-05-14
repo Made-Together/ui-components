@@ -301,11 +301,12 @@ const Root = forwardRef<HTMLUListElement, AccordionRootProps>(
 
     return (
       <AccordionContext.Provider value={ctx}>
+        <style>{ACCORDION_BEHAVIORAL_CSS}</style>
         <ul
           ref={ref}
           data-slot="accordion-root"
           data-orientation="vertical"
-          className={cn("list-none", className)}
+          className={cn(className)}
           {...rest}
         >
           {children}
@@ -314,6 +315,56 @@ const Root = forwardRef<HTMLUListElement, AccordionRootProps>(
     );
   },
 );
+
+const ACCORDION_BEHAVIORAL_CSS = `
+[data-slot="accordion-root"] {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+[data-slot="accordion-item"] {
+  list-style: none;
+}
+[data-slot="accordion-heading"] {
+  margin: 0;
+}
+[data-slot="accordion-trigger"] {
+  cursor: pointer;
+  transition: color 150ms ease-out, background-color 150ms ease-out;
+}
+[data-slot="accordion-trigger"]:disabled {
+  cursor: not-allowed;
+}
+[data-slot="accordion-content"] {
+  display: grid;
+  grid-template-rows: 0fr;
+  opacity: 0;
+  transition: grid-template-rows 300ms ease-out, opacity 300ms ease-out;
+}
+[data-slot="accordion-content"][data-state="open"] {
+  grid-template-rows: 1fr;
+  opacity: 1;
+}
+[data-slot="accordion-content"] > [data-slot="accordion-content-inner"] {
+  min-height: 0;
+  overflow: hidden;
+}
+[data-slot="accordion-indicator"] {
+  display: inline-flex;
+  flex-shrink: 0;
+  transition: transform 200ms ease-out;
+}
+[data-slot="accordion-indicator"][data-state="open"] {
+  transform: rotate(-180deg);
+}
+@media (prefers-reduced-motion: reduce) {
+  [data-slot="accordion-trigger"],
+  [data-slot="accordion-content"],
+  [data-slot="accordion-indicator"] {
+    transition: none;
+  }
+}
+`;
 
 interface AccordionItemProps extends ComponentPropsWithoutRef<"li"> {
   /**
@@ -360,7 +411,7 @@ const Item = forwardRef<HTMLLIElement, AccordionItemProps>(
           data-slot="accordion-item"
           data-state={open ? "open" : "closed"}
           data-disabled={isDisabled ? "" : undefined}
-          className={cn("list-none", className)}
+          className={cn(className)}
           {...rest}
         >
           {children}
@@ -389,7 +440,7 @@ const Heading = forwardRef<HTMLHeadingElement, AccordionHeadingProps>(
         ref={ref}
         data-slot="accordion-heading"
         data-state={item.open ? "open" : "closed"}
-        className={cn("m-0", className)}
+        className={cn(className)}
         {...rest}
       >
         {children}
@@ -462,10 +513,7 @@ const Trigger = forwardRef<HTMLButtonElement, AccordionTriggerProps>(
         data-disabled={isDisabled ? "" : undefined}
         onClick={handleClick}
         onKeyDown={handleKeyDown}
-        className={cn(
-          "cursor-pointer transition-colors duration-150 ease-out disabled:cursor-not-allowed motion-reduce:transition-none",
-          className,
-        )}
+        className={cn(className)}
         {...rest}
       >
         {children}
@@ -486,11 +534,11 @@ const Content = forwardRef<HTMLDivElement, AccordionContentProps>(
         inert={!item.open}
         data-slot="accordion-content"
         data-state={item.open ? "open" : "closed"}
-        className="grid grid-rows-[0fr] opacity-0 transition-[grid-template-rows,opacity] duration-300 ease-out data-[state=open]:grid-rows-[1fr] data-[state=open]:opacity-100 motion-reduce:transition-none"
       >
         <div
           ref={ref}
-          className={cn("min-h-0 overflow-hidden", className)}
+          data-slot="accordion-content-inner"
+          className={cn(className)}
           {...rest}
         >
           {children}
@@ -513,10 +561,7 @@ const Indicator = forwardRef<HTMLSpanElement, AccordionIndicatorProps>(
         aria-hidden="true"
         data-slot="accordion-indicator"
         data-state={item.open ? "open" : "closed"}
-        className={cn(
-          "inline-flex shrink-0 transition-transform duration-200 ease-out data-[state=open]:-rotate-180 motion-reduce:transition-none",
-          className,
-        )}
+        className={cn(className)}
         {...rest}
       >
         {children}
