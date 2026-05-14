@@ -324,7 +324,7 @@ return (
 
 ## API Reference
 
-### `Accordion.Root`
+### Accordion.Root
 
 Renders a `<ul>` and owns the open-state store. Extends all native `ul` props
 except `onChange`.
@@ -342,7 +342,7 @@ except `onChange`.
 
 Data attributes: `data-slot="accordion-root"`, `data-orientation="vertical"`.
 
-### `Accordion.Item`
+### Accordion.Item
 
 Wraps a single accordion entry. Renders an `<li>` and provides item context
 (open state, generated IDs) to its descendants.
@@ -359,7 +359,7 @@ Data attributes:
 `data-state="open" | "closed"`,
 `data-disabled` (empty string when disabled, otherwise absent).
 
-### `Accordion.Heading`
+### Accordion.Heading
 
 The heading element that wraps the trigger — required by the ARIA accordion
 pattern.
@@ -372,7 +372,7 @@ pattern.
 
 Data attributes: `data-slot="accordion-heading"`, `data-state="open" | "closed"`.
 
-### `Accordion.Trigger`
+### Accordion.Trigger
 
 The interactive `<button>` that toggles the item. Wired with
 `aria-expanded`, `aria-controls`, and keyboard navigation
@@ -394,7 +394,7 @@ Built-in attributes:
 `data-state="open" | "closed"`,
 `data-disabled` (empty string when disabled).
 
-### `Accordion.Content`
+### Accordion.Content
 
 The expandable panel. Renders a `<section role="region">` labelled by its
 trigger via `aria-labelledby`. Uses `inert` when closed so its contents
@@ -410,7 +410,7 @@ Data attributes: `data-slot="accordion-content"`, `data-state="open" | "closed"`
 Animation: a `grid-template-rows: 0fr ↔ 1fr` transition is applied by
 default, with `motion-reduce:transition-none` honoring the user's preference.
 
-### `Accordion.Indicator`
+### Accordion.Indicator
 
 Decorative `<span>` rendered inside the trigger. Mirrors `data-state` and
 rotates by `-180deg` on open by default.

@@ -372,7 +372,7 @@ side-nav-with-content pattern.
 
 ## API Reference
 
-### `Tabs.Root`
+### Tabs.Root
 
 Renders a `<div>` and owns selection. Extends all native `div` props.
 
@@ -391,7 +391,7 @@ Data attributes:
 `data-slot="tabs-root"`,
 `data-orientation="horizontal" | "vertical"`.
 
-### `Tabs.Container`
+### Tabs.Container
 
 Positioning context for the list and the absolutely-rendered indicator.
 Required whenever you use `Tabs.Indicator`.
@@ -403,7 +403,7 @@ Required whenever you use `Tabs.Indicator`.
 
 Data attributes: `data-slot="tabs-list-container"`.
 
-### `Tabs.List`
+### Tabs.List
 
 The `role="tablist"` group of triggers. Renders a `<div>` with
 `aria-orientation` derived from the root.
@@ -421,7 +421,7 @@ Built-in attributes: `role="tablist"`, `aria-orientation`,
   has an accessible name.
 </Callout>
 
-### `Tabs.Trigger`
+### Tabs.Trigger
 
 The interactive `role="tab"` `<button>`. Wired with `aria-selected`,
 `aria-controls`, a roving `tabIndex`, and orientation-aware arrow-key
@@ -447,7 +447,7 @@ Built-in attributes:
 `data-state="active" | "inactive"`,
 `data-disabled` (empty string when disabled).
 
-### `Tabs.Indicator`
+### Tabs.Indicator
 
 A sliding marker rendered inside the currently selected trigger. Uses
 motion's shared `layoutId` to animate position and size from the previous
@@ -464,7 +464,7 @@ Data attributes: `data-slot="tabs-indicator"`. The shared `layoutId` is
 scoped per `Tabs.Root` instance (`tabs-indicator-<scope>`), so multiple
 tabs on the same page never collide.
 
-### `Tabs.Separator`
+### Tabs.Separator
 
 Decorative divider between adjacent triggers. Fades out on the active tab
 via `group-data-[state=active]/tab:opacity-0` so the indicator can take its
@@ -477,7 +477,7 @@ place.
 
 Always `aria-hidden="true"`. Data attributes: `data-slot="tabs-separator"`.
 
-### `Tabs.Content`
+### Tabs.Content
 
 The `role="tabpanel"` for a tab. By default, inactive panels are unmounted;
 pass `forceMount` to keep them in the DOM with `hidden` toggled instead.
