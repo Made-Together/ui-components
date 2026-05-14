@@ -1,6 +1,6 @@
 "use client";
 
-import type { ComponentPropsWithoutRef, CSSProperties } from "react";
+import type { ComponentPropsWithoutRef } from "react";
 import {
   createContext,
   forwardRef,
@@ -37,8 +37,7 @@ function useAutoScrollText(component: string): AutoScrollTextContextValue {
   return ctx;
 }
 
-interface AutoScrollTextRootProps
-  extends ComponentPropsWithoutRef<"div"> {
+interface AutoScrollTextRootProps extends ComponentPropsWithoutRef<"div"> {
   /** Optional fixed container width in pixels. If not set, width is auto-inferred from parent. */
   containerWidth?: number;
   /** Duration in ms to wait before starting scroll animation. @default 2000 */
@@ -72,13 +71,27 @@ const Root = forwardRef<HTMLDivElement, AutoScrollTextRootProps>(
     const containerRef = useRef<HTMLDivElement | null>(null);
     const textRef = useRef<HTMLSpanElement | null>(null);
 
-    const [measurements, setMeasurements] = useState<{
-      containerW: number;
-      textW: number;
-    } | null>(null);
+    // The only state we keep: overflow status. It changes on resize / text
+    // change — never per animation frame — so it does NOT cause tick
+    // rerenders. Everything else (scroll progress, mask gradient, transform)
+    // is driven imperatively through refs + direct DOM writes below.
+    const [isOverflowing, setIsOverflowing] = useState(false);
 
-    const [scrollProgress, setScrollProgress] = useState(0);
-    const [isScrolling, setIsScrolling] = useState(false);
+    const measurementsRef = useRef<{ containerW: number; textW: number } | null>(
+      null,
+    );
+    const overflowAmountRef = useRef(0);
+    const fadePercentRef = useRef(10);
+
+    // Live prop refs so the long-lived rAF loop reads the latest values
+    // without having to tear down + restart on every prop change.
+    const optionsRef = useRef({
+      startDelay,
+      endDelay,
+      scrollSpeed,
+      fadeWidth,
+    });
+    optionsRef.current = { startDelay, endDelay, scrollSpeed, fadeWidth };
 
     const animationRef = useRef<number | null>(null);
     const abortControllerRef = useRef<AbortController | null>(null);
@@ -96,19 +109,158 @@ const Root = forwardRef<HTMLDivElement, AutoScrollTextRootProps>(
       [forwardedRef],
     );
 
+    const applyMask = useCallback((progress: number) => {
+      const container = containerRef.current;
+      if (!container) return;
+      const fadePercent = fadePercentRef.current;
+      const leftFadeEnd = progress * fadePercent;
+      const rightFadeStart = 100 - fadePercent + progress * fadePercent;
+      const gradient = `linear-gradient(to right, transparent 0%, black ${leftFadeEnd}%, black ${rightFadeStart}%, transparent 100%)`;
+      container.style.maskImage = gradient;
+      (container.style as CSSStyleDeclaration & {
+        webkitMaskImage: string;
+      }).webkitMaskImage = gradient;
+    }, []);
+
+    const clearMask = useCallback(() => {
+      const container = containerRef.current;
+      if (!container) return;
+      container.style.maskImage = "";
+      (container.style as CSSStyleDeclaration & {
+        webkitMaskImage: string;
+      }).webkitMaskImage = "";
+    }, []);
+
+    const stopAnimation = useCallback(() => {
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+        abortControllerRef.current = null;
+      }
+      if (animationRef.current) {
+        cancelAnimationFrame(animationRef.current);
+        animationRef.current = null;
+      }
+    }, []);
+
+    const resetVisuals = useCallback(() => {
+      const textEl = textRef.current;
+      if (textEl) textEl.style.transform = "translateX(0)";
+      clearMask();
+      const container = containerRef.current;
+      if (container) container.dataset.state = "idle";
+    }, [clearMask]);
+
+    const runScrollAnimation = useCallback(() => {
+      const textEl = textRef.current;
+      const container = containerRef.current;
+      const overflowAmount = overflowAmountRef.current;
+      if (!(textEl && container) || overflowAmount === 0) return;
+
+      stopAnimation();
+      abortControllerRef.current = new AbortController();
+      const signal = abortControllerRef.current.signal;
+
+      const sleep = (ms: number) =>
+        new Promise<void>((resolve, reject) => {
+          const timeoutId = setTimeout(resolve, ms);
+          signal.addEventListener("abort", () => {
+            clearTimeout(timeoutId);
+            reject(new Error("Aborted"));
+          });
+        });
+
+      const animateScroll = (direction: "left" | "right"): Promise<void> =>
+        new Promise((resolve, reject) => {
+          if (signal.aborted) {
+            reject(new Error("Aborted"));
+            return;
+          }
+          const startTime = performance.now();
+          const startProgress = direction === "left" ? 0 : 1;
+          const endProgress = direction === "left" ? 1 : 0;
+          const scrollDuration =
+            (overflowAmount / optionsRef.current.scrollSpeed) * 1000;
+
+          const tick = (currentTime: number) => {
+            if (signal.aborted) {
+              reject(new Error("Aborted"));
+              return;
+            }
+            const t = Math.min((currentTime - startTime) / scrollDuration, 1);
+            const progress =
+              startProgress + (endProgress - startProgress) * t;
+
+            // Direct DOM writes — no React rerender per frame.
+            textEl.style.transform = `translateX(${-progress * overflowAmount}px)`;
+            applyMask(progress);
+
+            if (t < 1) {
+              animationRef.current = requestAnimationFrame(tick);
+            } else {
+              resolve();
+            }
+          };
+
+          animationRef.current = requestAnimationFrame(tick);
+          signal.addEventListener("abort", () => {
+            if (animationRef.current) {
+              cancelAnimationFrame(animationRef.current);
+            }
+            reject(new Error("Aborted"));
+          });
+        });
+
+      (async () => {
+        try {
+          textEl.style.transform = "translateX(0)";
+          applyMask(0);
+          container.dataset.state = "scrolling";
+
+          while (!signal.aborted) {
+            await sleep(optionsRef.current.startDelay);
+            if (signal.aborted) break;
+            await animateScroll("left");
+            if (signal.aborted) break;
+            await sleep(optionsRef.current.endDelay);
+            if (signal.aborted) break;
+            await animateScroll("right");
+            if (signal.aborted) break;
+          }
+        } catch {
+          // Aborted — expected.
+        }
+      })();
+    }, [applyMask, stopAnimation]);
+
     const measure = useCallback(() => {
       const container = containerRef.current;
       const text = textRef.current;
       if (!(container && text)) return;
       const containerW = containerWidth ?? container.offsetWidth;
       const textW = text.scrollWidth;
-      setMeasurements((prev) => {
-        if (prev && prev.containerW === containerW && prev.textW === textW) {
-          return prev;
-        }
-        return { containerW, textW };
-      });
-    }, [containerWidth]);
+
+      const prev = measurementsRef.current;
+      if (prev && prev.containerW === containerW && prev.textW === textW) {
+        return;
+      }
+      measurementsRef.current = { containerW, textW };
+      overflowAmountRef.current = Math.max(0, textW - containerW);
+      fadePercentRef.current = Math.min(
+        (optionsRef.current.fadeWidth / containerW) * 100,
+        20,
+      );
+
+      const overflowing = textW > containerW;
+      setIsOverflowing((cur) => (cur === overflowing ? cur : overflowing));
+
+      // If we're already scrolling, keep going but with fresh measurements
+      // baked into the next frame (overflowAmountRef is read live).
+      if (overflowing && abortControllerRef.current) {
+        // Restart cleanly so the running tick doesn't undershoot/overshoot
+        // when overflowAmount changes mid-flight.
+        runScrollAnimation();
+      }
+    }, [containerWidth, runScrollAnimation]);
 
     const observeAll = useCallback(() => {
       resizeObserverRef.current?.disconnect();
@@ -142,160 +294,28 @@ const Root = forwardRef<HTMLDivElement, AutoScrollTextRootProps>(
 
     const notifyContentChange = useCallback(
       (_text: string) => {
-        if (abortControllerRef.current) {
-          abortControllerRef.current.abort();
-        }
-        if (animationRef.current) {
-          cancelAnimationFrame(animationRef.current);
-        }
-        const textEl = textRef.current;
-        if (textEl) {
-          textEl.style.transform = "translateX(0)";
-        }
-        setIsScrolling(false);
-        setScrollProgress(0);
+        stopAnimation();
+        resetVisuals();
         measure();
       },
-      [measure],
+      [measure, resetVisuals, stopAnimation],
     );
 
-    const isOverflowing = measurements
-      ? measurements.textW > measurements.containerW
-      : false;
-    const overflowAmount = measurements
-      ? Math.max(0, measurements.textW - measurements.containerW)
-      : 0;
-
-    const runScrollAnimation = useCallback(async () => {
-      const textEl = textRef.current;
-      if (!(isOverflowing && textEl) || overflowAmount === 0) return;
-
-      abortControllerRef.current = new AbortController();
-      const signal = abortControllerRef.current.signal;
-
-      const scrollDuration = (overflowAmount / scrollSpeed) * 1000;
-
-      const sleep = (ms: number) =>
-        new Promise<void>((resolve, reject) => {
-          const timeoutId = setTimeout(resolve, ms);
-          signal.addEventListener("abort", () => {
-            clearTimeout(timeoutId);
-            reject(new Error("Aborted"));
-          });
-        });
-
-      const animateScroll = (direction: "left" | "right"): Promise<void> => {
-        return new Promise((resolve, reject) => {
-          if (signal.aborted) {
-            reject(new Error("Aborted"));
-            return;
-          }
-
-          const startTime = performance.now();
-          const startProgress = direction === "left" ? 0 : 1;
-          const endProgress = direction === "left" ? 1 : 0;
-
-          const tick = (currentTime: number) => {
-            if (signal.aborted) {
-              reject(new Error("Aborted"));
-              return;
-            }
-
-            const elapsed = currentTime - startTime;
-            const t = Math.min(elapsed / scrollDuration, 1);
-            const progress =
-              startProgress + (endProgress - startProgress) * t;
-
-            const translateX = -progress * overflowAmount;
-            textEl.style.transform = `translateX(${translateX}px)`;
-            setScrollProgress(progress);
-
-            if (t < 1) {
-              animationRef.current = requestAnimationFrame(tick);
-            } else {
-              resolve();
-            }
-          };
-
-          animationRef.current = requestAnimationFrame(tick);
-
-          signal.addEventListener("abort", () => {
-            if (animationRef.current) {
-              cancelAnimationFrame(animationRef.current);
-            }
-            reject(new Error("Aborted"));
-          });
-        });
-      };
-
-      try {
-        textEl.style.transform = "translateX(0)";
-        setScrollProgress(0);
-        setIsScrolling(true);
-
-        while (!signal.aborted) {
-          await sleep(startDelay);
-          if (signal.aborted) break;
-          await animateScroll("left");
-          if (signal.aborted) break;
-          await sleep(endDelay);
-          if (signal.aborted) break;
-          await animateScroll("right");
-          if (signal.aborted) break;
-        }
-      } catch {
-        // Loop was aborted - expected.
-      }
-    }, [isOverflowing, overflowAmount, scrollSpeed, startDelay, endDelay]);
-
+    // Start / stop the animation when overflow status changes.
     useEffect(() => {
       if (isOverflowing) {
         runScrollAnimation();
       } else {
-        setIsScrolling(false);
-        setScrollProgress(0);
-        const textEl = textRef.current;
-        if (textEl) {
-          textEl.style.transform = "translateX(0)";
-        }
+        stopAnimation();
+        resetVisuals();
       }
-
       return () => {
-        if (abortControllerRef.current) {
-          abortControllerRef.current.abort();
-        }
-        if (animationRef.current) {
-          cancelAnimationFrame(animationRef.current);
-        }
+        stopAnimation();
       };
-    }, [isOverflowing, runScrollAnimation]);
-
-    const fadePercent = measurements
-      ? Math.min((fadeWidth / measurements.containerW) * 100, 20)
-      : 10;
-
-    const leftFadeEnd = scrollProgress * fadePercent;
-    const rightFadeStart = 100 - fadePercent + scrollProgress * fadePercent;
-
-    const maskGradient =
-      isOverflowing && isScrolling
-        ? `linear-gradient(to right, transparent 0%, black ${leftFadeEnd}%, black ${rightFadeStart}%, transparent 100%)`
-        : undefined;
-
-    const maskStyle: CSSProperties = maskGradient
-      ? {
-          WebkitMaskImage: maskGradient,
-          maskImage: maskGradient,
-          transition: `-webkit-mask-image ${fadeTransitionDuration}ms ease-out, mask-image ${fadeTransitionDuration}ms ease-out`,
-        }
-      : {};
+    }, [isOverflowing, runScrollAnimation, resetVisuals, stopAnimation]);
 
     const ctx = useMemo<AutoScrollTextContextValue>(
-      () => ({
-        registerContent,
-        notifyContentChange,
-        isOverflowing,
-      }),
+      () => ({ registerContent, notifyContentChange, isOverflowing }),
       [registerContent, notifyContentChange, isOverflowing],
     );
 
@@ -305,7 +325,7 @@ const Root = forwardRef<HTMLDivElement, AutoScrollTextRootProps>(
           ref={setContainerRef}
           aria-live="polite"
           data-slot="autoscroll-text-root"
-          data-state={isScrolling ? "scrolling" : "idle"}
+          data-state="idle"
           data-overflowing={isOverflowing ? "" : undefined}
           className={cn(
             "relative overflow-hidden whitespace-nowrap",
@@ -313,7 +333,7 @@ const Root = forwardRef<HTMLDivElement, AutoScrollTextRootProps>(
           )}
           style={{
             width: containerWidth ? `${containerWidth}px` : undefined,
-            ...maskStyle,
+            transition: `-webkit-mask-image ${fadeTransitionDuration}ms ease-out, mask-image ${fadeTransitionDuration}ms ease-out`,
             ...style,
           }}
           {...rest}
@@ -378,6 +398,9 @@ type AutoScrollTextComposition = {
    * `Content` to decide whether the text overflows, then runs a smooth
    * back-and-forth scroll animation with fade masks on the edges.
    *
+   * The animation loop drives `transform` and the CSS mask via direct DOM
+   * writes — no React state updates per frame.
+   *
    * @example
    *
    * ```tsx
@@ -390,8 +413,8 @@ type AutoScrollTextComposition = {
    */
   Root: typeof Root;
   /**
-   * The scrolling text node. Must be a direct (or nested) child of `Root`
-   * and receive a `string` child — the text to scroll.
+   * The scrolling text node. Must be a (nested) child of `Root` and receive
+   * a `string` child — the text to scroll.
    */
   Content: typeof Content;
 };
