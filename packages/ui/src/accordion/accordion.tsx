@@ -11,11 +11,16 @@ import {
   forwardRef,
   useCallback,
   useContext,
+  useEffect,
   useId,
+  useLayoutEffect,
   useMemo,
   useRef,
-  useState,
+  useSyncExternalStore,
 } from "react";
+
+const useIsoLayoutEffect =
+  typeof window !== "undefined" ? useLayoutEffect : useEffect;
 
 import { cn } from "../../lib/utils.js";
 
@@ -26,11 +31,11 @@ type MultipleValue = string[];
 
 interface AccordionContextValue {
   type: AccordionType;
-  value: MultipleValue;
   collapsible: boolean;
   disabled: boolean;
   toggle: (itemValue: string) => void;
   isOpen: (itemValue: string) => boolean;
+  subscribe: (itemValue: string, listener: () => void) => () => void;
   registerTrigger: (itemValue: string, node: HTMLButtonElement | null) => void;
   focusTrigger: (
     fromValue: string,
@@ -117,19 +122,113 @@ const Root = forwardRef<HTMLUListElement, AccordionRootProps>(
     const isMultiple = type === "multiple";
     const isControlled = controlledValue !== undefined;
 
-    const normalize = useCallback(
-      (raw: SingleValue | MultipleValue | undefined): MultipleValue => {
-        if (raw === undefined || raw === null) return [];
-        return Array.isArray(raw) ? raw : [raw];
-      },
+    const normalize = (
+      raw: SingleValue | MultipleValue | undefined,
+    ): MultipleValue => {
+      if (raw === undefined || raw === null) return [];
+      return Array.isArray(raw) ? raw : [raw];
+    };
+
+    // Open state lives in a ref + per-key listener map, so toggling does NOT
+    // re-render Root. Each Item subscribes only to its own key via
+    // useSyncExternalStore, so siblings don't re-render either.
+    const valueRef = useRef<MultipleValue>(
+      normalize(isControlled ? controlledValue : defaultValue),
+    );
+    const listenersRef = useRef(new Map<string, Set<() => void>>());
+
+    const subscribe = useCallback((itemValue: string, listener: () => void) => {
+      let set = listenersRef.current.get(itemValue);
+      if (!set) {
+        set = new Set();
+        listenersRef.current.set(itemValue, set);
+      }
+      set.add(listener);
+      return () => {
+        set?.delete(listener);
+        if (set && set.size === 0) {
+          listenersRef.current.delete(itemValue);
+        }
+      };
+    }, []);
+
+    const isOpen = useCallback(
+      (itemValue: string) => valueRef.current.includes(itemValue),
       [],
     );
 
-    const [internalValue, setInternalValue] = useState<MultipleValue>(() =>
-      normalize(defaultValue),
+    const applyValue = useCallback((next: MultipleValue) => {
+      const prev = valueRef.current;
+      if (prev.length === next.length && prev.every((v, i) => v === next[i])) {
+        return;
+      }
+      const affected = new Set<string>();
+      for (const v of prev) {
+        if (!next.includes(v)) affected.add(v);
+      }
+      for (const v of next) {
+        if (!prev.includes(v)) affected.add(v);
+      }
+      valueRef.current = next;
+      for (const key of affected) {
+        const set = listenersRef.current.get(key);
+        if (!set) continue;
+        for (const listener of set) listener();
+      }
+    }, []);
+
+    // Keep latest onValueChange reachable without bumping `toggle`'s identity.
+    const onValueChangeRef = useRef(onValueChange);
+    useIsoLayoutEffect(() => {
+      onValueChangeRef.current = onValueChange;
+    }, [onValueChange]);
+
+    const emitChange = useCallback(
+      (next: MultipleValue) => {
+        const cb = onValueChangeRef.current;
+        if (!cb) return;
+        if (isMultiple) {
+          (cb as (v: MultipleValue) => void)(next);
+        } else {
+          (cb as (v: SingleValue) => void)(next[0] ?? null);
+        }
+      },
+      [isMultiple],
     );
 
-    const value = isControlled ? normalize(controlledValue) : internalValue;
+    const toggle = useCallback(
+      (itemValue: string) => {
+        const cur = valueRef.current;
+        const open = cur.includes(itemValue);
+        let next: MultipleValue;
+        if (isMultiple) {
+          next = open
+            ? cur.filter((v) => v !== itemValue)
+            : [...cur, itemValue];
+        } else if (open) {
+          if (!collapsible) return;
+          next = [];
+        } else {
+          next = [itemValue];
+        }
+        // Controlled: don't mutate the ref ourselves — defer to the consumer,
+        // who will pass a new `value` prop and the sync effect below will
+        // commit + notify listeners.
+        if (isControlled) {
+          emitChange(next);
+          return;
+        }
+        applyValue(next);
+        emitChange(next);
+      },
+      [applyValue, collapsible, emitChange, isControlled, isMultiple],
+    );
+
+    // Sync controlled `value` into the ref and notify affected items.
+    useIsoLayoutEffect(() => {
+      if (!isControlled) return;
+      applyValue(normalize(controlledValue));
+    }, [controlledValue, isControlled, applyValue]);
 
     const triggersRef = useRef(new Map<string, HTMLButtonElement>());
     const orderRef = useRef<string[]>([]);
@@ -148,45 +247,6 @@ const Root = forwardRef<HTMLUListElement, AccordionRootProps>(
         }
       },
       [],
-    );
-
-    const commit = useCallback(
-      (next: MultipleValue) => {
-        if (!isControlled) setInternalValue(next);
-        if (isMultiple) {
-          (onValueChange as ((v: MultipleValue) => void) | undefined)?.(next);
-        } else {
-          (onValueChange as ((v: SingleValue) => void) | undefined)?.(
-            next[0] ?? null,
-          );
-        }
-      },
-      [isControlled, isMultiple, onValueChange],
-    );
-
-    const toggle = useCallback(
-      (itemValue: string) => {
-        const isOpen = value.includes(itemValue);
-        if (isMultiple) {
-          commit(
-            isOpen
-              ? value.filter((v) => v !== itemValue)
-              : [...value, itemValue],
-          );
-          return;
-        }
-        if (isOpen) {
-          if (collapsible) commit([]);
-          return;
-        }
-        commit([itemValue]);
-      },
-      [collapsible, commit, isMultiple, value],
-    );
-
-    const isOpen = useCallback(
-      (itemValue: string) => value.includes(itemValue),
-      [value],
     );
 
     const focusTrigger = useCallback(
@@ -219,21 +279,21 @@ const Root = forwardRef<HTMLUListElement, AccordionRootProps>(
     const ctx = useMemo<AccordionContextValue>(
       () => ({
         type,
-        value,
         collapsible,
         disabled,
         toggle,
         isOpen,
+        subscribe,
         registerTrigger,
         focusTrigger,
       }),
       [
         type,
-        value,
         collapsible,
         disabled,
         toggle,
         isOpen,
+        subscribe,
         registerTrigger,
         focusTrigger,
       ],
@@ -274,7 +334,12 @@ const Item = forwardRef<HTMLLIElement, AccordionItemProps>(
   ) {
     const root = useAccordion("Accordion.Item");
     const reactId = useId();
-    const open = root.isOpen(value);
+    const subscribe = useCallback(
+      (listener: () => void) => root.subscribe(value, listener),
+      [root, value],
+    );
+    const getSnapshot = useCallback(() => root.isOpen(value), [root, value]);
+    const open = useSyncExternalStore(subscribe, getSnapshot, getSnapshot);
     const isDisabled = disabled || root.disabled;
 
     const ctx = useMemo<AccordionItemContextValue>(
