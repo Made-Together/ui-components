@@ -5,8 +5,8 @@
 - [x] Carousel
 - [x] Marquee
 - [x] Accordion
-- [ ] Tabs
-- [ ] AutoScrollText
+- [x] Tabs
+- [x] AutoScrollText
 - [ ] StackedContent
 - [ ] Swappable
 - [ ] TextReveal
