@@ -4,7 +4,12 @@ const meta: MetaRecord = {
   "getting-started": "Getting Started",
   installation: "Installation",
   skills: "Skills",
-  components: "Components",
+  components: {
+    title: "Components",
+    theme: {
+      collapsed: true,
+    },
+  },
   changelog: "Changelog",
 };
 
