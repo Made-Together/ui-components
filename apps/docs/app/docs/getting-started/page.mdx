@@ -1,53 +1,66 @@
 ---
 description:
-  Nextra is a framework built on top of Next.js that enables the creation of
-  content-focused websites. It combines the robust features of Next.js with
-  enhanced capabilities for crafting Markdown-based content.
+  made-together/ui is a collection library of re-usable headless React
+  components, built on top of motion and Tailwind CSS. Open source,
+  composition-first, and AI-ready.
 ---
+
+import { Cards } from "nextra/components";
 
 # Getting started
 
-**Nextra** is a framework on top of Next.js, that lets you build content focused
-websites. It has all the great features from Next.js, plus extra power to create
-Markdown-based content with ease.
+`@made-together/ui` is a collection of re-usable **headless React components**.
+It ships raw, minimally styled primitives that you compose into your own design system —
+with first-class animation support via [motion](https://motion.dev) and styling
+hooks that play nicely with [Tailwind CSS](https://tailwindcss.com).
 
-## Quick start
+The library is authored and published by
+[together.agency](https://together.agency), initially for use across our
+internal projects. We've open sourced it so others can build on the same
+foundation we do.
 
-To start using Nextra, you need to select a theme first:
+## Open sourced
 
-If you want to use Nextra without using these built-in themes, you can follow
-the [Custom Theme](/docs/custom-theme) docs.
+`@made-together/ui` is free, MIT-licensed, and developed in the open. The
+library was born out of patterns we found ourselves rewriting across client
+work at [together.agency](https://together.agency).
 
-## FAQ
+- **Peer-dep friendly.** `react ^17 || ^18 || ^19`, `motion ^12`, and
+  `tailwindcss ^4` are peer dependencies — there's no second copy of React or
+  motion getting bundled into your app.
+- **No build step.** Components are shipped as raw source. Your bundler
+  transpiles them alongside the rest of your code, so tree-shaking and source
+  maps work the way you expect.
+- **Issues and PRs welcome.** If something is missing, broken, or could be more
+  ergonomic, open an issue or send a patch.
 
-The Nextra FAQ is a collection of useful questions and answers about the
-project. If you have a question that isn't answered here, please
-[open a discussion](https://github.com/shuding/nextra/discussions).
+## Composition
 
-<details>
-  {/* prettier-ignore */}
-  <summary>Can I use Nextra with Next.js `pages` router?</summary>
-Nextra 4 only works with the `app` router. Only Nextra 1/2/3 supports the
-`pages` router.
+Every component in `@made-together/ui` is **headless by default** — it owns
+behavior, state, and accessibility, and leaves the look and feel up to you.
 
-</details>
+That means:
 
-<details>
-  <summary>Can I use X with Nextra?</summary>
-The answer is "yes" for most things. Since Nextra is just a Next.js plugin, almost all the things
-that can be done with React can be done with Nextra. Here are some examples and guides:
+- **Composition over configuration.** Instead of a giant prop surface, you get
+  small primitives you compose into the exact shape your design calls for.
+  Slots, render props, and forwardRef'd elements let you reach in wherever you
+  need to.
+- **Bring your own styles.** Default classes (when any exist) are minimal and
+  always overridable — pass `className` and it merges last, so your styles win.
+  You're not fighting the library to make it look like your product.
+- **Controlled or uncontrolled.** Components support both patterns where it
+  makes sense, and expose internal state through `data-*` attributes (e.g.
+  `data-state`, `data-open`) so you can style or query against them.
 
-- [Use Tailwind CSS](/docs/guide/tailwind-css)
-- [Use custom CSS and Sass](/docs/guide/custom-css)
-- [Use custom fonts](https://nextjs.org/docs/basic-features/font-optimization)
+## AI-Ready
 
-</details>
+The library is built to be legible to humans and to coding agents alike. Files
+are small, exports are explicit, folder layout is predictable, and every
+component lives in its own directory with a `README.md` next to the source.
 
-<details>
-  {/* prettier-ignore */}
-  <summary>How can I add a live coding component in Nextra?</summary>
-There are libraries like [Sandpack](https://sandpack.codesandbox.io) and
-[react-live](https://github.com/FormidableLabs/react-live) that can help you
-add live coding components to your MDX.
-
-</details>
+Each component ships with a focused [skills](/docs/skills) entry — a
+machine-readable description of the component's API, intended usage, and
+composition patterns — that you can feed directly to Claude Code, Cursor, or
+any other agentic tool. Point your assistant at `@made-together/ui` and it can
+scaffold, wire up, and customize components without hallucinating an API that
+doesn't exist.

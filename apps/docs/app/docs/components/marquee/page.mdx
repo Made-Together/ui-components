@@ -1,3 +1,354 @@
+---
+description:
+  A headless, seamless marquee for React. Horizontal or vertical, reversible,
+  pause-on-hover, with reduced-motion support built in.
+---
+
+import { Callout } from "nextra/components";
+import { ComponentShowcase } from "../../../components/component-showcase";
+import {
+  BasicMarqueeExample,
+  FastMarqueeExample,
+  LogoCloudMarqueeExample,
+  PauseOnHoverMarqueeExample,
+  ReverseMarqueeExample,
+  VerticalMarqueeExample,
+} from "./_examples";
+
 # Marquee
 
-The Marquee component is a responsive and customizable marquee component that allows you to display a list of items in a scrolling area.
+A headless, seamless marquee that scrolls a list of items at a configurable
+speed. Horizontal or vertical, reversible, pause-on-hover, and resilient to
+viewport size — the component duplicates content automatically so the loop
+reset is invisible regardless of how wide your container is.
+
+<ComponentShowcase preview={<BasicMarqueeExample />}>
+
+```tsx
+import { Marquee } from "@made-together/ui/marquee";
+
+const words = [
+  "Motion",
+  "Layout",
+  "Tokens",
+  "A11y",
+  "Composition",
+  "Tailwind",
+  "React",
+];
+
+export function BasicMarquee() {
+  return (
+    <Marquee.Root className="rounded-xl border [--gap:2rem] [--duration:35s]">
+      {words.map((word) => (
+        <Marquee.Item key={word}>
+          <span className="inline-flex items-center rounded-full border bg-white px-4 py-2 text-sm font-medium shadow-sm">
+            {word}
+          </span>
+        </Marquee.Item>
+      ))}
+    </Marquee.Root>
+  );
+}
+```
+
+</ComponentShowcase>
+
+## Import
+
+```tsx
+import { Marquee } from "@made-together/ui/marquee";
+```
+
+The component is exported as a compound object — sub-components are
+properties of `Marquee`:
+
+```tsx
+Marquee.Root;
+Marquee.Item;
+```
+
+## Composition
+
+Marquee is a two-part component. `Marquee.Root` owns the scroll behavior, the
+scoped animation CSS, and the duplication that keeps the loop seamless.
+`Marquee.Item` wraps each individual cell in the strip.
+
+```tsx
+<Marquee.Root>
+  <Marquee.Item>One</Marquee.Item>
+  <Marquee.Item>Two</Marquee.Item>
+  <Marquee.Item>Three</Marquee.Item>
+</Marquee.Root>
+```
+
+- **`Marquee.Root`** renders a clipped `<div>` and injects a `<style>` block
+  scoped to the instance via a `useId()`-derived token, so multiple marquees
+  on the same page never share keyframes.
+- **`Marquee.Item`** renders a `<div>` with `data-marquee-item` and
+  `flex-shrink: 0` applied automatically.
+
+Behavior is configured through two CSS custom properties on the root:
+
+| Variable     | Default | Description                                                  |
+| ------------ | ------- | ------------------------------------------------------------ |
+| `--duration` | `40s`   | One full loop. Lower = faster.                               |
+| `--gap`      | `1rem`  | Space between items. Drives both layout gap and the shift distance. |
+
+Override them with Tailwind's arbitrary-value syntax
+(`[--duration:20s]`, `[--gap:2rem]`) or with inline `style`.
+
+<Callout type="info">
+  Marquee ships a scoped `<style>` block per instance so the same component
+  can be reused at different speeds, directions, and orientations on the
+  same page without any class collisions. It also respects
+  `prefers-reduced-motion` — when the user opts out, the animation simply
+  doesn't play.
+</Callout>
+
+## Usage
+
+### Basic usage
+
+A horizontal marquee. Set `--duration` for the loop length and `--gap` for
+the spacing between items.
+
+```tsx
+<Marquee.Root className="[--duration:30s] [--gap:1.5rem]">
+  {items.map((item) => (
+    <Marquee.Item key={item.id}>{item.content}</Marquee.Item>
+  ))}
+</Marquee.Root>
+```
+
+### Reverse direction
+
+Pass `reverse` to flip the animation. Combine with a shorter `--duration`
+for a busier strip.
+
+<ComponentShowcase preview={<ReverseMarqueeExample />}>
+
+```tsx
+<Marquee.Root
+  reverse
+  className="rounded-xl bg-neutral-950 text-white [--gap:1.25rem] [--duration:18s]"
+>
+  {words.map((word) => (
+    <Marquee.Item key={word}>
+      <span className="inline-flex items-center rounded-lg bg-white/10 px-3 py-1.5 text-sm font-medium ring-1 ring-white/20">
+        {word}
+      </span>
+    </Marquee.Item>
+  ))}
+</Marquee.Root>
+```
+
+</ComponentShowcase>
+
+### Pause on hover
+
+Set `pauseOnHover` to freeze motion when the cursor enters the strip — useful
+when items are links, logos, or copy you want users to read.
+
+<ComponentShowcase preview={<PauseOnHoverMarqueeExample />}>
+
+```tsx
+<Marquee.Root
+  pauseOnHover
+  className="cursor-default rounded-xl border border-dashed [--gap:2rem] [--duration:28s]"
+>
+  {logos.map((logo) => (
+    <Marquee.Item key={logo}>
+      <span className="text-base font-semibold uppercase tracking-[0.2em] text-neutral-600">
+        {logo}
+      </span>
+    </Marquee.Item>
+  ))}
+</Marquee.Root>
+```
+
+</ComponentShowcase>
+
+### Vertical orientation
+
+Pass `vertical` to stack the track in a column. Give the root a fixed height
+so the overflow clips cleanly — without one, the marquee won't have anything
+to scroll within.
+
+<ComponentShowcase preview={<VerticalMarqueeExample />}>
+
+```tsx
+<Marquee.Root
+  vertical
+  repeat={3}
+  className="h-52 [--gap:0.75rem] [--duration:22s]"
+>
+  {words.map((word) => (
+    <Marquee.Item key={word}>
+      <span className="block rounded-md bg-white px-3 py-2 text-center text-sm font-medium shadow-sm ring-1 ring-neutral-200">
+        {word}
+      </span>
+    </Marquee.Item>
+  ))}
+</Marquee.Root>
+```
+
+</ComponentShowcase>
+
+### Speed
+
+`--duration` controls how long one full loop takes. Lower values produce a
+faster strip; higher values feel more ambient.
+
+```tsx
+<Marquee.Root className="[--duration:6s]">…</Marquee.Root>
+<Marquee.Root className="[--duration:60s]">…</Marquee.Root>
+```
+
+### Repeat count
+
+`repeat` (default `4`) sets the minimum number of identical child copies
+inside the track. The component automatically renders more copies if your
+viewport is wider than the rendered content so the loop reset stays seamless
+— you almost never need to touch this prop, but it's there for when you
+want to guarantee a denser strip with very few items.
+
+## Examples
+
+### Fast strip
+
+A short `--duration` reads as a high-energy ticker — perfect for status
+banners or activity strips.
+
+<ComponentShowcase preview={<FastMarqueeExample />}>
+
+```tsx
+<Marquee.Root className="rounded-xl bg-neutral-50 [--gap:1rem] [--duration:6s]">
+  {words.map((word) => (
+    <Marquee.Item key={word}>
+      <span className="inline-flex items-center rounded-md bg-neutral-900/5 px-3 py-1.5 text-sm font-medium">
+        {word}
+      </span>
+    </Marquee.Item>
+  ))}
+</Marquee.Root>
+```
+
+</ComponentShowcase>
+
+### Logo cloud
+
+Marquee is a natural fit for logo walls — wide gap, slow duration, pause on
+hover so users can read what's there.
+
+<ComponentShowcase preview={<LogoCloudMarqueeExample />}>
+
+```tsx
+<Marquee.Root
+  pauseOnHover
+  className="[--gap:3rem] [--duration:30s]"
+>
+  {logos.map((logo) => (
+    <Marquee.Item key={logo}>
+      <span className="text-xl font-bold tracking-tight text-neutral-500 transition-colors hover:text-neutral-900">
+        {logo}
+      </span>
+    </Marquee.Item>
+  ))}
+</Marquee.Root>
+```
+
+</ComponentShowcase>
+
+### Vertical side-ticker
+
+A vertical marquee paired with a static column — useful for activity feeds,
+testimonial walls, or any "live signal" pattern.
+
+<ComponentShowcase preview={<VerticalMarqueeExample />}>
+
+```tsx
+<div className="flex flex-row gap-6 rounded-xl border p-4">
+  <p className="w-32 shrink-0 self-center text-sm text-neutral-600">
+    Side column stays still while the ticker runs beside it.
+  </p>
+  <Marquee.Root
+    vertical
+    repeat={3}
+    className="h-52 min-w-0 flex-1 [--gap:0.75rem] [--duration:22s]"
+  >
+    {words.map((word) => (
+      <Marquee.Item key={word}>
+        <span className="block rounded-md bg-white px-3 py-2 text-center text-sm font-medium shadow-sm ring-1 ring-neutral-200">
+          {word}
+        </span>
+      </Marquee.Item>
+    ))}
+  </Marquee.Root>
+</div>
+```
+
+</ComponentShowcase>
+
+## API Reference
+
+### Marquee.Root
+
+Renders a `<div>` that clips its overflow, hosts the scoped animation
+`<style>` block, and renders the duplicated track. Extends all native `div`
+props.
+
+| Prop           | Type                                    | Default | Description                                                                                                                          |
+| -------------- | --------------------------------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| `reverse`      | `boolean`                               | `false` | Flip the animation direction.                                                                                                        |
+| `pauseOnHover` | `boolean`                               | `false` | Freeze the animation while the cursor is over the root.                                                                              |
+| `vertical`     | `boolean`                               | `false` | Animate along the Y axis instead of X. Give the root a fixed height when using vertical orientation.                                |
+| `repeat`       | `number`                                | `4`     | Minimum number of identical child copies inside the track. The component renders more automatically if the viewport demands it.    |
+| `children`     | `React.ReactNode`                       | —       | One or more `Marquee.Item` nodes (or any other content) — rendered inside each copy of the loop.                                    |
+| `className`    | `string`                                | —       | Merged after the component's defaults via `cn`, so your classes win.                                                                 |
+
+CSS variables (set via `className` or inline `style`):
+
+| Variable     | Default | Description                                                                  |
+| ------------ | ------- | ---------------------------------------------------------------------------- |
+| `--duration` | `40s`   | Length of one full loop. Lower = faster.                                     |
+| `--gap`      | `1rem`  | Gap between items. Used both for layout and to compute the per-cycle shift. |
+
+Data attributes:
+
+- `data-marquee-root`
+- `data-marquee-instance="<scope>"` — unique per instance, used for scoping the keyframes.
+- `data-marquee-vertical="true" | "false"`
+- `data-marquee-reverse="true" | "false"`
+- `data-marquee-pause-hover="true" | "false"`
+
+### Marquee.Item
+
+A single cell in the strip. Renders a `<div>` with
+`data-marquee-item` and a fixed `flex-shrink: 0` applied via the scoped
+stylesheet. Extends all native `div` props.
+
+| Prop        | Type                                    | Default | Description                                |
+| ----------- | --------------------------------------- | ------- | ------------------------------------------ |
+| `className` | `string`                                | —       | Forwarded to the underlying `<div>`.       |
+| `children`  | `React.ReactNode`                       | —       | The content rendered inside the cell.      |
+
+Data attributes: `data-marquee-item`.
+
+### Accessibility
+
+- `Marquee.Root` duplicates its children to create the seamless loop;
+  duplicated copies are marked with `aria-hidden="true"` so screen readers
+  only announce the content once.
+- The component honors `prefers-reduced-motion: reduce` — when the user opts
+  out, the animation is set to `none` and the content sits still.
+
+### Exported types
+
+```ts
+import type {
+  MarqueeComposition,
+  MarqueeItemProps,
+  MarqueeRootProps,
+} from "@made-together/ui/marquee";
+```

@@ -1,0 +1,453 @@
+---
+description:
+  A headless, accessible accordion for React. Single or multiple open items,
+  controlled or uncontrolled, with full keyboard navigation and animated
+  panels driven by data-state.
+---
+
+import { Callout } from "nextra/components";
+import { ComponentShowcase } from "../../../components/component-showcase";
+import {
+  BasicAccordionExample,
+  ControlledAccordionExample,
+  DisabledAccordionExample,
+  MultipleAccordionExample,
+  NonCollapsibleAccordionExample,
+} from "./_examples";
+
+# Accordion
+
+A headless, accessible disclosure primitive. Renders semantic
+`ul > li > h3 > button` markup with the full WAI-ARIA accordion pattern wired
+up — `aria-expanded`, `aria-controls`, panel `region`, and Arrow / Home / End
+keyboard navigation between triggers. Open state is exposed via `data-state`
+on every part so you can drive transitions purely from CSS.
+
+<ComponentShowcase preview={<BasicAccordionExample />}>
+
+```tsx
+import { Accordion } from "@made-together/ui/accordion";
+
+const faqItems = [
+  { value: "headless", title: "Is the accordion headless?", content: "…" },
+  { value: "a11y", title: "What about keyboard support?", content: "…" },
+  { value: "controlled", title: "Can I control the open state?", content: "…" },
+];
+
+export function BasicAccordion() {
+  return (
+    <Accordion.Root
+      type="single"
+      defaultValue="headless"
+      className="divide-y rounded-2xl border bg-white"
+    >
+      {faqItems.map((item) => (
+        <Accordion.Item key={item.value} value={item.value}>
+          <Accordion.Heading>
+            <Accordion.Trigger className="flex w-full items-center justify-between gap-4 px-5 py-4 text-left text-sm font-medium hover:bg-neutral-50">
+              {item.title}
+              <Accordion.Indicator className="text-neutral-500">
+                <ChevronDown className="size-4" />
+              </Accordion.Indicator>
+            </Accordion.Trigger>
+          </Accordion.Heading>
+          <Accordion.Content className="px-5 pb-4 text-sm leading-relaxed text-neutral-600">
+            {item.content}
+          </Accordion.Content>
+        </Accordion.Item>
+      ))}
+    </Accordion.Root>
+  );
+}
+```
+
+</ComponentShowcase>
+
+## Import
+
+```tsx
+import { Accordion } from "@made-together/ui/accordion";
+```
+
+The component is exported as a compound object — every sub-component is a
+property of `Accordion`:
+
+```tsx
+Accordion.Root;
+Accordion.Item;
+Accordion.Heading;
+Accordion.Trigger;
+Accordion.Content;
+Accordion.Indicator;
+```
+
+## Composition
+
+Accordion follows the WAI-ARIA pattern strictly. The minimum viable accordion
+nests five parts — `Root → Item → Heading → Trigger`, plus `Content` as a
+sibling of `Heading`:
+
+```tsx
+<Accordion.Root type="single" defaultValue="one" collapsible>
+  <Accordion.Item value="one">
+    <Accordion.Heading>
+      <Accordion.Trigger>
+        Title
+        <Accordion.Indicator>
+          <ChevronDown />
+        </Accordion.Indicator>
+      </Accordion.Trigger>
+    </Accordion.Heading>
+    <Accordion.Content>Panel content</Accordion.Content>
+  </Accordion.Item>
+</Accordion.Root>
+```
+
+- **`Accordion.Root`** renders a `<ul>` and owns the open-state store. Pass
+  `type="single"` or `type="multiple"` to choose between exclusive and
+  multi-open behavior.
+- **`Accordion.Item`** renders an `<li>`. Each item needs a unique `value`
+  prop — that string is what `defaultValue` / `value` / `onValueChange`
+  reference.
+- **`Accordion.Heading`** renders an `<h3>` by default (configurable via
+  `level`). This is required by the ARIA accordion pattern — the trigger must
+  live inside a heading so screen readers expose the structure correctly.
+- **`Accordion.Trigger`** is the real `<button>`. Already wired with
+  `aria-expanded`, `aria-controls`, and keyboard navigation
+  (ArrowDown / ArrowUp / Home / End move between triggers).
+- **`Accordion.Content`** is the `<section role="region">` labelled by the
+  trigger. The default styles animate `grid-template-rows` from `0fr` to
+  `1fr`, giving you a smooth height transition without measuring anything.
+- **`Accordion.Indicator`** is an optional decorative `<span>` that mirrors
+  the item's `data-state` — handy for a chevron that rotates on open.
+
+<Callout type="info">
+  Open state lives in a ref + per-key listener map inside `Accordion.Root`.
+  Toggling an item only re-renders the affected `Accordion.Item` — sibling
+  items and the root itself don't re-render. This keeps large FAQs fast even
+  with rich content inside each panel.
+</Callout>
+
+## Usage
+
+### Basic usage
+
+A single accordion where one panel is open at a time. `defaultValue` puts
+the component in uncontrolled mode — perfect when you don't need to read or
+override the open state from outside.
+
+```tsx
+<Accordion.Root type="single" defaultValue="one" collapsible>
+  <Accordion.Item value="one">…</Accordion.Item>
+  <Accordion.Item value="two">…</Accordion.Item>
+</Accordion.Root>
+```
+
+### Multiple open items
+
+Pass `type="multiple"` to allow several panels open simultaneously. The
+`value` shape becomes `string[]` instead of `string | null`.
+
+<ComponentShowcase preview={<MultipleAccordionExample />}>
+
+```tsx
+<Accordion.Root type="multiple" defaultValue={["a11y", "animation"]}>
+  {faqItems.map((item) => (
+    <Accordion.Item key={item.value} value={item.value}>
+      <Accordion.Heading>
+        <Accordion.Trigger>
+          {item.title}
+          <Accordion.Indicator>
+            <ChevronDown />
+          </Accordion.Indicator>
+        </Accordion.Trigger>
+      </Accordion.Heading>
+      <Accordion.Content>{item.content}</Accordion.Content>
+    </Accordion.Item>
+  ))}
+</Accordion.Root>
+```
+
+</ComponentShowcase>
+
+### Controlled
+
+Pass `value` + `onValueChange` to take over the open state. The signatures
+mirror the `type` prop — `string | null` for `"single"`, `string[]` for
+`"multiple"`.
+
+<ComponentShowcase preview={<ControlledAccordionExample />}>
+
+```tsx
+const [value, setValue] = useState<string | null>("headless");
+
+<Accordion.Root type="single" value={value} onValueChange={setValue}>
+  {faqItems.map((item) => (
+    <Accordion.Item key={item.value} value={item.value}>…</Accordion.Item>
+  ))}
+</Accordion.Root>;
+```
+
+</ComponentShowcase>
+
+### Non-collapsible single
+
+With `type="single"`, set `collapsible={false}` to require that one item
+remain open at all times. Clicking the open trigger again is a no-op.
+
+<ComponentShowcase preview={<NonCollapsibleAccordionExample />}>
+
+```tsx
+<Accordion.Root type="single" defaultValue="headless" collapsible={false}>
+  {faqItems.map((item) => (
+    <Accordion.Item key={item.value} value={item.value}>…</Accordion.Item>
+  ))}
+</Accordion.Root>
+```
+
+</ComponentShowcase>
+
+### Disabled items
+
+Pass `disabled` on `Accordion.Root` to disable every item, or on an
+individual `Accordion.Item` to disable just that one. Disabled triggers
+are skipped during keyboard navigation, and the item exposes
+`data-disabled` for styling.
+
+<ComponentShowcase preview={<DisabledAccordionExample />}>
+
+```tsx
+<Accordion.Root type="single" defaultValue="headless">
+  {faqItems.map((item, i) => (
+    <Accordion.Item
+      key={item.value}
+      value={item.value}
+      disabled={i === 1}
+      className="data-[disabled]:opacity-50"
+    >
+      …
+    </Accordion.Item>
+  ))}
+</Accordion.Root>
+```
+
+</ComponentShowcase>
+
+### Animating the panel
+
+The default `Accordion.Content` animates open/close via a
+`grid-template-rows: 0fr → 1fr` transition — no JS measurement, no layout
+thrash. Every part also exposes `data-state="open" | "closed"`, so you can
+add your own transitions on the trigger, the indicator, or any nested
+element.
+
+```tsx
+<Accordion.Indicator className="transition-transform data-[state=open]:-rotate-180">
+  <ChevronDown />
+</Accordion.Indicator>
+```
+
+The library already applies `-rotate-180` on open by default — you only
+need to override or extend if you want a different transform.
+
+## Examples
+
+### Multi-open card stack
+
+`type="multiple"` paired with per-item cards instead of a divided list — the
+ring color picks up the open state via `data-[state=open]`.
+
+<ComponentShowcase preview={<MultipleAccordionExample />}>
+
+```tsx
+<Accordion.Root type="multiple" defaultValue={["a11y", "animation"]} className="flex flex-col gap-2">
+  {faqItems.map((item) => (
+    <Accordion.Item
+      key={item.value}
+      value={item.value}
+      className="overflow-hidden rounded-xl bg-white ring-1 ring-neutral-200 data-[state=open]:ring-neutral-400"
+    >
+      <Accordion.Heading>
+        <Accordion.Trigger className="flex w-full items-center justify-between gap-4 px-4 py-3 text-left text-sm font-medium">
+          {item.title}
+          <Accordion.Indicator className="grid size-6 place-items-center rounded-full bg-neutral-100">
+            <ChevronDown className="size-3.5" />
+          </Accordion.Indicator>
+        </Accordion.Trigger>
+      </Accordion.Heading>
+      <Accordion.Content className="border-t px-4 py-3 text-sm leading-relaxed text-neutral-600">
+        {item.content}
+      </Accordion.Content>
+    </Accordion.Item>
+  ))}
+</Accordion.Root>
+```
+
+</ComponentShowcase>
+
+### Controlled with external toggles
+
+Open state lifted to a parent — external pill buttons can drive the
+accordion the same way the triggers do.
+
+<ComponentShowcase preview={<ControlledAccordionExample />}>
+
+```tsx
+const [value, setValue] = useState<string | null>("headless");
+
+return (
+  <>
+    <div className="flex gap-2">
+      {faqItems.map((item) => (
+        <button
+          key={item.value}
+          onClick={() =>
+            setValue((cur) => (cur === item.value ? null : item.value))
+          }
+          data-active={value === item.value || undefined}
+          className="rounded-full border px-3 py-1 data-[active]:bg-neutral-900 data-[active]:text-white"
+        >
+          {item.value}
+        </button>
+      ))}
+    </div>
+    <Accordion.Root type="single" value={value} onValueChange={setValue}>
+      {faqItems.map((item) => (
+        <Accordion.Item key={item.value} value={item.value}>…</Accordion.Item>
+      ))}
+    </Accordion.Root>
+  </>
+);
+```
+
+</ComponentShowcase>
+
+## API Reference
+
+### `Accordion.Root`
+
+Renders a `<ul>` and owns the open-state store. Extends all native `ul` props
+except `onChange`.
+
+| Prop            | Type                                                                    | Default      | Description                                                                                                                |
+| --------------- | ----------------------------------------------------------------------- | ------------ | -------------------------------------------------------------------------------------------------------------------------- |
+| `type`          | `"single" \| "multiple"`                                                | `"single"`   | Whether one or many items can be open at a time. Changes the shape of `value` / `defaultValue` / `onValueChange`.       |
+| `value`         | `string \| null` (single) · `string[]` (multiple)                       | `undefined`  | Controlled open state. Pair with `onValueChange`. Switch to uncontrolled by omitting this prop.                          |
+| `defaultValue`  | `string \| null` (single) · `string[]` (multiple)                       | `undefined`  | Initial open state in uncontrolled mode.                                                                                  |
+| `onValueChange` | `(value: string \| null) => void` (single) · `(value: string[]) => void` (multiple) | `undefined` | Fires whenever an item is toggled.                                                                                          |
+| `collapsible`   | `boolean`                                                               | `true`       | When `type="single"`, allows closing the currently open item. Ignored when `type="multiple"`.                            |
+| `disabled`      | `boolean`                                                               | `false`      | Disables interaction with every item.                                                                                     |
+| `className`     | `string`                                                                | —            | Merged via `cn` — your classes can replace the default `list-none`.                                                       |
+| `...rest`       | `Omit<React.ComponentPropsWithoutRef<"ul">, "onChange">`                | —            | Forwarded to the underlying `<ul>`.                                                                                       |
+
+Data attributes: `data-slot="accordion-root"`, `data-orientation="vertical"`.
+
+### `Accordion.Item`
+
+Wraps a single accordion entry. Renders an `<li>` and provides item context
+(open state, generated IDs) to its descendants.
+
+| Prop        | Type                                  | Default      | Description                                                                                  |
+| ----------- | ------------------------------------- | ------------ | -------------------------------------------------------------------------------------------- |
+| `value`     | `string`                              | **required** | Unique identifier — referenced by `defaultValue` / `value` / `onValueChange` on the root. |
+| `disabled`  | `boolean`                             | `false`      | Disables this item only. Skipped during keyboard navigation.                                |
+| `className` | `string`                              | —            | Merged via `cn`.                                                                            |
+| `...rest`   | `React.ComponentPropsWithoutRef<"li">` | —            | Forwarded to the underlying `<li>`.                                                          |
+
+Data attributes:
+`data-slot="accordion-item"`,
+`data-state="open" | "closed"`,
+`data-disabled` (empty string when disabled, otherwise absent).
+
+### `Accordion.Heading`
+
+The heading element that wraps the trigger — required by the ARIA accordion
+pattern.
+
+| Prop        | Type                                                       | Default | Description                                                                              |
+| ----------- | ---------------------------------------------------------- | ------- | ---------------------------------------------------------------------------------------- |
+| `level`     | `1 \| 2 \| 3 \| 4 \| 5 \| 6`                               | `3`     | Heading level. Renders the corresponding `<hN>` tag.                                     |
+| `className` | `string`                                                   | —       | Merged via `cn`. Default is `m-0` so the heading doesn't introduce extra spacing.        |
+| `...rest`   | `React.ComponentPropsWithoutRef<"h3">`                     | —       | Forwarded to the underlying heading element.                                              |
+
+Data attributes: `data-slot="accordion-heading"`, `data-state="open" | "closed"`.
+
+### `Accordion.Trigger`
+
+The interactive `<button>` that toggles the item. Wired with
+`aria-expanded`, `aria-controls`, and keyboard navigation
+(ArrowDown / ArrowUp / Home / End).
+
+| Prop        | Type                                                                          | Default     | Description                                                                                                              |
+| ----------- | ----------------------------------------------------------------------------- | ----------- | ------------------------------------------------------------------------------------------------------------------------ |
+| `type`      | `"button" \| "submit" \| "reset"`                                             | `"button"`  | Standard button type.                                                                                                    |
+| `disabled`  | `boolean`                                                                     | `undefined` | Force-disable just this trigger. Overrides item/root `disabled`.                                                         |
+| `onClick`   | `React.MouseEventHandler<HTMLButtonElement>`                                  | `undefined` | Fires before the toggle. Call `event.preventDefault()` to skip the built-in toggle.                                      |
+| `onKeyDown` | `React.KeyboardEventHandler<HTMLButtonElement>`                               | `undefined` | Fires before the built-in arrow-key handling. Call `event.preventDefault()` to skip navigation.                          |
+| `className` | `string`                                                                      | —           | Merged via `cn` — defaults include cursor and transition utilities you can override.                                     |
+| `...rest`   | `React.ComponentPropsWithoutRef<"button">`                                    | —           | Forwarded to the underlying `<button>`.                                                                                  |
+
+Built-in attributes:
+`aria-expanded`,
+`aria-controls`,
+`data-slot="accordion-trigger"`,
+`data-state="open" | "closed"`,
+`data-disabled` (empty string when disabled).
+
+### `Accordion.Content`
+
+The expandable panel. Renders a `<section role="region">` labelled by its
+trigger via `aria-labelledby`. Uses `inert` when closed so its contents
+aren't focusable or read by assistive tech.
+
+| Prop        | Type                                    | Default | Description                                                                                                   |
+| ----------- | --------------------------------------- | ------- | ------------------------------------------------------------------------------------------------------------- |
+| `className` | `string`                                | —       | Applied to the inner content `<div>`. Merged via `cn` — defaults include `min-h-0 overflow-hidden`.          |
+| `...rest`   | `React.ComponentPropsWithoutRef<"div">` | —       | Forwarded to the inner content `<div>` (not the outer `<section>` — the outer element owns the animation). |
+
+Data attributes: `data-slot="accordion-content"`, `data-state="open" | "closed"`.
+
+Animation: a `grid-template-rows: 0fr ↔ 1fr` transition is applied by
+default, with `motion-reduce:transition-none` honoring the user's preference.
+
+### `Accordion.Indicator`
+
+Decorative `<span>` rendered inside the trigger. Mirrors `data-state` and
+rotates by `-180deg` on open by default.
+
+| Prop        | Type                                     | Default | Description                                                                                  |
+| ----------- | ---------------------------------------- | ------- | -------------------------------------------------------------------------------------------- |
+| `className` | `string`                                 | —       | Merged via `cn` — defaults include the rotate-on-open transition you can override or extend. |
+| `children`  | `React.ReactNode`                        | —       | The icon (chevron, plus/minus, etc.) to render inside the indicator.                         |
+| `...rest`   | `React.ComponentPropsWithoutRef<"span">` | —       | Forwarded to the underlying `<span>`.                                                         |
+
+`aria-hidden="true"` is always set so the indicator never announces to
+assistive tech. Data attributes: `data-slot="accordion-indicator"`,
+`data-state="open" | "closed"`.
+
+### Keyboard interactions
+
+| Key                  | Action                                                                                  |
+| -------------------- | --------------------------------------------------------------------------------------- |
+| `Space` / `Enter`    | Toggle the focused trigger.                                                             |
+| `ArrowDown`          | Move focus to the next trigger (wraps to the first).                                   |
+| `ArrowUp`            | Move focus to the previous trigger (wraps to the last).                                |
+| `Home`               | Move focus to the first trigger.                                                        |
+| `End`                | Move focus to the last trigger.                                                         |
+| `Tab` / `Shift+Tab`  | Standard tab navigation — moves through triggers and the visible content of open panels. |
+
+Disabled triggers are skipped during arrow / Home / End navigation.
+
+### Exported types
+
+```ts
+import type {
+  AccordionContentProps,
+  AccordionHeadingProps,
+  AccordionIndicatorProps,
+  AccordionItemProps,
+  AccordionRootProps,
+  AccordionTriggerProps,
+  AccordionType, // "single" | "multiple"
+} from "@made-together/ui/accordion";
+```

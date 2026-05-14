@@ -1,53 +1,81 @@
 ---
 description:
-  Nextra is a framework built on top of Next.js that enables the creation of
-  content-focused websites. It combines the robust features of Next.js with
-  enhanced capabilities for crafting Markdown-based content.
+  Install @made-together/ui into your React project. Requires React, motion,
+  and Tailwind CSS as peer dependencies.
 ---
+
+import { Callout, Cards, Tabs } from "nextra/components";
 
 # Installation
 
-**Nextra** is a framework on top of Next.js, that lets you build content focused
-websites. It has all the great features from Next.js, plus extra power to create
-Markdown-based content with ease.
+`@made-together/ui` is distributed on npm. Add it to your React project with
+your package manager of choice.
 
-## Quick start
+<Tabs items={["pnpm", "npm", "yarn", "bun"]}>
+  <Tabs.Tab>
+    ```sh
+    pnpm add @made-together/ui
+    ```
+  </Tabs.Tab>
+  <Tabs.Tab>
+    ```sh
+    npm install @made-together/ui
+    ```
+  </Tabs.Tab>
+  <Tabs.Tab>
+    ```sh
+    yarn add @made-together/ui
+    ```
+  </Tabs.Tab>
+  <Tabs.Tab>
+    ```sh
+    bun add @made-together/ui
+    ```
+  </Tabs.Tab>
+</Tabs>
 
-To start using Nextra, you need to select a theme first:
+## Peer dependencies
 
-If you want to use Nextra without using these built-in themes, you can follow
-the [Custom Theme](/docs/custom-theme) docs.
+`@made-together/ui` ships components as raw source and relies on your app to
+provide the runtime. Make sure the following are installed:
 
-## FAQ
+```sh
+pnpm add react react-dom motion tailwindcss
+```
 
-The Nextra FAQ is a collection of useful questions and answers about the
-project. If you have a question that isn't answered here, please
-[open a discussion](https://github.com/shuding/nextra/discussions).
+| Package       | Version          | Why                                                 |
+| ------------- | ---------------- | --------------------------------------------------- |
+| `react`       | `^17.0.0` onwards| The component runtime.                              |
+| `react-dom`   | matches `react`  | Required for any DOM-rendered React app.            |
+| `motion`      | `^12`            | Used by every animated component in the library.   |
+| `tailwindcss` | `^4`             | Used for the minimal, overridable default styles.   |
 
-<details>
-  {/* prettier-ignore */}
-  <summary>Can I use Nextra with Next.js `pages` router?</summary>
-Nextra 4 only works with the `app` router. Only Nextra 1/2/3 supports the
-`pages` router.
+If you're using Next.js, Vite, Remix, or any modern React tooling, you almost
+certainly have `react` and `react-dom` already — just add the remaining peers.
 
-</details>
+## Tailwind CSS
 
-<details>
-  <summary>Can I use X with Nextra?</summary>
-The answer is "yes" for most things. Since Nextra is just a Next.js plugin, almost all the things
-that can be done with React can be done with Nextra. Here are some examples and guides:
+Components use Tailwind v4 utility classes for their (minimal, overridable)
+defaults. If you haven't set Tailwind up yet, follow the
+[official guide](https://tailwindcss.com/docs/installation)
 
-- [Use Tailwind CSS](/docs/guide/tailwind-css)
-- [Use custom CSS and Sass](/docs/guide/custom-css)
-- [Use custom fonts](https://nextjs.org/docs/basic-features/font-optimization)
+## Importing components
 
-</details>
+Components are exported per-name. Import them directly from their subpath:
 
-<details>
-  {/* prettier-ignore */}
-  <summary>How can I add a live coding component in Nextra?</summary>
-There are libraries like [Sandpack](https://sandpack.codesandbox.io) and
-[react-live](https://github.com/FormidableLabs/react-live) that can help you
-add live coding components to your MDX.
+```tsx
+import { Carousel } from "@made-together/ui/carousel";
+import { Marquee } from "@made-together/ui/marquee";
+import { Tabs } from "@made-together/ui/tabs";
+```
 
-</details>
+Subpath imports keep your bundle tree-shakeable — you only pay for what you
+use.
+
+<Callout type="info">
+  **React only components** `@made-together/ui` is plug-and-play for React
+  apps only. Many components rely on hooks, refs, and browser APIs, so they
+  ship with the `"use client"` directive. In a React Server Components setup
+  (Next.js App Router, etc.), import them from a client component or accept
+  that they will run on the client.
+</Callout>

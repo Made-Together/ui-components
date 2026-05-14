@@ -1,3 +1,466 @@
+---
+description:
+  A composable, headless carousel for React built on top of Embla Carousel.
+  Drag, snap, autoplay, loop, multi-slide layouts, and full keyboard support
+  — all under your own styling.
+---
+
+import { Callout } from "nextra/components";
+import { ComponentShowcase } from "../../../components/component-showcase";
+import {
+  AutoplayCarouselExample,
+  BasicCarouselExample,
+  LoopingCarouselExample,
+  MultiSlideCarouselExample,
+  NumberedNavCarouselExample,
+} from "./_examples";
+
 # Carousel
 
-The Carousel component is a responsive and customizable carousel component that allows you to display a list of items in a scrollable area.
+A headless, composable carousel built on top of
+[Embla Carousel](https://www.embla-carousel.com). Ships drag-to-scroll, snap
+points, autoplay, looping, multi-slide layouts, and keyboard-accessible
+navigation — with every visual choice left to you.
+
+<ComponentShowcase preview={<BasicCarouselExample />}>
+
+```tsx
+import { Carousel } from "@made-together/ui/carousel";
+
+const slides = [
+  { title: "Aurora", hue: "from-indigo-500 to-fuchsia-500" },
+  { title: "Tidepool", hue: "from-cyan-500 to-teal-500" },
+  { title: "Ember", hue: "from-amber-500 to-rose-500" },
+  { title: "Moss", hue: "from-emerald-500 to-lime-500" },
+  { title: "Dusk", hue: "from-slate-700 to-slate-900" },
+];
+
+export function BasicCarousel() {
+  return (
+    <Carousel.Root autoplay={false} options={{ align: "start" }}>
+      <Carousel.Viewport className="overflow-hidden rounded-2xl">
+        <Carousel.Container className="flex">
+          {slides.map((slide, i) => (
+            <Carousel.Slide
+              key={slide.title}
+              index={i}
+              className="min-w-0 flex-[0_0_100%] pr-3 last:pr-0"
+            >
+              <div
+                className={`aspect-video rounded-2xl bg-linear-to-br ${slide.hue} p-6 text-white`}
+              >
+                <h3 className="text-2xl font-semibold">{slide.title}</h3>
+              </div>
+            </Carousel.Slide>
+          ))}
+        </Carousel.Container>
+      </Carousel.Viewport>
+
+      <div className="mt-4 flex items-center justify-between">
+        <Carousel.Navigation className="flex items-center gap-2">
+          {slides.map((slide, i) => (
+            <Carousel.NavigationItem
+              key={slide.title}
+              index={i}
+              className="block h-2 w-2 rounded-full bg-neutral-300 transition-[width,background-color] duration-300 data-[state=active]:w-5 data-[state=active]:bg-neutral-900"
+            />
+          ))}
+        </Carousel.Navigation>
+        <div className="flex gap-2">
+          <Carousel.Previous className="rounded-full border px-4 py-2 text-sm font-medium disabled:opacity-40">
+            Prev
+          </Carousel.Previous>
+          <Carousel.Next className="rounded-full border px-4 py-2 text-sm font-medium disabled:opacity-40">
+            Next
+          </Carousel.Next>
+        </div>
+      </div>
+    </Carousel.Root>
+  );
+}
+```
+
+</ComponentShowcase>
+
+## Import
+
+```tsx
+import { Carousel, useCarousel } from "@made-together/ui/carousel";
+```
+
+The component is exported as a compound object — every sub-component is a
+property of `Carousel`:
+
+```tsx
+Carousel.Root;
+Carousel.Viewport;
+Carousel.Container;
+Carousel.Slide;
+Carousel.Previous;
+Carousel.Next;
+Carousel.Navigation;
+Carousel.NavigationItem;
+```
+
+The `useCarousel` hook returns the Embla API and scroll helpers from the
+nearest `Carousel.Root` and is intended for custom controls or telemetry.
+
+## Composition
+
+Carousel follows a strict, composable structure. The minimum viable carousel is
+three nested parts — `Root → Viewport → Container → Slide`:
+
+```tsx
+<Carousel.Root>
+  <Carousel.Viewport>
+    <Carousel.Container>
+      <Carousel.Slide index={0}>…</Carousel.Slide>
+      <Carousel.Slide index={1}>…</Carousel.Slide>
+      <Carousel.Slide index={2}>…</Carousel.Slide>
+    </Carousel.Container>
+  </Carousel.Viewport>
+
+  <Carousel.Previous>Prev</Carousel.Previous>
+  <Carousel.Next>Next</Carousel.Next>
+
+  <Carousel.Navigation />
+</Carousel.Root>
+```
+
+- **`Carousel.Root`** owns the Embla instance, the autoplay plugin, and
+  context. Wraps everything.
+- **`Carousel.Viewport`** is the clipped window. Apply `overflow: hidden` here
+  (Tailwind: `overflow-hidden`). The Embla ref attaches to this element.
+- **`Carousel.Container`** is the horizontal flex track that holds slides.
+  Apply `display: flex` here.
+- **`Carousel.Slide`** wraps each item. Pass `index` so the slide can reflect
+  its selected state via `data-state="active" | "inactive"`.
+- **`Carousel.Previous` / `Carousel.Next`** are real `<button>` elements wired
+  to the Embla API. They auto-disable at edges (unless `options.loop` is
+  true).
+- **`Carousel.Navigation`** wraps dot/number indicators. When passed no
+  children, it renders one `Carousel.NavigationItem` per scroll snap
+  automatically. Pass children for full control.
+
+<Callout type="info">
+  The library is headless — no widths, gaps, or colors are applied for you.
+  Slide widths come from your own utility classes (`flex-[0_0_100%]`,
+  `flex-[0_0_33.333%]`, etc.), and the active state is exposed via
+  `data-state` so you can style transitions with `data-[state=active]:…`.
+</Callout>
+
+## Usage
+
+### Basic usage
+
+A standard carousel with one slide per view, dot navigation, and prev/next
+buttons. Buttons auto-disable when you reach an edge.
+
+```tsx
+<Carousel.Root options={{ align: "start" }}>
+  <Carousel.Viewport className="overflow-hidden">
+    <Carousel.Container className="flex">
+      {items.map((item, i) => (
+        <Carousel.Slide key={item.id} index={i} className="flex-[0_0_100%]">
+          {item.content}
+        </Carousel.Slide>
+      ))}
+    </Carousel.Container>
+  </Carousel.Viewport>
+  <Carousel.Previous>Prev</Carousel.Previous>
+  <Carousel.Next>Next</Carousel.Next>
+</Carousel.Root>
+```
+
+### Autoplay
+
+Autoplay is enabled by default. Pass an options object to tune the delay or
+the user-interaction behavior, or `autoplay={false}` to disable it entirely.
+
+<ComponentShowcase preview={<AutoplayCarouselExample />}>
+
+```tsx
+<Carousel.Root
+  options={{ loop: true, align: "start" }}
+  autoplay={{ delay: 2500, stopOnInteraction: false }}
+>
+  <Carousel.Viewport className="overflow-hidden rounded-2xl">
+    <Carousel.Container className="flex">
+      {slides.map((slide, i) => (
+        <Carousel.Slide key={slide.title} index={i} className="flex-[0_0_100%]">
+          <SlideCard {...slide} />
+        </Carousel.Slide>
+      ))}
+    </Carousel.Container>
+  </Carousel.Viewport>
+  <Carousel.Navigation className="mt-4 flex justify-center gap-2">
+    {slides.map((slide, i) => (
+      <Carousel.NavigationItem
+        key={slide.title}
+        index={i}
+        className="h-2 w-2 rounded-full bg-neutral-300 data-[state=active]:w-5 data-[state=active]:bg-neutral-900"
+      />
+    ))}
+  </Carousel.Navigation>
+</Carousel.Root>
+```
+
+</ComponentShowcase>
+
+### Looping
+
+Pass `options={{ loop: true }}` to wrap in both directions. With looping
+enabled, `Carousel.Previous` and `Carousel.Next` never disable.
+
+### Multi-slide layouts
+
+Slide width is just CSS — set `flex-[0_0_33.333%]` (or any other basis) on
+`Carousel.Slide` to show multiple slides per view. Pair with
+`options={{ dragFree: true }}` for momentum scrolling that doesn't snap.
+
+### Custom navigation
+
+`Carousel.Navigation` renders default items when given no children, but you
+can pass your own — useful when you want labels, thumbnails, or a non-1:1
+mapping between snaps and indicators.
+
+```tsx
+<Carousel.Navigation aria-label="Featured">
+  <Carousel.NavigationItem index={0}>Intro</Carousel.NavigationItem>
+  <Carousel.NavigationItem index={1}>Features</Carousel.NavigationItem>
+  <Carousel.NavigationItem index={2}>Pricing</Carousel.NavigationItem>
+</Carousel.Navigation>
+```
+
+### Reading the Embla API
+
+Use the `useCarousel` hook (from inside `Carousel.Root`) or the `onApiChange`
+prop to access the underlying Embla instance — useful for analytics, custom
+controls, or wiring up plugins.
+
+```tsx
+<Carousel.Root
+  onApiChange={(api) => {
+    api?.on("select", () => {
+      console.log("selected:", api.selectedScrollSnap());
+    });
+  }}
+>
+  …
+</Carousel.Root>
+```
+
+## Examples
+
+### Looping with peek
+
+A `loop: true` carousel with `align: "center"` and slides narrower than the
+viewport — inactive slides get scaled and faded via `data-[state=inactive]`.
+
+<ComponentShowcase preview={<LoopingCarouselExample />}>
+
+```tsx
+<Carousel.Root options={{ loop: true, align: "center" }}>
+  <Carousel.Viewport className="overflow-hidden rounded-2xl">
+    <Carousel.Container className="flex">
+      {slides.map((slide, i) => (
+        <Carousel.Slide
+          key={slide.title}
+          index={i}
+          className="group min-w-0 flex-[0_0_70%] pr-3"
+        >
+          <div className="transition-[transform,opacity] duration-500 group-data-[state=inactive]:scale-95 group-data-[state=inactive]:opacity-50">
+            <SlideCard {...slide} />
+          </div>
+        </Carousel.Slide>
+      ))}
+    </Carousel.Container>
+  </Carousel.Viewport>
+
+  <div className="mt-4 flex justify-center gap-2">
+    <Carousel.Previous className="grid size-9 place-items-center rounded-full bg-neutral-900 text-white">
+      ←
+    </Carousel.Previous>
+    <Carousel.Next className="grid size-9 place-items-center rounded-full bg-neutral-900 text-white">
+      →
+    </Carousel.Next>
+  </div>
+</Carousel.Root>
+```
+
+</ComponentShowcase>
+
+### Multi-slide, drag-free
+
+Three slides per view with momentum scrolling instead of snapping.
+
+<ComponentShowcase preview={<MultiSlideCarouselExample />}>
+
+```tsx
+<Carousel.Root options={{ dragFree: true, align: "start" }}>
+  <Carousel.Viewport className="overflow-hidden">
+    <Carousel.Container className="flex">
+      {items.map((item, i) => (
+        <Carousel.Slide
+          key={item.id}
+          index={i}
+          className="min-w-0 flex-[0_0_33.333%] pr-3"
+        >
+          <SlideCard {...item} compact />
+        </Carousel.Slide>
+      ))}
+    </Carousel.Container>
+  </Carousel.Viewport>
+</Carousel.Root>
+```
+
+</ComponentShowcase>
+
+### Numbered navigation
+
+`Carousel.Navigation` accepts children for custom indicators — here, numbered
+pills with active state.
+
+<ComponentShowcase preview={<NumberedNavCarouselExample />}>
+
+```tsx
+<Carousel.Root options={{ loop: true }}>
+  <Carousel.Viewport className="overflow-hidden rounded-2xl">
+    <Carousel.Container className="flex">
+      {slides.map((slide, i) => (
+        <Carousel.Slide key={slide.title} index={i} className="flex-[0_0_100%]">
+          <SlideCard {...slide} />
+        </Carousel.Slide>
+      ))}
+    </Carousel.Container>
+  </Carousel.Viewport>
+  <Carousel.Navigation className="mt-4 flex items-center justify-center gap-2">
+    {slides.map((slide, i) => (
+      <Carousel.NavigationItem
+        key={slide.title}
+        index={i}
+        aria-label={`Go to ${slide.title}`}
+        className="grid size-8 place-items-center rounded-full border text-xs font-medium data-[state=active]:border-neutral-900 data-[state=active]:bg-neutral-900 data-[state=active]:text-white"
+      >
+        {i + 1}
+      </Carousel.NavigationItem>
+    ))}
+  </Carousel.Navigation>
+</Carousel.Root>
+```
+
+</ComponentShowcase>
+
+## API Reference
+
+### Carousel.Root
+
+Renders a `<div>`. Owns the Embla instance and provides context to every
+sub-component. Extends all native `div` props.
+
+| Prop          | Default     | Description                                                                                                              |
+| ------------- | ----------- | ------------------------------------------------------------------------------------------------------------------------ |
+| `options`     | `undefined` | Embla [options](https://www.embla-carousel.com/api/options/) (e.g. `loop`, `align`, `dragFree`, `axis`, `slidesToScroll`). |
+| `plugins`     | `undefined` | Embla [plugins](https://www.embla-carousel.com/plugins/). If you supply your own `Autoplay()` here, the `autoplay` prop is ignored. |
+| `autoplay`    | `true`      | Configures the built-in autoplay plugin. Pass `false` to disable, or an options object to override delays and behavior. |
+| `onApiChange` | `undefined` | Fired whenever the Embla API reference changes. Useful for wiring up custom listeners.                                  |
+
+Data attributes: `data-slot="carousel-root"`.
+
+### Carousel.Viewport
+
+The clipped window — attach `overflow-hidden` here. Renders a `<div>` and
+extends all native `div` props.
+
+Data attributes: `data-slot="carousel-viewport"`.
+
+### Carousel.Container
+
+The horizontal flex track that holds slides. Apply `display: flex` here.
+Renders a `<div>` and extends all native `div` props.
+
+Data attributes: `data-slot="carousel-container"`.
+
+### Carousel.Slide
+
+A single slide. Renders a `<div role="group" aria-roledescription="slide">`
+and extends all native `div` props.
+
+| Prop      | Type                                    | Default     | Description                                                                                                                  |
+| --------- | --------------------------------------- | ----------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| `index`   | `number`                                | `undefined` | The slide's index. Required for `data-state` to reflect active/inactive. The DOM updates without re-rendering the slide.    |
+
+Data attributes: `data-slot="carousel-slide"`, `data-state="active" | "inactive"`.
+
+### Carousel.Previous / Next
+
+Real `<button>` elements wired to `scrollPrev` / `scrollNext`. They
+automatically set `disabled` when the carousel can't scroll further in that
+direction (unless `options.loop` is true). Override by passing `disabled`
+yourself or by calling `event.preventDefault()` in your `onClick`.
+
+| Prop       | Type                                       | Default                                  | Description                                                                                |
+| ---------- | ------------------------------------------ | ---------------------------------------- | ------------------------------------------------------------------------------------------ |
+| `type`     | `"button" \| "submit" \| "reset"`          | `"button"`                               | Standard button type.                                                                      |
+| `onClick`  | `React.MouseEventHandler<HTMLButtonElement>` | `undefined`                              | Fires before the scroll. Call `event.preventDefault()` to skip the built-in scroll action. |
+| `disabled` | `boolean`                                  | derived from `canScrollPrev`/`canScrollNext` | Force-disables the button.                                                                |
+
+Built-in attributes: `aria-label="Previous slide"` / `"Next slide"`,
+`data-slot="carousel-previous" | "carousel-next"`,
+`data-disabled="true" | "false"`.
+
+### Carousel.Navigation
+
+Wraps navigation items. Renders a `<nav>` and extends all native `nav` props
+(except `children`).
+
+| Prop         | Type                                                          | Default                  | Description                                                                                                              |
+| ------------ | ------------------------------------------------------------- | ------------------------ | ------------------------------------------------------------------------------------------------------------------------ |
+| `children`   | `React.ReactNode`                                             | one item per scroll snap | When omitted, one `Carousel.NavigationItem` is rendered per snap. Pass children for full control over item rendering.   |
+| `aria-label` | `string`                                                      | `"Carousel navigation"`  | Accessible label for the nav landmark.                                                                                   |
+
+Data attributes: `data-slot="carousel-navigation"`.
+
+### Carousel.NavigationItem
+
+A `<button>` that jumps to a specific slide index. Reflects whether it
+represents the currently-selected snap via `aria-current` and `data-state`.
+
+| Prop         | Type                                       | Default               | Description                                                                                       |
+| ------------ | ------------------------------------------ | --------------------- | ------------------------------------------------------------------------------------------------- |
+| `index`      | `number`                                   | **required**          | The slide index this item jumps to.                                                               |
+| `type`       | `"button" \| "submit" \| "reset"`          | `"button"`            | Standard button type.                                                                             |
+| `onClick`    | `React.MouseEventHandler`                  | `undefined`           | Fires before the scroll. Call `event.preventDefault()` to skip the built-in jump.                |
+| `aria-label` | `string`                                   | `"Go to slide N"`     | Defaults to a 1-indexed label; override for custom item labels.                                  |
+
+Data attributes: `data-slot="carousel-navigation-item"`,
+`data-state="active" | "inactive"`. Also sets `aria-current="true"` when
+selected.
+
+### useCarousel()
+
+Returns the Embla context from the nearest `Carousel.Root`. Throws if used
+outside one.
+
+| Field        | Type                              | Description                                                                                  |
+| ------------ | --------------------------------- | -------------------------------------------------------------------------------------------- |
+| `emblaRef`   | `(node: HTMLElement \| null) => void` | The ref to attach to the viewport. Already wired by `Carousel.Viewport`.                |
+| `emblaApi`   | `CarouselApi \| undefined`        | The Embla API. `undefined` until the carousel mounts.                                       |
+| `scrollPrev` | `() => void`                      | Scroll one snap backwards.                                                                  |
+| `scrollNext` | `() => void`                      | Scroll one snap forwards.                                                                   |
+| `scrollTo`   | `(index: number) => void`         | Jump to a specific snap index.                                                              |
+
+### Exported types
+
+```ts
+import type {
+  CarouselApi, // EmblaApi instance
+  CarouselAutoplay, // boolean | AutoplayOptionsType
+  CarouselNavigationItemProps,
+  CarouselNavigationProps,
+  CarouselOptions, // EmblaOptionsType
+  CarouselPlugins, // EmblaPluginType[]
+  CarouselRootProps,
+  CarouselSlideProps,
+} from "@made-together/ui/carousel";
+```

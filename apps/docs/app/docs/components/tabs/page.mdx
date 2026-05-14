@@ -1,0 +1,526 @@
+---
+description:
+  A headless, accessible tabs component for React. Horizontal or vertical,
+  controlled or uncontrolled, with a shared-layout sliding indicator powered
+  by motion and full WAI-ARIA keyboard support.
+---
+
+import { Callout } from "nextra/components";
+import { ComponentShowcase } from "../../../components/component-showcase";
+import {
+  BasicTabsExample,
+  ControlledTabsExample,
+  DisabledTabsExample,
+  ManualActivationTabsExample,
+  UnderlineTabsExample,
+  VerticalTabsExample,
+} from "./_examples";
+
+# Tabs
+
+A headless, accessible tabs primitive. Renders semantic
+`role="tablist" / "tab" / "tabpanel"` markup with the full WAI-ARIA tabs
+pattern wired up — `aria-selected`, `aria-controls`, `aria-labelledby`,
+roving `tabIndex`, and orientation-aware arrow-key navigation. The optional
+`Tabs.Indicator` rides on motion's shared `layoutId`, so the active marker
+slides smoothly between triggers when selection changes.
+
+<ComponentShowcase preview={<BasicTabsExample />}>
+
+```tsx
+import { Tabs } from "@made-together/ui/tabs";
+
+const items = [
+  { id: "account", label: "Account", body: "Manage your account." },
+  { id: "security", label: "Security", body: "2FA and password." },
+  { id: "notifications", label: "Notifications", body: "How we reach you." },
+  { id: "billing", label: "Billing", body: "Subscriptions & payment." },
+];
+
+export function BasicTabs() {
+  return (
+    <Tabs.Root defaultValue="account">
+      <Tabs.Container>
+        <Tabs.List
+          aria-label="Settings sections"
+          className="rounded-full bg-neutral-100 p-1"
+        >
+          {items.map((tab) => (
+            <Tabs.Trigger key={tab.id} id={tab.id} className="flex-1">
+              <Tabs.Separator />
+              {tab.label}
+              <Tabs.Indicator className="rounded-full bg-white shadow-sm ring-1 ring-black/5" />
+            </Tabs.Trigger>
+          ))}
+        </Tabs.List>
+      </Tabs.Container>
+      {items.map((tab) => (
+        <Tabs.Content key={tab.id} id={tab.id} className="px-1 py-4">
+          <h3 className="mb-1 font-semibold">{tab.label}</h3>
+          <p className="text-sm text-neutral-500">{tab.body}</p>
+        </Tabs.Content>
+      ))}
+    </Tabs.Root>
+  );
+}
+```
+
+</ComponentShowcase>
+
+## Import
+
+```tsx
+import { Tabs } from "@made-together/ui/tabs";
+```
+
+The component is exported as a compound object — every sub-component is a
+property of `Tabs`:
+
+```tsx
+Tabs.Root;
+Tabs.Container;
+Tabs.List;
+Tabs.Trigger;
+Tabs.Indicator;
+Tabs.Separator;
+Tabs.Content;
+```
+
+## Composition
+
+Tabs follows the WAI-ARIA pattern strictly. The minimum viable tabs widget
+nests four parts — `Root → Container → List → Trigger`, with `Content`
+siblings of `Container`:
+
+```tsx
+<Tabs.Root defaultValue="one">
+  <Tabs.Container>
+    <Tabs.List aria-label="Sections">
+      <Tabs.Trigger id="one">
+        One
+        <Tabs.Indicator />
+      </Tabs.Trigger>
+      <Tabs.Trigger id="two">
+        Two
+        <Tabs.Indicator />
+      </Tabs.Trigger>
+    </Tabs.List>
+  </Tabs.Container>
+  <Tabs.Content id="one">Panel one</Tabs.Content>
+  <Tabs.Content id="two">Panel two</Tabs.Content>
+</Tabs.Root>
+```
+
+- **`Tabs.Root`** renders a `<div>` and owns selection. Pass `defaultValue`
+  or `value` + `onValueChange` to choose between uncontrolled and
+  controlled.
+- **`Tabs.Container`** is a `position: relative` wrapper around `Tabs.List`.
+  It provides the positioning context the absolutely-rendered
+  `Tabs.Indicator` needs — required whenever you use an indicator.
+- **`Tabs.List`** is the `role="tablist"` group, with
+  `aria-orientation` derived from the root.
+- **`Tabs.Trigger`** is the real `role="tab"` `<button>`. Each one carries an
+  `id` that ties it to a `Tabs.Content` with the same `id`.
+- **`Tabs.Indicator`** is an optional sliding marker. Rendered only inside
+  the currently selected trigger; motion's shared `layoutId` animates the
+  marker between triggers when selection moves.
+- **`Tabs.Separator`** is an optional decorative divider between adjacent
+  triggers. Fades out on the active tab so the indicator can take its
+  place.
+- **`Tabs.Content`** is the `role="tabpanel"` for an id. By default,
+  inactive panels are unmounted — pass `forceMount` to keep them in the DOM.
+
+<Callout type="info">
+  `Tabs.Indicator` uses motion's shared `layoutId` (`tabs-indicator-<scope>`)
+  to animate the marker between triggers. Selection state lives in a ref +
+  per-key listener map inside `Tabs.Root`, so changing tabs only re-renders
+  the affected trigger and content — never sibling tabs, never the root.
+</Callout>
+
+## Usage
+
+### Basic usage
+
+Uncontrolled mode — pass `defaultValue` and let the component own selection.
+
+```tsx
+<Tabs.Root defaultValue="one">
+  <Tabs.Container>
+    <Tabs.List aria-label="Sections">
+      <Tabs.Trigger id="one">
+        One
+        <Tabs.Indicator />
+      </Tabs.Trigger>
+      <Tabs.Trigger id="two">
+        Two
+        <Tabs.Indicator />
+      </Tabs.Trigger>
+    </Tabs.List>
+  </Tabs.Container>
+  <Tabs.Content id="one">…</Tabs.Content>
+  <Tabs.Content id="two">…</Tabs.Content>
+</Tabs.Root>
+```
+
+### Vertical orientation
+
+Pass `orientation="vertical"` to lay the list out as a column beside the
+panel. Arrow keys swap from Left/Right to Up/Down automatically.
+
+<ComponentShowcase preview={<VerticalTabsExample />}>
+
+```tsx
+<Tabs.Root orientation="vertical" defaultValue="account">
+  <Tabs.Container>
+    <Tabs.List aria-label="Vertical tabs" className="w-44 gap-1 p-1">
+      {items.map((tab) => (
+        <Tabs.Trigger
+          key={tab.id}
+          id={tab.id}
+          className="h-9 w-full justify-start px-3"
+        >
+          {tab.label}
+          <Tabs.Indicator className="rounded-lg bg-white shadow-sm ring-1 ring-black/5" />
+        </Tabs.Trigger>
+      ))}
+    </Tabs.List>
+  </Tabs.Container>
+  {items.map((tab) => (
+    <Tabs.Content key={tab.id} id={tab.id} className="flex-1 px-4 py-2">
+      {tab.body}
+    </Tabs.Content>
+  ))}
+</Tabs.Root>
+```
+
+</ComponentShowcase>
+
+### Controlled
+
+Pass `value` + `onValueChange` to lift selection out of the component. The
+value type is always a `string` matching a trigger `id`.
+
+<ComponentShowcase preview={<ControlledTabsExample />}>
+
+```tsx
+const [value, setValue] = useState("account");
+
+<Tabs.Root value={value} onValueChange={setValue}>
+  …
+</Tabs.Root>;
+```
+
+</ComponentShowcase>
+
+### Manual activation
+
+By default, focusing a trigger via arrow keys also activates it
+(`activationMode="automatic"`). Set `activationMode="manual"` to require
+`Space`/`Enter` to activate — useful when each panel is expensive to
+render.
+
+<ComponentShowcase preview={<ManualActivationTabsExample />}>
+
+```tsx
+<Tabs.Root defaultValue="account" activationMode="manual">
+  …
+</Tabs.Root>
+```
+
+</ComponentShowcase>
+
+### Disabled triggers
+
+Pass `disabled` on `Tabs.Root` to disable every trigger, or on an individual
+`Tabs.Trigger` to disable just one. Disabled triggers are skipped during
+arrow / Home / End navigation.
+
+<ComponentShowcase preview={<DisabledTabsExample />}>
+
+```tsx
+<Tabs.Root defaultValue="account">
+  <Tabs.Container>
+    <Tabs.List aria-label="With a disabled tab">
+      {items.map((tab, i) => (
+        <Tabs.Trigger key={tab.id} id={tab.id} disabled={i === 2}>
+          <Tabs.Separator />
+          {tab.label}
+          <Tabs.Indicator />
+        </Tabs.Trigger>
+      ))}
+    </Tabs.List>
+  </Tabs.Container>
+  …
+</Tabs.Root>
+```
+
+</ComponentShowcase>
+
+### Persisting panel state
+
+Inactive panels are unmounted by default. Pass `forceMount` on `Tabs.Content`
+to keep them in the DOM — handy for preserving form state, scroll position,
+or expensive sub-trees between tab switches.
+
+```tsx
+<Tabs.Content id="settings" forceMount>
+  <SettingsForm />
+</Tabs.Content>
+```
+
+When `forceMount` is set, the panel is hidden via the `hidden` attribute
+(`data-state="inactive"`) instead of being removed from the tree.
+
+## Examples
+
+### Segmented pill
+
+The default style — pill-shaped indicator slides between triggers with
+motion's shared `layoutId`. Separators fade out on the active tab so the
+indicator owns its slot cleanly.
+
+<ComponentShowcase preview={<BasicTabsExample />}>
+
+```tsx
+<Tabs.Root defaultValue="account">
+  <Tabs.Container>
+    <Tabs.List
+      aria-label="Settings sections"
+      className="rounded-full bg-neutral-100 p-1"
+    >
+      {items.map((tab) => (
+        <Tabs.Trigger key={tab.id} id={tab.id} className="flex-1">
+          <Tabs.Separator />
+          {tab.label}
+          <Tabs.Indicator className="rounded-full bg-white shadow-sm ring-1 ring-black/5" />
+        </Tabs.Trigger>
+      ))}
+    </Tabs.List>
+  </Tabs.Container>
+  …
+</Tabs.Root>
+```
+
+</ComponentShowcase>
+
+### Underline
+
+A different look using the same primitives — override the indicator's
+default rounded-pill styling with a thin bar pinned to the bottom edge.
+Same sliding animation, very different feel.
+
+<ComponentShowcase preview={<UnderlineTabsExample />}>
+
+```tsx
+<Tabs.Root defaultValue="account">
+  <Tabs.Container>
+    <Tabs.List
+      aria-label="Underline tabs"
+      className="gap-2 border-b bg-transparent p-0"
+    >
+      {items.map((tab) => (
+        <Tabs.Trigger
+          key={tab.id}
+          id={tab.id}
+          className="h-10 rounded-none px-3 text-neutral-500 data-[state=active]:text-neutral-900"
+        >
+          {tab.label}
+          <Tabs.Indicator className="-bottom-px top-auto h-0.5 rounded-none bg-neutral-900 shadow-none ring-0" />
+        </Tabs.Trigger>
+      ))}
+    </Tabs.List>
+  </Tabs.Container>
+  …
+</Tabs.Root>
+```
+
+</ComponentShowcase>
+
+### Vertical settings layout
+
+`orientation="vertical"` paired with a fixed-width list — classic
+side-nav-with-content pattern.
+
+<ComponentShowcase preview={<VerticalTabsExample />}>
+
+```tsx
+<Tabs.Root orientation="vertical" defaultValue="account" className="rounded-2xl border p-2">
+  <Tabs.Container>
+    <Tabs.List aria-label="Vertical tabs" className="w-44 gap-1 p-1">
+      {items.map((tab) => (
+        <Tabs.Trigger
+          key={tab.id}
+          id={tab.id}
+          className="h-9 w-full justify-start px-3"
+        >
+          {tab.label}
+          <Tabs.Indicator className="rounded-lg bg-white shadow-sm ring-1 ring-black/5" />
+        </Tabs.Trigger>
+      ))}
+    </Tabs.List>
+  </Tabs.Container>
+  {items.map((tab) => (
+    <Tabs.Content key={tab.id} id={tab.id} className="flex-1 px-4 py-2">
+      <h3 className="mb-1 font-semibold">{tab.label}</h3>
+      <p className="text-sm text-neutral-500">{tab.body}</p>
+    </Tabs.Content>
+  ))}
+</Tabs.Root>
+```
+
+</ComponentShowcase>
+
+## API Reference
+
+### `Tabs.Root`
+
+Renders a `<div>` and owns selection. Extends all native `div` props.
+
+| Prop             | Type                                | Default        | Description                                                                                                            |
+| ---------------- | ----------------------------------- | -------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| `value`          | `string`                            | `undefined`    | Controlled selected tab id. Pair with `onValueChange`.                                                                |
+| `defaultValue`   | `string`                            | `undefined`    | Initial selected tab id in uncontrolled mode.                                                                          |
+| `onValueChange`  | `(value: string) => void`           | `undefined`    | Fires whenever selection changes.                                                                                      |
+| `orientation`    | `"horizontal" \| "vertical"`        | `"horizontal"` | Tab list orientation. Drives arrow-key direction and the `aria-orientation` attribute on `Tabs.List`.                |
+| `disabled`       | `boolean`                           | `false`        | Disables every trigger.                                                                                                 |
+| `activationMode` | `"automatic" \| "manual"`           | `"automatic"`  | When `automatic`, focusing a trigger via arrow keys also activates it. When `manual`, requires `Space`/`Enter`.   |
+| `className`      | `string`                            | —              | Merged via `cn`. Defaults set `flex gap-2` with column/row direction matching the orientation.                       |
+| `...rest`        | `React.ComponentPropsWithoutRef<"div">` | —          | Forwarded to the underlying `<div>`.                                                                                    |
+
+Data attributes:
+`data-slot="tabs-root"`,
+`data-orientation="horizontal" | "vertical"`.
+
+### `Tabs.Container`
+
+Positioning context for the list and the absolutely-rendered indicator.
+Required whenever you use `Tabs.Indicator`.
+
+| Prop        | Type                                    | Default | Description                                                                |
+| ----------- | --------------------------------------- | ------- | -------------------------------------------------------------------------- |
+| `className` | `string`                                | —       | Merged via `cn`. Defaults to `relative` so the indicator can be positioned. |
+| `...rest`   | `React.ComponentPropsWithoutRef<"div">` | —       | Forwarded to the underlying `<div>`.                                        |
+
+Data attributes: `data-slot="tabs-list-container"`.
+
+### `Tabs.List`
+
+The `role="tablist"` group of triggers. Renders a `<div>` with
+`aria-orientation` derived from the root.
+
+| Prop        | Type                                    | Default | Description                                                                                          |
+| ----------- | --------------------------------------- | ------- | ---------------------------------------------------------------------------------------------------- |
+| `className` | `string`                                | —       | Merged via `cn`. Defaults set `inline-flex p-1` plus a row/column flow based on orientation.       |
+| `...rest`   | `React.ComponentPropsWithoutRef<"div">` | —       | Forwarded to the underlying `<div>`.                                                                  |
+
+Built-in attributes: `role="tablist"`, `aria-orientation`,
+`data-slot="tabs-list"`, `data-orientation`.
+
+<Callout type="warning">
+  Always pass `aria-label` (or `aria-labelledby`) to `Tabs.List` so the tablist
+  has an accessible name.
+</Callout>
+
+### `Tabs.Trigger`
+
+The interactive `role="tab"` `<button>`. Wired with `aria-selected`,
+`aria-controls`, a roving `tabIndex`, and orientation-aware arrow-key
+navigation.
+
+| Prop        | Type                                                                | Default     | Description                                                                                                                              |
+| ----------- | ------------------------------------------------------------------- | ----------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| `id`        | `string`                                                            | **required** | Logical id of the tab. Pairs with the matching `Tabs.Content` and identifies the trigger to controlled selection and keyboard navigation. |
+| `type`      | `"button" \| "submit" \| "reset"`                                   | `"button"`  | Standard button type.                                                                                                                    |
+| `disabled`  | `boolean`                                                           | `false`     | Disables just this trigger. Overrides root `disabled`.                                                                                  |
+| `onClick`   | `React.MouseEventHandler<HTMLButtonElement>`                        | `undefined` | Fires before selection. Call `event.preventDefault()` to skip the built-in selection change.                                            |
+| `onKeyDown` | `React.KeyboardEventHandler<HTMLButtonElement>`                     | `undefined` | Fires before the built-in arrow-key handling. Call `event.preventDefault()` to skip navigation.                                          |
+| `onFocus`   | `React.FocusEventHandler<HTMLButtonElement>`                        | `undefined` | Fires before the built-in `automatic` activation. Call `event.preventDefault()` to skip activation on focus.                            |
+| `className` | `string`                                                            | —           | Merged via `cn` — defaults include the pill styling, cursor, focus ring, and `data-[state=active]` color hooks you can override.       |
+| `...rest`   | `Omit<React.ComponentPropsWithoutRef<"button">, "id">`              | —           | Forwarded to the underlying `<button>`.                                                                                                  |
+
+Built-in attributes:
+`role="tab"`,
+`aria-selected`,
+`aria-controls`,
+`tabIndex` (0 when selected, -1 otherwise),
+`data-slot="tabs-trigger"`,
+`data-state="active" | "inactive"`,
+`data-disabled` (empty string when disabled).
+
+### `Tabs.Indicator`
+
+A sliding marker rendered inside the currently selected trigger. Uses
+motion's shared `layoutId` to animate position and size from the previous
+trigger to the new one when selection changes. Only the active trigger
+renders an indicator.
+
+| Prop         | Type                                              | Default                                          | Description                                                                                                                                                                              |
+| ------------ | ------------------------------------------------- | ------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `transition` | `MotionProps["transition"]`                       | `{ type: "spring", stiffness: 380, damping: 32 }` | Motion transition. Automatically replaced with `{ duration: 0 }` when the user prefers reduced motion.                                                                                |
+| `className`  | `string`                                          | —                                                | Merged via `cn` — defaults include `-z-[1] absolute inset-0 rounded-3xl bg-white shadow-sm ring-1 ring-black/5`. Override freely to change the look (underline, fill, gradient, etc.). |
+| `...rest`    | `Omit<HTMLMotionProps<"span">, "layoutId" \| "children">` | —                                            | Forwarded to the underlying `motion.span` (sans `layoutId` and `children`, which the component owns).                                                                                  |
+
+Data attributes: `data-slot="tabs-indicator"`. The shared `layoutId` is
+scoped per `Tabs.Root` instance (`tabs-indicator-<scope>`), so multiple
+tabs on the same page never collide.
+
+### `Tabs.Separator`
+
+Decorative divider between adjacent triggers. Fades out on the active tab
+via `group-data-[state=active]/tab:opacity-0` so the indicator can take its
+place.
+
+| Prop        | Type                                     | Default | Description                                                                                                            |
+| ----------- | ---------------------------------------- | ------- | ---------------------------------------------------------------------------------------------------------------------- |
+| `className` | `string`                                 | —       | Merged via `cn`. Defaults position the separator on the appropriate edge depending on `orientation`.                  |
+| `...rest`   | `React.ComponentPropsWithoutRef<"span">` | —       | Forwarded to the underlying `<span>`.                                                                                   |
+
+Always `aria-hidden="true"`. Data attributes: `data-slot="tabs-separator"`.
+
+### `Tabs.Content`
+
+The `role="tabpanel"` for a tab. By default, inactive panels are unmounted;
+pass `forceMount` to keep them in the DOM with `hidden` toggled instead.
+
+| Prop         | Type                                                  | Default      | Description                                                                                                                  |
+| ------------ | ----------------------------------------------------- | ------------ | ---------------------------------------------------------------------------------------------------------------------------- |
+| `id`         | `string`                                              | **required** | Must match the `id` of a `Tabs.Trigger` in the same root.                                                                  |
+| `forceMount` | `boolean`                                             | `false`      | Keep the panel mounted in the DOM when its tab is not selected. Useful for preserving form state or transition libraries. |
+| `className`  | `string`                                              | —            | Merged via `cn`. Defaults to `outline-none`.                                                                                |
+| `...rest`    | `Omit<React.ComponentPropsWithoutRef<"div">, "id">`   | —            | Forwarded to the underlying `<div>`.                                                                                          |
+
+Built-in attributes:
+`role="tabpanel"`,
+`aria-labelledby` (matching trigger),
+`hidden` (set when inactive and `forceMount` is true),
+`data-slot="tabs-content"`,
+`data-state="active" | "inactive"`,
+`data-orientation`.
+
+### Keyboard interactions
+
+Direction keys depend on `orientation`. Disabled triggers are skipped.
+
+| Key                          | Action                                                                                       |
+| ---------------------------- | -------------------------------------------------------------------------------------------- |
+| `Space` / `Enter`            | Activate the focused trigger (only required when `activationMode="manual"`).                |
+| `ArrowRight` / `ArrowDown`   | Move focus to the next trigger (wraps to the first). Right when horizontal, Down when vertical. |
+| `ArrowLeft` / `ArrowUp`      | Move focus to the previous trigger (wraps to the last). Left when horizontal, Up when vertical. |
+| `Home`                       | Move focus to the first trigger.                                                              |
+| `End`                        | Move focus to the last trigger.                                                               |
+| `Tab` / `Shift+Tab`          | Enters and exits the tablist as a single stop (roving `tabIndex`).                          |
+
+### Exported types
+
+```ts
+import type {
+  TabsContainerProps,
+  TabsContentProps,
+  TabsIndicatorProps,
+  TabsListProps,
+  TabsOrientation, // "horizontal" | "vertical"
+  TabsRootProps,
+  TabsSeparatorProps,
+  TabsTriggerProps,
+} from "@made-together/ui/tabs";
+```

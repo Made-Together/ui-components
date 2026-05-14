@@ -1,0 +1,356 @@
+---
+description:
+  An overflow-aware text scroller for React. Measures its container and only
+  animates when the text overflows — otherwise stays perfectly still.
+---
+
+import { Callout } from "nextra/components";
+import { ComponentShowcase } from "../../../components/component-showcase";
+import {
+  BasicAutoScrollTextExample,
+  DynamicAutoScrollTextExample,
+  FadesAutoScrollTextExample,
+  FixedWidthAutoScrollTextExample,
+  NotificationAutoScrollTextExample,
+  PlayerRowAutoScrollTextExample,
+  ShortTextAutoScrollTextExample,
+  SpeedsAutoScrollTextExample,
+} from "./_examples";
+
+# AutoScrollText
+
+A Spotify-style ticker for long text. The component measures both its
+container and its content; when the text overflows, it scrolls
+back-and-forth at a configurable speed with gradient fade masks on the
+edges. When it fits, the component does nothing — no animation, no mask,
+no layout cost.
+
+<ComponentShowcase preview={<BasicAutoScrollTextExample />}>
+
+```tsx
+import { AutoScrollText } from "@made-together/ui/autoscroll-text";
+
+export function NewsTicker() {
+  return (
+    <div className="flex items-center gap-3 rounded-lg bg-neutral-900 px-3 py-2.5 text-white">
+      <span className="shrink-0 rounded border border-white/30 px-2.5 py-1 text-sm font-medium">
+        News
+      </span>
+      <AutoScrollText.Root
+        className="flex-1"
+        startDelay={2000}
+        endDelay={2000}
+        scrollSpeed={40}
+      >
+        <AutoScrollText.Content>
+          Health Closes Pre-Seed Funding to Automate Healthcare Compliance and
+          Risk Management
+        </AutoScrollText.Content>
+      </AutoScrollText.Root>
+    </div>
+  );
+}
+```
+
+</ComponentShowcase>
+
+## Import
+
+```tsx
+import { AutoScrollText } from "@made-together/ui/autoscroll-text";
+```
+
+The component is exported as a compound object — both sub-components are
+properties of `AutoScrollText`:
+
+```tsx
+AutoScrollText.Root;
+AutoScrollText.Content;
+```
+
+## Composition
+
+AutoScrollText is a two-part component. `Root` measures and animates;
+`Content` renders the actual text.
+
+```tsx
+<AutoScrollText.Root>
+  <AutoScrollText.Content>Some long text that may overflow…</AutoScrollText.Content>
+</AutoScrollText.Root>
+```
+
+- **`AutoScrollText.Root`** renders a `<div>` with
+  `overflow: hidden; white-space: nowrap`. Watches its width and the inner
+  content's width via a `ResizeObserver`; when content exceeds container,
+  it kicks off the scroll loop.
+- **`AutoScrollText.Content`** renders a `<span>` that receives a **string**
+  child. The string is required (not arbitrary JSX) so the component can
+  detect content changes and reset the animation cleanly.
+
+<Callout type="info">
+  The animation loop drives `transform` and the CSS `mask-image` via direct
+  DOM writes inside `requestAnimationFrame` — no React state updates per
+  frame. The only React state is the overflow flag, which only flips on
+  resize or text change. Even on long lists of tickers, this stays cheap.
+</Callout>
+
+## Usage
+
+### Basic usage
+
+Drop the component into any container that has a constrained width. When
+the text fits, nothing animates.
+
+```tsx
+<AutoScrollText.Root className="flex-1">
+  <AutoScrollText.Content>
+    Some long string that may or may not overflow its container.
+  </AutoScrollText.Content>
+</AutoScrollText.Root>
+```
+
+### Short text (no scrolling)
+
+If the content fits, the component stays static — no mask, no transform,
+no animation. This is the same component, just with shorter text.
+
+<ComponentShowcase preview={<ShortTextAutoScrollTextExample />}>
+
+```tsx
+<AutoScrollText.Root>
+  <AutoScrollText.Content>Short text that fits</AutoScrollText.Content>
+</AutoScrollText.Root>
+```
+
+</ComponentShowcase>
+
+### Fixed container width
+
+Pass `containerWidth` (in pixels) to pin the track to an exact width
+regardless of parent layout — useful inside flex parents that would
+otherwise let the child grow.
+
+<ComponentShowcase preview={<FixedWidthAutoScrollTextExample />}>
+
+```tsx
+<AutoScrollText.Root
+  containerWidth={200}
+  className="rounded bg-neutral-100 px-2 py-1"
+  startDelay={1500}
+  scrollSpeed={30}
+>
+  <AutoScrollText.Content>
+    This is a much longer text that will definitely overflow the 200px container
+  </AutoScrollText.Content>
+</AutoScrollText.Root>
+```
+
+</ComponentShowcase>
+
+### Tuning the speed
+
+`scrollSpeed` is in pixels per second. Same text, three tempos.
+
+<ComponentShowcase preview={<SpeedsAutoScrollTextExample />}>
+
+```tsx
+<AutoScrollText.Root scrollSpeed={25}>…</AutoScrollText.Root>
+<AutoScrollText.Root scrollSpeed={50}>…</AutoScrollText.Root>
+<AutoScrollText.Root scrollSpeed={100}>…</AutoScrollText.Root>
+```
+
+</ComponentShowcase>
+
+### Edge fades
+
+`fadeWidth` controls the gradient mask on each edge — a narrow value gives
+a subtle hint of clipping, a wide value reads as a deliberate dramatic
+effect.
+
+<ComponentShowcase preview={<FadesAutoScrollTextExample />}>
+
+```tsx
+<AutoScrollText.Root fadeWidth={12}>…</AutoScrollText.Root>
+<AutoScrollText.Root fadeWidth={48}>…</AutoScrollText.Root>
+```
+
+</ComponentShowcase>
+
+### Delays
+
+`startDelay` and `endDelay` (in milliseconds) control how long the
+component pauses before starting and at the end of each pass. Defaults are
+`2000ms` for both — feel free to lengthen for ambient tickers or shorten
+for active feeds.
+
+```tsx
+<AutoScrollText.Root startDelay={3000} endDelay={1500}>
+  <AutoScrollText.Content>…</AutoScrollText.Content>
+</AutoScrollText.Root>
+```
+
+### Dynamic text
+
+Updating the `children` of `AutoScrollText.Content` cleanly resets the
+animation. The component re-measures and decides whether to scroll based
+on the new content's width.
+
+<ComponentShowcase preview={<DynamicAutoScrollTextExample />}>
+
+```tsx
+const [text, setText] = useState("Original text");
+
+<AutoScrollText.Root>
+  <AutoScrollText.Content>{text}</AutoScrollText.Content>
+</AutoScrollText.Root>;
+```
+
+</ComponentShowcase>
+
+## Examples
+
+### News ticker
+
+Inline label, scrolling headline, trailing icon. Only the headline runs —
+the surrounding chrome stays put.
+
+<ComponentShowcase preview={<BasicAutoScrollTextExample />}>
+
+```tsx
+<div className="flex items-center gap-3 rounded-lg bg-neutral-900 px-3 py-2.5 text-white">
+  <span className="shrink-0 rounded border border-white/30 px-2.5 py-1 text-sm font-medium">
+    News
+  </span>
+  <AutoScrollText.Root className="flex-1" startDelay={2000} scrollSpeed={40}>
+    <AutoScrollText.Content>
+      Health Closes Pre-Seed Funding to Automate Healthcare Compliance and Risk
+      Management
+    </AutoScrollText.Content>
+  </AutoScrollText.Root>
+  <ArrowRight className="size-5 shrink-0 opacity-60" />
+</div>
+```
+
+</ComponentShowcase>
+
+### Player row
+
+Two stacked scrollers with independent delays — title runs first, artist
+follows. Each `Root` has its own animation loop and measurements.
+
+<ComponentShowcase preview={<PlayerRowAutoScrollTextExample />}>
+
+```tsx
+<div className="flex items-center gap-4 rounded-xl bg-emerald-900 p-4">
+  <div className="size-14 shrink-0 rounded-md bg-emerald-700" />
+  <div className="min-w-0 flex-1 space-y-1">
+    <AutoScrollText.Root
+      className="font-medium text-white"
+      startDelay={3000}
+      endDelay={2000}
+      scrollSpeed={35}
+    >
+      <AutoScrollText.Content>
+        Bohemian Rhapsody - 2011 Remaster (Super Deluxe Edition)
+      </AutoScrollText.Content>
+    </AutoScrollText.Root>
+    <AutoScrollText.Root
+      className="text-sm text-emerald-200"
+      startDelay={3500}
+      scrollSpeed={30}
+    >
+      <AutoScrollText.Content>
+        Queen • A Night at the Opera (Deluxe Remastered Version)
+      </AutoScrollText.Content>
+    </AutoScrollText.Root>
+  </div>
+</div>
+```
+
+</ComponentShowcase>
+
+### Notification banner
+
+A pulsing status dot paired with a scrolling message — the mask hides
+clipping at both edges so the strip reads as live.
+
+<ComponentShowcase preview={<NotificationAutoScrollTextExample />}>
+
+```tsx
+<div className="flex items-center gap-3 rounded-lg bg-blue-600 px-4 py-3">
+  <span className="relative flex size-2 shrink-0">
+    <span className="absolute inline-flex size-full animate-ping rounded-full bg-white opacity-75" />
+    <span className="relative inline-flex size-2 rounded-full bg-white" />
+  </span>
+  <AutoScrollText.Root className="flex-1 font-medium text-white" startDelay={2500} scrollSpeed={45}>
+    <AutoScrollText.Content>
+      System update available: Version 2.4.1 includes performance improvements
+      and bug fixes. Click here to learn more.
+    </AutoScrollText.Content>
+  </AutoScrollText.Root>
+</div>
+```
+
+</ComponentShowcase>
+
+## API Reference
+
+### `AutoScrollText.Root`
+
+Renders a `<div>` with `relative overflow-hidden whitespace-nowrap`.
+Measures its width and the inner content's `scrollWidth`, then drives a
+back-and-forth scroll animation when content overflows. Extends all native
+`div` props.
+
+| Prop                     | Type                                    | Default     | Description                                                                                                                                  |
+| ------------------------ | --------------------------------------- | ----------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| `containerWidth`         | `number`                                | `undefined` | Optional fixed container width in pixels. When unset, the width is inferred from the parent layout via `offsetWidth` + `ResizeObserver`. |
+| `startDelay`             | `number`                                | `2000`      | Milliseconds to wait before starting each scroll pass.                                                                                       |
+| `endDelay`               | `number`                                | `2000`      | Milliseconds to pause at the end of a pass before scrolling back.                                                                            |
+| `scrollSpeed`            | `number`                                | `50`        | Animation speed in pixels per second.                                                                                                        |
+| `fadeWidth`              | `number`                                | `24`        | Width of the gradient fade mask on each edge, in pixels. Clamped to at most 20% of the container width.                                    |
+| `fadeTransitionDuration` | `number`                                | `300`       | Milliseconds for the mask fade transition when scrolling starts/stops.                                                                       |
+| `className`              | `string`                                | —           | Merged via `cn`. Defaults include `relative overflow-hidden whitespace-nowrap`.                                                              |
+| `style`                  | `React.CSSProperties`                   | —           | Merged with the component's inline `width` (when `containerWidth` is set) and `mask-image` transition.                                       |
+| `...rest`                | `React.ComponentPropsWithoutRef<"div">` | —           | Forwarded to the underlying `<div>`.                                                                                                          |
+
+Built-in attributes: `aria-live="polite"`.
+
+Data attributes:
+`data-slot="autoscroll-text-root"`,
+`data-state="idle" | "scrolling"`,
+`data-overflowing` (empty string when content overflows, otherwise absent).
+
+### `AutoScrollText.Content`
+
+Renders an `inline-block` `<span>` that holds the text. The component
+registers itself with the root via context — there's only one
+`AutoScrollText.Content` per root.
+
+| Prop        | Type                                                       | Default      | Description                                                                                                                       |
+| ----------- | ---------------------------------------------------------- | ------------ | --------------------------------------------------------------------------------------------------------------------------------- |
+| `children`  | `string`                                                   | **required** | The text content. Must be a string — changing it cleanly resets the animation and re-measures whether scrolling is needed.       |
+| `className` | `string`                                                   | —            | Merged via `cn`. Default is `inline-block`.                                                                                       |
+| `style`     | `React.CSSProperties`                                      | —            | Merged with the component's `will-change: transform` (only applied while scrolling).                                              |
+| `...rest`   | `Omit<React.ComponentPropsWithoutRef<"span">, "children">` | —            | Forwarded to the underlying `<span>`.                                                                                              |
+
+Data attributes: `data-slot="autoscroll-text-content"`.
+
+### Accessibility
+
+- `AutoScrollText.Root` sets `aria-live="polite"` so screen readers
+  announce content updates without interrupting.
+- Because animation runs on `transform` only (no text recreation), screen
+  readers see a stable string regardless of scroll state.
+- The component intentionally does not animate when content fits — the
+  mask is removed, `transform` resets to `0`, and there's no `will-change`
+  hint on the inner span. Static content costs nothing.
+
+### Exported types
+
+```ts
+import type {
+  AutoScrollTextContentProps,
+  AutoScrollTextRootProps,
+} from "@made-together/ui/autoscroll-text";
+```
