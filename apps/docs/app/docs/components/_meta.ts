@@ -8,6 +8,7 @@ const meta: MetaRecord = {
   "autoscroll-text": "AutoScrollText",
   swappable: "Swappable",
   "number-flow": "NumberFlow",
+  "scroll-stack": "ScrollStack",
 };
 
 export default meta;

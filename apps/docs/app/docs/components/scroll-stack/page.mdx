@@ -1,0 +1,334 @@
+---
+description: >-
+  A headless, scroll-driven stacking-cards primitive for React. Pins each card
+  with position sticky and scales it down as later cards stack on top, with a
+  motion-driven spring you can tune or replace.
+---
+
+import { Callout } from "nextra/components";
+import { ComponentShowcase } from "../../../components/component-showcase";
+import {
+  BasicScrollStackExample,
+  RawScrollStackExample,
+  SnappyScrollStackExample,
+  SteppedScrollStackExample,
+  TightScrollStackExample,
+} from "./_examples";
+
+# ScrollStack
+
+A headless layered-stack primitive. Every `ScrollStack.Item` is a sticky card
+sharing the Viewport as its positioning ancestor — as you scroll, each card
+pins on top of the previous one and the earlier cards scale down, producing
+the familiar stacked-cards transition.
+
+<ComponentShowcase preview={<BasicScrollStackExample />}>
+
+```tsx
+import { ScrollStack } from "@made-together/ui/scroll-stack";
+
+export function StackedCards() {
+  return (
+    <ScrollStack.Root useViewportScroll topOffset={16} stackGap={12} itemDistance={120}>
+      <ScrollStack.Viewport className="h-80 rounded-2xl border bg-background p-4">
+        {cards.map((card) => (
+          <ScrollStack.Item key={card.id}>
+            <div className="flex h-56 flex-col justify-between rounded-2xl bg-foreground p-6 text-background">
+              {/* card content */}
+            </div>
+          </ScrollStack.Item>
+        ))}
+      </ScrollStack.Viewport>
+    </ScrollStack.Root>
+  );
+}
+```
+
+</ComponentShowcase>
+
+## Import
+
+```tsx
+import { ScrollStack } from "@made-together/ui/scroll-stack";
+```
+
+The component is exported as a compound object — every sub-component is a
+property of `ScrollStack`:
+
+```tsx
+ScrollStack.Root;
+ScrollStack.Viewport;
+ScrollStack.Item;
+```
+
+## Composition
+
+ScrollStack has three parts: `Root → Viewport → Item`. Items must be direct
+children of `Viewport` — they all need to share the same sticky-positioning
+ancestor so that they can pin on top of one another instead of each card
+disappearing as it leaves its own parent.
+
+```tsx
+<ScrollStack.Root useViewportScroll>
+  <ScrollStack.Viewport className="h-[80vh]">
+    <ScrollStack.Item>
+      <div className="rounded-2xl bg-card p-6">Card one</div>
+    </ScrollStack.Item>
+    <ScrollStack.Item>
+      <div className="rounded-2xl bg-card p-6">Card two</div>
+    </ScrollStack.Item>
+  </ScrollStack.Viewport>
+</ScrollStack.Root>
+```
+
+- **`ScrollStack.Root`** holds shared configuration — `topOffset`,
+  `stackGap`, `scaleStep`, `itemDistance`, `spring`, and the
+  `useViewportScroll` switch. It runs a single `useScroll` (against the
+  page or the Viewport) and feeds the smoothed scroll position to every Item.
+- **`ScrollStack.Viewport`** is the scroll container and the shared
+  positioning ancestor for the items. By default it's a passive wrapper and
+  the page scroll drives the animation; pass `useViewportScroll` on Root and
+  the Viewport gains `relative overflow-y-auto` so it scrolls itself.
+- **`ScrollStack.Item`** is the visual card. It renders a motion `<div>`
+  with `position: sticky; top: topOffset + index * stackGap`, plus a
+  `margin-bottom` of `itemDistance` (except for the last one) to create the
+  scroll distance that separates pin events. Its `scale` is driven by the
+  Root's scroll progress, mapped from `[pinStart, lastPinStart]` to
+  `[1, 1 - depthFromTop * scaleStep]`.
+
+<Callout type="info">
+  Sticky positioning is the key. All items share Viewport as their positioning
+  parent, so when the next item pins on top, the previous one stays pinned
+  too — they visually stack with `stackGap` between their pinned tops. Each
+  Item measures its own flow position with a `ResizeObserver` and reports it
+  back to the Root, which is how the scale ranges stay correct across
+  resizes, font loads, and content changes.
+</Callout>
+
+## Usage
+
+### Basic usage
+
+The minimum: a Root with `useViewportScroll`, a Viewport sized via Tailwind,
+and one Item per card. `itemDistance` controls how much scroll separates
+each card's pin event from the next.
+
+```tsx
+<ScrollStack.Root useViewportScroll itemDistance={120} className="w-full max-w-md">
+  <ScrollStack.Viewport className="h-80 rounded-2xl border bg-background p-4">
+    {cards.map((card) => (
+      <ScrollStack.Item key={card.id}>
+        <div className="flex h-56 flex-col justify-between rounded-2xl bg-card p-6">
+          {/* card content */}
+        </div>
+      </ScrollStack.Item>
+    ))}
+  </ScrollStack.Viewport>
+</ScrollStack.Root>
+```
+
+### Window scroll
+
+Omit `useViewportScroll` and the page scroll drives the animation. The
+Viewport is just a wrapper; cards still pin to the top of the window via
+`position: sticky`. Bump `topOffset` past any sticky header, and use a
+larger `itemDistance` so the cards aren't pinned right on top of each other.
+
+```tsx
+<ScrollStack.Root topOffset={96} stackGap={16} itemDistance={400}>
+  <ScrollStack.Viewport>
+    {sections.map((section) => (
+      <ScrollStack.Item key={section.id}>
+        <div className="rounded-3xl bg-card p-10">{/* section content */}</div>
+      </ScrollStack.Item>
+    ))}
+  </ScrollStack.Viewport>
+</ScrollStack.Root>
+```
+
+### Tight stack
+
+Smaller `stackGap`, `scaleStep`, and `itemDistance` keep the stack compact —
+earlier cards peek out by a sliver, barely shrink, and the transitions
+happen quickly. Good for dense content where the stack is decorative rather
+than the focal point.
+
+<ComponentShowcase preview={<TightScrollStackExample />}>
+
+```tsx
+<ScrollStack.Root
+  useViewportScroll
+  topOffset={8}
+  stackGap={4}
+  scaleStep={0.02}
+  itemDistance={80}
+>
+  <ScrollStack.Viewport className="h-80 rounded-2xl border bg-background p-4">
+    {cards.map((card) => (
+      <ScrollStack.Item key={card.id}>
+        <Card {...card} />
+      </ScrollStack.Item>
+    ))}
+  </ScrollStack.Viewport>
+</ScrollStack.Root>
+```
+
+</ComponentShowcase>
+
+### Stepped stack
+
+Larger `stackGap`, `scaleStep`, and `itemDistance` give a more dramatic,
+visibly-tiered look — each card sits visibly behind the next and shrinks
+noticeably.
+
+<ComponentShowcase preview={<SteppedScrollStackExample />}>
+
+```tsx
+<ScrollStack.Root
+  useViewportScroll
+  topOffset={24}
+  stackGap={24}
+  scaleStep={0.08}
+  itemDistance={180}
+>
+  <ScrollStack.Viewport className="h-80 rounded-2xl border bg-background p-4">
+    {cards.map((card) => (
+      <ScrollStack.Item key={card.id}>
+        <Card {...card} />
+      </ScrollStack.Item>
+    ))}
+  </ScrollStack.Viewport>
+</ScrollStack.Root>
+```
+
+</ComponentShowcase>
+
+### Tuning the spring
+
+Scroll progress is fed through `useSpring` before being mapped to the scale.
+Override `spring` to change the feel — stiffer + less mass is snappier and
+tracks the wheel closer; softer is more cinematic. Pass any `SpringOptions`
+from `motion/react`.
+
+<ComponentShowcase preview={<SnappyScrollStackExample />}>
+
+```tsx
+<ScrollStack.Root
+  useViewportScroll
+  spring={{ stiffness: 500, damping: 50, mass: 0.4 }}
+>
+  <ScrollStack.Viewport className="h-80 rounded-2xl border bg-background p-4">
+    {cards.map((card) => (
+      <ScrollStack.Item key={card.id}>
+        <Card {...card} />
+      </ScrollStack.Item>
+    ))}
+  </ScrollStack.Viewport>
+</ScrollStack.Root>
+```
+
+</ComponentShowcase>
+
+### Disabling the spring
+
+Pass `spring={false}` to drive `scale` directly from raw scroll progress.
+The animation becomes 1:1 with the scroll position — no inertia, no
+overshoot.
+
+<ComponentShowcase preview={<RawScrollStackExample />}>
+
+```tsx
+<ScrollStack.Root useViewportScroll spring={false}>
+  <ScrollStack.Viewport className="h-80 rounded-2xl border bg-background p-4">
+    {cards.map((card) => (
+      <ScrollStack.Item key={card.id}>
+        <Card {...card} />
+      </ScrollStack.Item>
+    ))}
+  </ScrollStack.Viewport>
+</ScrollStack.Root>
+```
+
+</ComponentShowcase>
+
+### Reduced motion
+
+`useReducedMotion` is honored automatically: when the user has
+`prefers-reduced-motion: reduce`, the scale transform short-circuits to `1`
+on every Item, so the cards still pin in a stack but don't shrink.
+
+## API Reference
+
+### ScrollStack.Root
+
+Renders a `<div>` and owns the shared configuration, item registry, and
+scroll-driven `MotionValue`. Extends all native `div` props.
+
+| Prop                | Type                            | Default                                       | Description                                                                                                                                |
+| ------------------- | ------------------------------- | --------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| `topOffset`         | `number`                        | `0`                                           | Pixel distance from the top of the scroll container where the first card pins. Each subsequent card pins `stackGap` lower than the previous. |
+| `stackGap`          | `number`                        | `16`                                          | Per-item offset added to `topOffset`, producing the visible step between stacked cards.                                                    |
+| `scaleStep`         | `number`                        | `0.04`                                        | How much each card scales down per card stacked on top. Card at depth `N` ends at `1 - N * scaleStep`.                                     |
+| `itemDistance`      | `number`                        | `160`                                         | Pixel `margin-bottom` between consecutive items. Also defines how much scroll separates each card's pin event from the next.                |
+| `useViewportScroll` | `boolean`                       | `false`                                       | When `true`, `ScrollStack.Viewport` becomes the scroll container (`relative overflow-y-auto` is applied). Otherwise the page scroll drives the animation. |
+| `spring`            | `SpringOptions \| false`        | `{ stiffness: 200, damping: 40, mass: 0.5 }` | Spring config used to smooth scroll progress before it's mapped to the scale. Pass `false` to skip smoothing entirely.                     |
+| `className`         | `string`                        | —                                             | Merged via `cn`.                                                                                                                           |
+| `...rest`           | `React.ComponentPropsWithoutRef<"div">` | —                                       | Forwarded to the underlying `<div>`.                                                                                                       |
+
+Data attributes: `data-slot="scroll-stack-root"`.
+
+### ScrollStack.Viewport
+
+The scroll container and shared positioning ancestor for the items. When
+`useViewportScroll` is set on Root, this element gets
+`relative overflow-y-auto` applied so `useScroll` can target it.
+
+| Prop        | Type                                     | Default | Description                                                                                          |
+| ----------- | ---------------------------------------- | ------- | ---------------------------------------------------------------------------------------------------- |
+| `className` | `string`                                 | —       | Merged via `cn`. Set a height (e.g. `h-80`, `h-[80vh]`) when using `useViewportScroll`.              |
+| `...rest`   | `React.ComponentPropsWithoutRef<"div">`  | —       | Forwarded to the underlying `<div>`.                                                                 |
+
+Data attributes:
+`data-slot="scroll-stack-viewport"`,
+`data-scroll-container` (empty string when `useViewportScroll` is on, otherwise absent).
+
+### ScrollStack.Item
+
+A single sticky card. Renders a motion `<div>` with
+`position: sticky; top: topOffset + index * stackGap`, a scroll-driven
+`scale` transform, and `margin-bottom: itemDistance` (except for the last
+item).
+
+| Prop        | Type                                              | Default | Description                                                                                                            |
+| ----------- | ------------------------------------------------- | ------- | ---------------------------------------------------------------------------------------------------------------------- |
+| `className` | `string`                                          | —       | Merged via `cn`. Style the card itself (rounded corners, background, padding…) — the spacing comes from `itemDistance`. |
+| `style`     | `React.CSSProperties`                             | —       | Merged onto the sticky card. Use this to override `marginBottom` if you need per-card spacing.                         |
+| `...rest`   | `HTMLMotionProps<"div">`                          | —       | Forwarded to the underlying motion `<div>`.                                                                            |
+
+Data attributes:
+`data-slot="scroll-stack-item"`,
+`data-index="<number>"`.
+
+### Sizing tips
+
+- The card's height comes from its **children**. Give the inner element a
+  fixed height (e.g. `h-56`) or let it size to content.
+- `itemDistance` is the single knob for inter-card scroll distance. Larger
+  values mean each pin event takes longer to reach, so the animation feels
+  more deliberate; smaller values feel snappier.
+- With `useViewportScroll`, set the Viewport height explicitly (`h-80`,
+  `h-[80vh]`). Without it, the Viewport is just a wrapper and the document
+  is the scrolling ancestor — sticky pins to the window top.
+- Make sure `Item` is a *direct* child of `Viewport`. Wrapping items in
+  another `<div>` breaks the sticky stack, because each card would only
+  share a parent with itself.
+
+### Exported types
+
+```ts
+import type {
+  ScrollStackItemProps,
+  ScrollStackRootProps,
+  ScrollStackViewportProps,
+} from "@made-together/ui/scroll-stack";
+```
