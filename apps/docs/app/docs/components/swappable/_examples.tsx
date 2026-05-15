@@ -20,7 +20,7 @@ export function BasicSwappableExample() {
     <Swappable.Root
       items={Logos}
       rows={1}
-      cols={{ base: 2, sm: 3, md: 4, lg: 5 }}
+      cols={{ base: 2, sm: 3, md: 4, lg: 4 }}
       className="w-full max-w-3xl rounded-2xl border border-border bg-background p-3"
     >
       <Swappable.Grid<Logo> className="gap-3">
@@ -60,7 +60,7 @@ export function FastRotationSwappableExample() {
     <Swappable.Root
       items={Logos}
       rows={1}
-      cols={{ base: 3, sm: 4, lg: 6 }}
+      cols={{ base: 3, sm: 4, lg: 4 }}
       rotationInterval={{ min: 600, max: 1400 }}
       className="w-full max-w-3xl rounded-2xl border border-border bg-background p-3"
     >

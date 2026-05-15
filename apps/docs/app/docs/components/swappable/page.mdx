@@ -21,8 +21,7 @@ A headless rotating grid. Hand it an array of items and a grid shape (`rows` ×
 `cols`) — it renders the first `rows × cols` items, then, while
 `items.length > gridSize`, periodically swaps a random visible cell with a
 random off-screen item. Uniqueness is preserved: the same item is never
-visible twice. Every swap runs through `motion`'s `AnimatePresence`, so
-enter/exit transitions are smooth and overridable per-instance or globally.
+visible twice.
 
 <ComponentShowcase preview={<BasicSwappableExample />}>
 
@@ -165,8 +164,7 @@ focused — useful for letting users actually read what's on screen.
 ### Fast rotation
 
 `rotationInterval` accepts a `{ min, max }` range in milliseconds — each tick
-picks a random delay inside that range. Tighter ranges feel more energetic;
-wider ranges feel more organic.
+picks a random delay inside that range.
 
 <ComponentShowcase preview={<FastRotationSwappableExample />}>
 
