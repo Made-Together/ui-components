@@ -65,7 +65,7 @@ export function BasicAccordionExample() {
               </Accordion.Indicator>
             </Accordion.Trigger>
           </Accordion.Heading>
-          <Accordion.Content className="px-5 pb-4 text-sm leading-relaxed text-muted-foreground">
+          <Accordion.Content className="px-5 text-sm leading-relaxed text-muted-foreground">
             {item.content}
           </Accordion.Content>
         </Accordion.Item>
@@ -90,12 +90,12 @@ export function MultipleAccordionExample() {
           <Accordion.Heading>
             <Accordion.Trigger className="flex w-full items-center justify-between gap-4 px-4 py-3 text-left text-sm font-medium hover:bg-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
               {item.title}
-              <Accordion.Indicator className="grid size-6 place-items-center rounded-full bg-foreground/10">
+              <Accordion.Indicator className="">
                 <ChevronDown className="size-3.5" />
               </Accordion.Indicator>
             </Accordion.Trigger>
           </Accordion.Heading>
-          <Accordion.Content className="border-t border-border px-4 py-3 text-sm leading-relaxed text-muted-foreground">
+          <Accordion.Content className="border-t border-border px-4 text-sm leading-relaxed text-muted-foreground">
             {item.content}
           </Accordion.Content>
         </Accordion.Item>
@@ -147,7 +147,7 @@ export function ControlledAccordionExample() {
                 </Accordion.Indicator>
               </Accordion.Trigger>
             </Accordion.Heading>
-            <Accordion.Content className="px-5 pb-4 text-sm leading-relaxed text-muted-foreground">
+            <Accordion.Content className="px-5 text-sm leading-relaxed text-muted-foreground">
               {item.content}
             </Accordion.Content>
           </Accordion.Item>
@@ -185,7 +185,7 @@ export function DisabledAccordionExample() {
               )}
             </Accordion.Trigger>
           </Accordion.Heading>
-          <Accordion.Content className="px-5 pb-4 text-sm leading-relaxed text-muted-foreground">
+          <Accordion.Content className="px-5 text-sm leading-relaxed text-muted-foreground">
             {item.content}
           </Accordion.Content>
         </Accordion.Item>
@@ -212,7 +212,7 @@ export function NonCollapsibleAccordionExample() {
               </Accordion.Indicator>
             </Accordion.Trigger>
           </Accordion.Heading>
-          <Accordion.Content className="px-5 pb-4 text-sm leading-relaxed text-muted-foreground">
+          <Accordion.Content className="px-5 text-sm leading-relaxed text-muted-foreground">
             {item.content}
           </Accordion.Content>
         </Accordion.Item>

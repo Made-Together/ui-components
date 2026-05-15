@@ -6,6 +6,7 @@ const meta: MetaRecord = {
   marquee: "Marquee",
   tabs: "Tabs",
   "autoscroll-text": "AutoScrollText",
+  swappable: "Swappable",
 };
 
 export default meta;
