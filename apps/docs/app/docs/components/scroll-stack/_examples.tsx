@@ -58,11 +58,11 @@ export function BasicScrollStackExample() {
       useViewportScroll
       topOffset={16}
       stackGap={12}
-      scaleStep={0.04}
+      scaleStep={0}
       itemDistance={120}
       className="w-full max-w-md"
     >
-      <ScrollStack.Viewport className="h-80 rounded-2xl border border-border bg-background p-4 pb-48">
+      <ScrollStack.Viewport className="h-80 rounded-2xl border border-border bg-background p-4 pb-20">
         {cards.map((card) => (
           <ScrollStack.Item key={card.eyebrow}>
             <Card {...card} />
