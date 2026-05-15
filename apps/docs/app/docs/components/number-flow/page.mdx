@@ -1,0 +1,285 @@
+---
+description:
+  An accessible, animated number primitive. Transitions smoothly between
+  values with `Intl.NumberFormat`-driven formatting, locale support, custom
+  prefixes and suffixes, and grouped layout sync.
+---
+
+import { Callout } from "nextra/components";
+import { ComponentShowcase } from "../../../components/component-showcase";
+import {
+  BasicNumberFlowExample,
+  CompactNumberFlowExample,
+  ContinuousNumberFlowExample,
+  CurrencyNumberFlowExample,
+  GroupNumberFlowExample,
+  TrendNumberFlowExample,
+} from "./_examples";
+
+# NumberFlow
+
+A thin, headless wrapper around [`@number-flow/react`](https://number-flow.barvian.me/).
+Renders a custom element that animates digit transitions whenever `value`
+changes. Formatting is driven by standard `Intl.NumberFormatOptions`, so
+currencies, percentages, compact notations, and locales work out of the box.
+
+<ComponentShowcase preview={<BasicNumberFlowExample />}>
+
+```tsx
+import { NumberFlow } from "@made-together/ui/number-flow";
+
+export function Counter({ value }: { value: number }) {
+  return <NumberFlow.Root value={value} />;
+}
+```
+
+</ComponentShowcase>
+
+## Import
+
+```tsx
+import { NumberFlow } from "@made-together/ui/number-flow";
+```
+
+The component is exported as a compound object:
+
+```tsx
+NumberFlow.Root;
+NumberFlow.Group;
+```
+
+The animation hooks from the underlying library are re-exported as well:
+
+```tsx
+import {
+  useCanAnimate,
+  useIsSupported,
+  usePrefersReducedMotion,
+} from "@made-together/ui/number-flow";
+```
+
+## Composition
+
+NumberFlow is a single primitive (`Root`) plus an optional grouping wrapper
+(`Group`). `Root` renders a custom element that lays out and animates its
+digits internally — there is no separate trigger or content slot.
+
+```tsx
+<NumberFlow.Group>
+  <NumberFlow.Root value={price} format={{ style: "currency", currency: "USD" }} />
+  <NumberFlow.Root value={delta} format={{ style: "percent" }} />
+</NumberFlow.Group>
+```
+
+<Callout type="info">
+  `NumberFlow.Root` is a [custom element](https://developer.mozilla.org/en-US/docs/Web/API/Web_components/Using_custom_elements)
+  under the hood. Internal pieces are exposed via [CSS shadow parts](https://developer.mozilla.org/en-US/docs/Web/CSS/::part)
+  (`::part(number)`, `::part(digit)`, `::part(integer)`, etc.) so consumers
+  can target them without piercing the shadow tree.
+</Callout>
+
+## Usage
+
+### Formatting with `Intl.NumberFormat`
+
+`format` is forwarded to `Intl.NumberFormat` — anything the platform supports
+works. Pair it with `prefix` / `suffix` for affixes that should sit outside
+the animated number itself.
+
+<ComponentShowcase preview={<CurrencyNumberFlowExample />}>
+
+```tsx
+<NumberFlow.Root
+  value={value}
+  format={{ style: "currency", currency: "USD" }}
+  suffix="/mo"
+/>
+```
+
+</ComponentShowcase>
+
+### Compact notation
+
+Use `notation: "compact"` for human-readable large numbers (`1.2K`, `89M`).
+
+<ComponentShowcase preview={<CompactNumberFlowExample />}>
+
+```tsx
+<NumberFlow.Root value={value} format={{ notation: "compact" }} />
+```
+
+</ComponentShowcase>
+
+### Trend
+
+`trend` controls the spin direction. The default is `Math.sign(value - oldValue)`,
+so digits go up when the number grows and down when it shrinks. Passing `0`
+animates each digit toward the closest direction independently — useful when
+you want movement without implying a positive or negative change.
+
+<ComponentShowcase preview={<TrendNumberFlowExample />}>
+
+```tsx
+<NumberFlow.Root value={value} trend={0} />
+```
+
+</ComponentShowcase>
+
+### Continuous plugin
+
+The `continuous` plugin (re-exported from `@number-flow/react`) makes digit
+transitions pass through every intermediate value, producing a slot-machine
+feel. It has no effect when `trend` is `0`.
+
+<ComponentShowcase preview={<ContinuousNumberFlowExample />}>
+
+```tsx
+import { NumberFlow } from "@made-together/ui/number-flow";
+import { continuous } from "@number-flow/react";
+
+<NumberFlow.Root value={value} plugins={[continuous]} />;
+```
+
+</ComponentShowcase>
+
+### Synchronized group
+
+When one number's layout affects another's — stacked rows, a price plus a
+delta percentage, a list of stats — wrap them in `NumberFlow.Group` so their
+transitions stay in sync. The wrapper renders no DOM of its own.
+
+<ComponentShowcase preview={<GroupNumberFlowExample />}>
+
+```tsx
+<NumberFlow.Group>
+  <NumberFlow.Root
+    value={price}
+    format={{ style: "currency", currency: "USD" }}
+  />
+  <NumberFlow.Root
+    value={delta}
+    format={{
+      style: "percent",
+      maximumFractionDigits: 2,
+      signDisplay: "exceptZero",
+    }}
+  />
+</NumberFlow.Group>
+```
+
+</ComponentShowcase>
+
+### Reduced motion
+
+`respectMotionPreference` defaults to `true`. When a user has
+`prefers-reduced-motion: reduce` set, NumberFlow finishes any in-flight
+transitions and skips new ones. Pass `respectMotionPreference={false}` to
+opt out and always animate.
+
+```tsx
+<NumberFlow.Root value={value} respectMotionPreference={false} />
+```
+
+## API Reference
+
+### NumberFlow.Root
+
+Renders the animated number. Forwards its ref to the underlying
+`NumberFlowElement` custom element.
+
+| Prop                      | Type                                                                          | Default                              | Description                                                                                                                                          |
+| ------------------------- | ----------------------------------------------------------------------------- | ------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `value`                   | `number`                                                                      | **required**                         | The number to display. Transitions whenever this changes.                                                                                            |
+| `format`                  | `Intl.NumberFormatOptions`                                                    | —                                    | Formatting options forwarded to `Intl.NumberFormat`. Covers currency, percent, compact notation, fraction digits, sign display, etc.                 |
+| `locales`                 | `Intl.LocalesArgument`                                                        | runtime default                      | BCP-47 locale tag (or list) used for formatting.                                                                                                     |
+| `prefix`                  | `string`                                                                      | —                                    | Static text rendered before the number.                                                                                                              |
+| `suffix`                  | `string`                                                                      | —                                    | Static text rendered after the number.                                                                                                               |
+| `trend`                   | `number \| ((oldValue: number, value: number) => number)`                     | `(old, v) => Math.sign(v - old)`     | Spin direction. `+1` always up, `-1` always down, `0` shortest path per digit.                                                                       |
+| `isolate`                 | `boolean`                                                                     | `false`                              | Isolate this instance's transitions from sibling layout updates. Ignored inside a `NumberFlow.Group`.                                                |
+| `animated`                | `boolean`                                                                     | `true`                               | Set to `false` to finish any current animation and disable further ones — useful while a value is being edited live.                                |
+| `transformTiming`         | `EffectTiming`                                                                | library default                      | Timing for layout-related transforms.                                                                                                                |
+| `spinTiming`              | `EffectTiming`                                                                | falls back to `transformTiming`      | Timing for the digit spin animations.                                                                                                                |
+| `opacityTiming`           | `EffectTiming`                                                                | library default                      | Timing for character fade-in / fade-out.                                                                                                             |
+| `digits`                  | `Record<number, { max?: number }>`                                            | —                                    | Per-position digit configuration (e.g. cap a digit at `5` for the tens place of a clock). Not reactive — set once.                                  |
+| `respectMotionPreference` | `boolean`                                                                     | `true`                               | Honor `prefers-reduced-motion: reduce`.                                                                                                              |
+| `plugins`                 | `Plugin[]`                                                                    | —                                    | Plugins from `@number-flow/react`. Currently only `continuous`.                                                                                      |
+| `willChange`              | `boolean`                                                                     | `false`                              | Apply `will-change` hints to internals. Useful for high-frequency updates; costs memory.                                                              |
+| `nonce`                   | `string`                                                                      | —                                    | CSP nonce forwarded to NumberFlow's inline `<style>` blocks during SSR/hydration.                                                                    |
+| `onAnimationsStart`       | `(e: CustomEvent<undefined>) => void`                                         | —                                    | Fires when an update animation begins. Distinct from the DOM `onAnimationStart`.                                                                     |
+| `onAnimationsFinish`      | `(e: CustomEvent<undefined>) => void`                                         | —                                    | Fires when an update animation completes.                                                                                                            |
+| `className`               | `string`                                                                      | —                                    | Merged via `cn` onto the underlying custom element.                                                                                                  |
+| `...rest`                 | `React.HTMLAttributes<NumberFlowElement>`                                     | —                                    | Forwarded to the underlying custom element.                                                                                                          |
+
+Data attributes: `data-slot="number-flow-root"`.
+
+### NumberFlow.Group
+
+Wraps multiple `NumberFlow.Root` instances so their transitions are
+orchestrated together. Renders no DOM and accepts only `children`. Has no
+props beyond children — useful whenever one animated number's layout shift
+would otherwise reflow another mid-animation.
+
+```tsx
+<NumberFlow.Group>{/* NumberFlow.Root instances */}</NumberFlow.Group>
+```
+
+## Styling
+
+NumberFlow exposes its internals through CSS shadow parts. Inspect the
+rendered element in DevTools to see what's available; the common ones are
+`number`, `digit`, `integer`, `fraction`, `prefix`, and `suffix`.
+
+```css
+number-flow-react::part(suffix) {
+  color: var(--muted-foreground);
+  margin-inline-start: 0.125em;
+}
+```
+
+There are also a couple of CSS custom properties:
+
+| Property                     | Default | Effect                                                                                                              |
+| ---------------------------- | ------- | ------------------------------------------------------------------------------------------------------------------- |
+| `--number-flow-mask-height`  | `.25em` | Height of the gradient mask at the top and bottom of the number. Also used as vertical padding.                     |
+| `--number-flow-mask-width`   | `.5em`  | Width of the gradient mask at the left and right of the number.                                                      |
+
+`font-variant-numeric: tabular-nums` is recommended on the container or the
+element itself to keep digit widths constant during transitions.
+
+## Hooks
+
+```tsx
+import {
+  useCanAnimate,
+  useIsSupported,
+  usePrefersReducedMotion,
+} from "@made-together/ui/number-flow";
+```
+
+- `useCanAnimate({ respectMotionPreference? })` — `true` when the browser
+  supports the required APIs and (optionally) the user is okay with motion.
+  Useful for conditionally rendering a `<NumberFlow.Root>` versus a plain
+  formatted number.
+- `useIsSupported()` — `true` when the browser supports the underlying
+  custom element features, regardless of motion preference.
+- `usePrefersReducedMotion()` — `true` when the user has requested reduced
+  motion.
+
+## Limitations
+
+Inherited from `@number-flow/react`:
+
+- Scientific and engineering notations are not supported.
+- Non-Latin digits and RTL locales are not currently supported.
+- Backgrounds and borders on `NumberFlow.Root` will not scale smoothly
+  during transitions. For animated chrome, wrap the number in a `motion`
+  container and animate that container's layout instead.
+
+## Exported types
+
+```ts
+import type {
+  NumberFlowGroupProps,
+  NumberFlowRootProps,
+} from "@made-together/ui/number-flow";
+```

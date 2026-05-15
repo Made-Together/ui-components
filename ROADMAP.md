@@ -8,10 +8,10 @@
 - [x] Tabs
 - [x] AutoScrollText
 - [ ] StackedContent
-- [ ] Swappable
+- [x] Swappable
 - [ ] TextReveal
 - [ ] TextSplit
-- [ ] NumberFlow
+- [x] NumberFlow
 - [ ] FixedScrollableArea
 
 ## Todos

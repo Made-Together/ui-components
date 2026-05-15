@@ -7,6 +7,7 @@ const meta: MetaRecord = {
   tabs: "Tabs",
   "autoscroll-text": "AutoScrollText",
   swappable: "Swappable",
+  "number-flow": "NumberFlow",
 };
 
 export default meta;
