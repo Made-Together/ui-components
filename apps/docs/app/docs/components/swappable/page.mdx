@@ -1,0 +1,376 @@
+---
+description:
+  A headless React component that displays an array of items in a responsive
+  M × N grid and randomly swaps cells on random intervals, with smooth motion
+  enter/exit animations and a uniqueness guarantee.
+---
+
+import { Callout } from "nextra/components";
+import { ComponentShowcase } from "../../../components/component-showcase";
+import {
+  BasicSwappableExample,
+  CustomTransitionSwappableExample,
+  FastRotationSwappableExample,
+  MultiRowSwappableExample,
+  StaticGridSwappableExample,
+} from "./_examples";
+
+# Swappable
+
+A headless rotating grid. Hand it an array of items and a grid shape (`rows` ×
+`cols`) — it renders the first `rows × cols` items, then, while
+`items.length > gridSize`, periodically swaps a random visible cell with a
+random off-screen item. Uniqueness is preserved: the same item is never
+visible twice. Every swap runs through `motion`'s `AnimatePresence`, so
+enter/exit transitions are smooth and overridable per-instance or globally.
+
+<ComponentShowcase preview={<BasicSwappableExample />}>
+
+```tsx
+import { Swappable } from "@made-together/ui/swappable";
+
+type Logo = (typeof Logos)[number];
+
+export function LogoWall() {
+  return (
+    <Swappable.Root
+      items={Logos}
+      rows={1}
+      cols={{ base: 2, sm: 3, md: 4, lg: 5 }}
+      className="rounded-2xl border bg-background p-3"
+    >
+      <Swappable.Grid<Logo> className="gap-3">
+        {(Logo) => (
+          <Swappable.Item>
+            <div className="flex h-24 items-center justify-center rounded-xl border bg-card p-4">
+              <Logo />
+            </div>
+          </Swappable.Item>
+        )}
+      </Swappable.Grid>
+    </Swappable.Root>
+  );
+}
+```
+
+</ComponentShowcase>
+
+## Import
+
+```tsx
+import { Swappable } from "@made-together/ui/swappable";
+```
+
+The component is exported as a compound object — every sub-component is a
+property of `Swappable`:
+
+```tsx
+Swappable.Root;
+Swappable.Grid;
+Swappable.Item;
+```
+
+## Composition
+
+Swappable is three parts that work together — `Root` owns state and the
+rotation timer, `Grid` renders the visible cells via a render prop, and `Item`
+is the animated cell wrapper:
+
+```tsx
+<Swappable.Root items={items} rows={1} cols={{ base: 2, md: 4 }}>
+  <Swappable.Grid<Item>>
+    {(item) => (
+      <Swappable.Item>
+        <Card data={item} />
+      </Swappable.Item>
+    )}
+  </Swappable.Grid>
+</Swappable.Root>
+```
+
+- **`Swappable.Root`** holds the `items` array, the grid shape, the rotation
+  timer, and the default motion variants. It deduplicates `items` on entry and
+  assigns each one a stable internal id (via a `Map<T, string>` keyed by
+  reference for objects, by value for primitives), so consumers never have to
+  thread an `id` field through their data.
+- **`Swappable.Grid`** renders the responsive CSS grid and calls its render
+  prop once per visible cell. It injects the internal id as `key` on the
+  rendered element, which is what lets `AnimatePresence` orchestrate the
+  enter/exit animation when an item swaps in or out. It is generic over the
+  item type — `<Swappable.Grid<MyItem>>` so the render-prop argument is
+  typed.
+- **`Swappable.Item`** is a `motion.div` that inherits Root's default
+  `initial` / `animate` / `exit` / `transition`. Per-instance props win over
+  the defaults.
+
+<Callout type="info">
+  Items are assumed to be unique. Duplicates are removed on entry by reference
+  equality (objects, functions, arrays) or value equality (strings, numbers).
+  If you pass primitives, make sure each value appears once — duplicate
+  primitives will be silently collapsed.
+</Callout>
+
+## Usage
+
+### Basic usage
+
+The default behavior — a single row, responsive column count, rotation every
+2–5 seconds, and a scale-and-fade transition.
+
+```tsx
+<Swappable.Root
+  items={Logos}
+  rows={1}
+  cols={{ base: 2, sm: 3, md: 4, lg: 5 }}
+>
+  <Swappable.Grid<Logo>>
+    {(Logo) => (
+      <Swappable.Item>
+        <Logo />
+      </Swappable.Item>
+    )}
+  </Swappable.Grid>
+</Swappable.Root>
+```
+
+### Multi-row grid with pause on hover
+
+Pass `rows` to get a 2D grid. The total cell count is `rows × resolvedCols`
+where `resolvedCols` is chosen from the `cols` map for the current viewport.
+`pauseOnHover` freezes the rotation timer while the grid is hovered or
+focused — useful for letting users actually read what's on screen.
+
+<ComponentShowcase preview={<MultiRowSwappableExample />}>
+
+```tsx
+<Swappable.Root
+  items={Logos}
+  rows={2}
+  cols={{ base: 2, sm: 3, md: 4 }}
+  rotationInterval={{ min: 1500, max: 3500 }}
+  pauseOnHover
+>
+  <Swappable.Grid<Logo>>
+    {(Logo) => (
+      <Swappable.Item>
+        <Logo />
+      </Swappable.Item>
+    )}
+  </Swappable.Grid>
+</Swappable.Root>
+```
+
+</ComponentShowcase>
+
+### Fast rotation
+
+`rotationInterval` accepts a `{ min, max }` range in milliseconds — each tick
+picks a random delay inside that range. Tighter ranges feel more energetic;
+wider ranges feel more organic.
+
+<ComponentShowcase preview={<FastRotationSwappableExample />}>
+
+```tsx
+<Swappable.Root
+  items={Logos}
+  rows={1}
+  cols={{ base: 3, sm: 4, lg: 6 }}
+  rotationInterval={{ min: 600, max: 1400 }}
+>
+  <Swappable.Grid<Logo>>
+    {(Logo) => (
+      <Swappable.Item>
+        <Logo />
+      </Swappable.Item>
+    )}
+  </Swappable.Grid>
+</Swappable.Root>
+```
+
+</ComponentShowcase>
+
+### Custom transition
+
+The motion variants applied to every cell are exposed on `Swappable.Root` as
+`initial`, `animate`, `exit`, and `transition`. They are forwarded verbatim
+to the underlying `motion.div` inside each `Swappable.Item`, so anything
+`motion` supports (translate, scale, blur, color, easing curves, springs) is
+available.
+
+<ComponentShowcase preview={<CustomTransitionSwappableExample />}>
+
+```tsx
+<Swappable.Root
+  items={Logos}
+  rows={1}
+  cols={{ base: 2, sm: 4, lg: 5 }}
+  rotationInterval={{ min: 1200, max: 2800 }}
+  initial={{ opacity: 0, y: 14, filter: "blur(6px)" }}
+  animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+  exit={{ opacity: 0, y: -14, filter: "blur(6px)" }}
+  transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+>
+  <Swappable.Grid<Logo>>
+    {(Logo) => (
+      <Swappable.Item>
+        <Logo />
+      </Swappable.Item>
+    )}
+  </Swappable.Grid>
+</Swappable.Root>
+```
+
+</ComponentShowcase>
+
+You can also override the transition on a single `Swappable.Item` — per-item
+props take precedence over the Root defaults. This is useful when one cell
+needs a different feel (an accent cell, a hero logo, etc.).
+
+```tsx
+<Swappable.Item
+  initial={{ opacity: 0, rotate: -8 }}
+  animate={{ opacity: 1, rotate: 0 }}
+  exit={{ opacity: 0, rotate: 8 }}
+  transition={{ type: "spring", stiffness: 220, damping: 24 }}
+>
+  <Logo />
+</Swappable.Item>
+```
+
+### Static grid (no rotation)
+
+When `items.length <= rows × cols`, every item fits on screen, so rotation is
+disabled automatically — the grid renders statically and `AnimatePresence`
+never kicks in. No prop needed.
+
+<ComponentShowcase preview={<StaticGridSwappableExample />}>
+
+```tsx
+<Swappable.Root
+  items={Logos.slice(0, 4)}
+  rows={1}
+  cols={{ base: 2, sm: 4 }}
+>
+  <Swappable.Grid<Logo>>
+    {(Logo) => (
+      <Swappable.Item>
+        <Logo />
+      </Swappable.Item>
+    )}
+  </Swappable.Grid>
+</Swappable.Root>
+```
+
+</ComponentShowcase>
+
+### Reduced motion
+
+When `prefers-reduced-motion: reduce` is set, the rotation timer never
+starts — the initial grid renders and stays. The motion variants on
+`Swappable.Item` are also short-circuited by `motion`'s built-in
+reduced-motion handling. No extra prop is needed.
+
+## API Reference
+
+### Swappable.Root
+
+Renders a `<div>` and owns the source `items`, the grid shape, the rotation
+timer, and the default motion variants applied to every cell. Generic over
+the item type `T` so `items` and the matching `Swappable.Grid<T>` render prop
+stay strongly typed.
+
+| Prop               | Type                                                       | Default                                            | Description                                                                                                                                                                  |
+| ------------------ | ---------------------------------------------------------- | -------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `items`            | `readonly T[]`                                             | **required**                                       | Source array of items. Assumed unique — duplicates are removed by reference (objects) or value (primitives) before being placed in the grid.                                |
+| `rows`             | `number`                                                   | `1`                                                | Number of grid rows.                                                                                                                                                         |
+| `cols`             | `number \| Partial<Record<Breakpoint, number>>`            | `1`                                                | Number of grid columns. Either a fixed number, or a Tailwind-aligned breakpoint map (`base`, `sm`, `md`, `lg`, `xl`, `2xl`). Total visible cells = `rows × resolvedCols`. |
+| `rotationInterval` | `{ min: number; max: number }`                             | `{ min: 2000, max: 5000 }`                         | Lower and upper bounds (in ms) for the random delay between swaps. Each tick picks a fresh random delay inside the range.                                                   |
+| `transition`       | `Transition`                                               | `{ duration: 0.35, ease: [0.32, 0.72, 0, 1] }`     | Default `motion` transition applied to every `Swappable.Item`. Per-item overrides win over this default.                                                                    |
+| `initial`          | `HTMLMotionProps<"div">["initial"]`                        | `{ opacity: 0, scale: 0.92 }`                      | Default `motion` `initial` variant.                                                                                                                                          |
+| `animate`          | `HTMLMotionProps<"div">["animate"]`                        | `{ opacity: 1, scale: 1 }`                         | Default `motion` `animate` variant.                                                                                                                                          |
+| `exit`             | `HTMLMotionProps<"div">["exit"]`                           | `{ opacity: 0, scale: 0.92 }`                      | Default `motion` `exit` variant.                                                                                                                                             |
+| `pauseOnHover`     | `boolean`                                                  | `false`                                            | Pause rotation while the grid is hovered or focused. The next swap fires when hover/focus is released.                                                                       |
+| `className`        | `string`                                                   | —                                                  | Merged via `cn`. Applied to the wrapping `<div>`.                                                                                                                            |
+| `...rest`          | `Omit<React.ComponentPropsWithoutRef<"div">, "children">`  | —                                                  | Forwarded to the underlying `<div>`.                                                                                                                                         |
+
+Data attributes: `data-slot="swappable-root"`, `data-swappable-instance` (scoped id used by the generated grid CSS).
+
+### Swappable.Grid
+
+Renders the responsive CSS grid and calls `children` once per visible cell.
+Generic over the item type `T` — use `<Swappable.Grid<MyItem>>` so the
+render-prop argument is typed.
+
+| Prop        | Type                                                       | Default | Description                                                                                                                                                                  |
+| ----------- | ---------------------------------------------------------- | ------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `children`  | `(item: T, index: number) => React.ReactNode`              | **required** | Render function called once per cell. Should return a `Swappable.Item` (or any `motion` component) as its root so the swap animation runs. `Grid` injects the per-item `key`. |
+| `className` | `string`                                                   | —       | Merged via `cn`. Applied to the grid `<div>` — use it to set `gap`, `padding`, etc.                                                                                          |
+| `...rest`   | `Omit<React.ComponentPropsWithoutRef<"div">, "children">`  | —       | Forwarded to the grid `<div>`.                                                                                                                                                |
+
+Data attributes: `data-slot="swappable-grid"`, `data-swappable-grid` (scoped id matched by the generated CSS).
+
+<Callout type="info">
+  `Swappable.Grid` clones the top-level element returned by `children` and
+  injects the internal item `key`. The cloned element is then handed to
+  `AnimatePresence` (with `mode="popLayout"`), which drives the enter/exit
+  animation. Returning a fragment as the top-level node will not animate —
+  the root must be a single React element (typically `Swappable.Item`).
+</Callout>
+
+### Swappable.Item
+
+Animated cell wrapper. Renders a `motion.div` and inherits the default
+`initial` / `animate` / `exit` / `transition` from `Swappable.Root`. Any
+prop you pass overrides the inherited default for that one cell.
+
+| Prop         | Type                          | Default                                         | Description                                                  |
+| ------------ | ----------------------------- | ----------------------------------------------- | ------------------------------------------------------------ |
+| `initial`    | `HTMLMotionProps<"div">["initial"]` | inherited from `Swappable.Root`                 | `motion` initial variant for this cell.                      |
+| `animate`    | `HTMLMotionProps<"div">["animate"]` | inherited from `Swappable.Root`                 | `motion` animate variant for this cell.                      |
+| `exit`       | `HTMLMotionProps<"div">["exit"]`    | inherited from `Swappable.Root`                 | `motion` exit variant for this cell.                         |
+| `transition` | `Transition`                  | inherited from `Swappable.Root`                 | `motion` transition for this cell.                           |
+| `className`  | `string`                      | —                                               | Merged via `cn`.                                              |
+| `...rest`    | `HTMLMotionProps<"div">`      | —                                               | Forwarded to the underlying `motion.div`.                    |
+
+Data attributes: `data-slot="swappable-item"`.
+
+### Responsive columns
+
+`cols` accepts either a single number or a mobile-first breakpoint map. The
+breakpoints align with Tailwind's defaults:
+
+| Breakpoint | Min width |
+| ---------- | --------- |
+| `base`     | `0px`     |
+| `sm`       | `640px`   |
+| `md`       | `768px`   |
+| `lg`       | `1024px`  |
+| `xl`       | `1280px`  |
+| `2xl`      | `1536px`  |
+
+Internally the component ships a small scoped `<style>` block per instance
+keyed by `useId()`, so the grid template responds to viewport changes via
+CSS (no JS resize listener fires on every frame).
+
+### Behavior notes
+
+- Rotation only runs when `items.length > rows × resolvedCols`. With fewer
+  items than cells, the grid renders statically.
+- Each swap picks a uniformly random visible cell and replaces it with a
+  uniformly random off-screen item. The invariant "no duplicates on screen"
+  is preserved across every swap.
+- The rotation timer is paused while `pauseOnHover` is on and the grid is
+  hovered or focused. The next tick fires when hover/focus releases.
+- `prefers-reduced-motion: reduce` disables the rotation timer entirely.
+
+### Exported types
+
+```ts
+import type {
+  ResponsiveCols,
+  RotationInterval,
+  SwappableGridProps,
+  SwappableItemProps,
+  SwappableRootProps,
+} from "@made-together/ui/swappable";
+```
