@@ -9,11 +9,11 @@
 - [x] Ticker
 - [x] ScrollStack
 - [x] Swappable
-- [ ] TextReveal
+- [x] TextReveal
 - [ ] TextSplit
 - [x] NumberFlow
 - [ ] FixedScrollableArea
-- [ ] TypeAhead
+- [x] TypeAhead
 
 ## Todos
 
