@@ -9,6 +9,7 @@ const meta: MetaRecord = {
   swappable: "Swappable",
   "number-flow": "NumberFlow",
   "scroll-stack": "ScrollStack",
+  "type-ahead": "TypeAhead",
 };
 
 export default meta;

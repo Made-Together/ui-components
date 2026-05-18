@@ -1,0 +1,299 @@
+---
+description:
+  A headless typewriter primitive for React. Type a single string or cycle
+  through many — with configurable speed, deletion, pause, blinking caret,
+  and a render prop for fully custom output. Safe to use inline inside `<p>`.
+---
+
+import { Callout } from "nextra/components";
+import { ComponentShowcase } from "../../../components/component-showcase";
+import {
+  BasicTypeAheadExample,
+  ControlledTypeAheadExample,
+  CustomCursorTypeAheadExample,
+  RenderPropTypeAheadExample,
+  SingleStringTypeAheadExample,
+  SpeedControlsTypeAheadExample,
+} from "./_examples";
+
+# TypeAhead
+
+A headless typewriter effect. Compose static and animated text inline — the
+whole tree is rendered as `<span>` elements, so it sits safely inside a `<p>`
+or any other text container. Cycles through one or many strings, with full
+control over typing speed, deletion speed, pause duration and the blinking
+caret. Honors `prefers-reduced-motion` by snapping to the final string.
+
+<ComponentShowcase preview={<BasicTypeAheadExample />}>
+
+```tsx
+import { TypeAhead } from "@made-together/ui/type-ahead";
+
+export function BasicTypeAhead() {
+  return (
+    <p className="text-2xl font-medium">
+      <TypeAhead.Root>
+        <TypeAhead.Static>I love building </TypeAhead.Static>
+        <TypeAhead.Animated
+          texts={["React apps", "design systems", "tiny components"]}
+        />
+      </TypeAhead.Root>
+    </p>
+  );
+}
+```
+
+</ComponentShowcase>
+
+## Import
+
+```tsx
+import { TypeAhead } from "@made-together/ui/type-ahead";
+```
+
+The component is exported as a compound object — every sub-component is a
+property of `TypeAhead`:
+
+```tsx
+TypeAhead.Root;
+TypeAhead.Static;
+TypeAhead.Animated;
+```
+
+## Composition
+
+`TypeAhead.Root` provides default animation settings to descendant
+`TypeAhead.Animated` parts via context. Mix and match `Static` and `Animated`
+segments freely:
+
+```tsx
+<p>
+  <TypeAhead.Root typingSpeed={28}>
+    <TypeAhead.Static>I love </TypeAhead.Static>
+    <TypeAhead.Animated texts={["React", "Vue", "Svelte"]} />
+    <TypeAhead.Static> for building UIs.</TypeAhead.Static>
+  </TypeAhead.Root>
+</p>
+```
+
+- **`TypeAhead.Root`** renders a `<span>` and seeds defaults for descendants.
+  Because it's an inline element, it can be nested inside `<p>`, headings,
+  list items — anywhere text belongs.
+- **`TypeAhead.Static`** renders an inert `<span>` of text. Use it to weave
+  static copy through an animated sentence without breaking the inline flow.
+- **`TypeAhead.Animated`** runs the typing state machine. Accepts a single
+  string or an array of strings to cycle through. All `Root` settings can be
+  overridden per instance.
+
+<Callout type="info">
+  Each `TypeAhead.Animated` runs an independent state machine and only
+  re-renders itself on each frame — sibling `Static` parts and the surrounding
+  `Root` are not affected by the animation tick.
+</Callout>
+
+## Usage
+
+### Single string
+
+Pass a string to `texts` to type a one-off message. Loop defaults to `false`
+for single strings, so the animation halts on the final character.
+
+<ComponentShowcase preview={<SingleStringTypeAheadExample />}>
+
+```tsx
+<TypeAhead.Root>
+  <TypeAhead.Animated texts="Headless. Accessible. Tiny." loop={false} />
+</TypeAhead.Root>
+```
+
+</ComponentShowcase>
+
+### Cycling through strings
+
+Pass an array of strings. Each entry is typed, paused, deleted, then the next
+entry types in. Looping defaults to `true` for arrays.
+
+```tsx
+<TypeAhead.Animated texts={["alpha", "bravo", "charlie"]} />
+```
+
+### Speed controls
+
+Tune `typingSpeed` and `deletionSpeed` (both in characters per second) and
+`pauseDuration` (milliseconds) either on the `Root` for defaults or
+per-`Animated` for overrides.
+
+<ComponentShowcase preview={<SpeedControlsTypeAheadExample />}>
+
+```tsx
+<TypeAhead.Root typingSpeed={48} deletionSpeed={64} pauseDuration={800}>
+  <TypeAhead.Animated texts={["snappy", "rapid", "instant"]} />
+</TypeAhead.Root>
+
+<TypeAhead.Root typingSpeed={8} deletionSpeed={12} pauseDuration={2000}>
+  <TypeAhead.Animated texts={["deliberate", "patient", "measured"]} />
+</TypeAhead.Root>
+```
+
+</ComponentShowcase>
+
+### Custom cursor
+
+Swap the caret character or hide it entirely via `cursorCharacter` and
+`showCursor`. Useful for terminal-style aesthetics or quieter implementations.
+
+<ComponentShowcase preview={<CustomCursorTypeAheadExample />}>
+
+```tsx
+<TypeAhead.Root cursorCharacter="▌">
+  <TypeAhead.Static>{"> "}</TypeAhead.Static>
+  <TypeAhead.Animated texts={["whoami", "ls -la", "exit"]} />
+</TypeAhead.Root>
+
+<TypeAhead.Root showCursor={false}>
+  <TypeAhead.Static>No cursor — </TypeAhead.Static>
+  <TypeAhead.Animated texts={["quiet typing", "no blink", "minimal"]} />
+</TypeAhead.Root>
+```
+
+</ComponentShowcase>
+
+### Listening to typing events
+
+`TypeAhead.Animated` exposes `onType`, `onDelete` and `onComplete` callbacks.
+`onType` fires each time a string is fully typed, `onDelete` when it's fully
+cleared, and `onComplete` once the animation halts (only meaningful when
+`loop` is `false`).
+
+<ComponentShowcase preview={<ControlledTypeAheadExample />}>
+
+```tsx
+const [history, setHistory] = useState<string[]>([]);
+
+<TypeAhead.Root>
+  <TypeAhead.Static>Currently showing: </TypeAhead.Static>
+  <TypeAhead.Animated
+    texts={["alpha", "bravo", "charlie", "delta"]}
+    onType={(text) => setHistory((cur) => [text, ...cur].slice(0, 4))}
+  />
+</TypeAhead.Root>;
+```
+
+</ComponentShowcase>
+
+### Custom render
+
+Pass `render` to take over the output — receives the current displayed text,
+the full target string, the active index, the phase and a `done` flag. Useful
+for adding decorations (badges, scrubbers, custom carets) without forking
+the typing state machine.
+
+<ComponentShowcase preview={<RenderPropTypeAheadExample />}>
+
+```tsx
+<TypeAhead.Animated
+  texts={["focused", "playful", "shipping"]}
+  render={({ text, phase }) => (
+    <span
+      data-phase={phase}
+      className="rounded-md bg-foreground/10 px-2 py-0.5 font-mono"
+    >
+      {text}
+      <span aria-hidden="true" className="ml-0.5 animate-pulse">
+        ▌
+      </span>
+    </span>
+  )}
+/>
+```
+
+</ComponentShowcase>
+
+### Reduced motion
+
+When the user has `prefers-reduced-motion: reduce` set, `TypeAhead.Animated`
+snaps directly to the final string and stops the caret blink. No additional
+configuration required — the component reads the media query via `motion`'s
+`useReducedMotion` hook on mount.
+
+## API Reference
+
+### TypeAhead.Root
+
+Renders a `<span>` and seeds default animation settings for descendant
+`TypeAhead.Animated` parts via context. Every setting on `Root` can be
+overridden per-instance on `Animated`.
+
+| Prop              | Type                                          | Default | Description                                                                                              |
+| ----------------- | --------------------------------------------- | ------- | -------------------------------------------------------------------------------------------------------- |
+| `typingSpeed`     | `number`                                      | `24`    | Default characters per second while typing.                                                              |
+| `deletionSpeed`   | `number`                                      | `36`    | Default characters per second while deleting.                                                            |
+| `pauseDuration`   | `number`                                      | `1500`  | Default milliseconds to wait after a string finishes typing before deletion begins.                      |
+| `startDelay`      | `number`                                      | `0`     | Default milliseconds to wait before the first character is typed.                                        |
+| `showCursor`      | `boolean`                                     | `true`  | Whether descendants render a blinking caret by default.                                                  |
+| `cursorCharacter` | `string`                                      | `"\|"`  | Character used for the blinking caret.                                                                   |
+| `loop`            | `boolean`                                     | `true`  | Whether descendants cycle their strings indefinitely by default.                                         |
+| `className`       | `string`                                      | —       | Merged via `cn` onto the underlying `<span>`.                                                            |
+| `...rest`         | `React.ComponentPropsWithoutRef<"span">`      | —       | Forwarded to the underlying `<span>`.                                                                    |
+
+Data attributes: `data-slot="type-ahead-root"`.
+
+### TypeAhead.Static
+
+Inert text segment. Renders a plain `<span>` — use to weave non-animated
+copy between `Animated` segments while keeping the entire tree inline.
+
+| Prop        | Type                                     | Default | Description                                    |
+| ----------- | ---------------------------------------- | ------- | ---------------------------------------------- |
+| `className` | `string`                                 | —       | Merged via `cn` onto the underlying `<span>`.  |
+| `...rest`   | `React.ComponentPropsWithoutRef<"span">` | —       | Forwarded to the underlying `<span>`.          |
+
+Data attributes: `data-slot="type-ahead-static"`.
+
+### TypeAhead.Animated
+
+Renders a `<span>` that types and optionally cycles through one or more
+strings. All `Root` settings can be overridden per instance.
+
+| Prop              | Type                                                                                                         | Default                              | Description                                                                                                                          |
+| ----------------- | ------------------------------------------------------------------------------------------------------------ | ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------ |
+| `texts`           | `string \| string[]`                                                                                         | **required**                         | A single string to type once, or an array to cycle through.                                                                          |
+| `typingSpeed`     | `number`                                                                                                     | inherited                            | Characters per second while typing.                                                                                                  |
+| `deletionSpeed`   | `number`                                                                                                     | inherited                            | Characters per second while deleting.                                                                                                |
+| `pauseDuration`   | `number`                                                                                                     | inherited                            | Milliseconds to wait after a string is fully typed before deletion begins.                                                           |
+| `startDelay`      | `number`                                                                                                     | inherited                            | Milliseconds to wait before typing the very first character.                                                                         |
+| `showCursor`      | `boolean`                                                                                                    | inherited                            | Whether to render a blinking caret while the animation runs.                                                                         |
+| `cursorCharacter` | `string`                                                                                                     | inherited                            | Character used for the blinking caret.                                                                                               |
+| `loop`            | `boolean`                                                                                                    | `true` for arrays, `false` otherwise | Whether to keep cycling once the last string is reached. When `false`, the animation halts on the final string and the caret stops. |
+| `render`          | `(state: { text, fullText, index, phase, done }) => ReactNode`                                               | `undefined`                          | Render-prop for fully custom output. Bypasses the default cursor rendering.                                                          |
+| `onType`          | `(text: string, index: number) => void`                                                                      | `undefined`                          | Fires whenever a string is fully typed.                                                                                              |
+| `onDelete`        | `(text: string, index: number) => void`                                                                      | `undefined`                          | Fires whenever a string is fully deleted, just before the next one starts typing.                                                    |
+| `onComplete`      | `() => void`                                                                                                 | `undefined`                          | Fires when the animation reaches its terminal state. Only invoked when `loop` resolves to `false`.                                   |
+| `className`       | `string`                                                                                                     | —                                    | Merged via `cn` onto the underlying `<span>`.                                                                                        |
+| `...rest`         | `Omit<React.ComponentPropsWithoutRef<"span">, "children">`                                                   | —                                    | Forwarded to the underlying `<span>`.                                                                                                |
+
+Data attributes:
+`data-slot="type-ahead-animated"`,
+`data-phase="idle" | "typing" | "pausing" | "deleting" | "done"`.
+
+The caret span exposes `data-slot="type-ahead-cursor"` and is always
+`aria-hidden`.
+
+### Accessibility
+
+- Every part renders inline — safe to nest inside `<p>`, headings, list items
+  or any text container without breaking the HTML content model.
+- The caret is decorative (`aria-hidden="true"`) and never announced.
+- `prefers-reduced-motion: reduce` snaps `TypeAhead.Animated` straight to the
+  final string and stops the caret blink, via `motion`'s `useReducedMotion`.
+
+### Exported types
+
+```ts
+import type {
+  TypeAheadAnimatedProps,
+  TypeAheadPhase,
+  TypeAheadRootProps,
+  TypeAheadStaticProps,
+} from "@made-together/ui/type-ahead";
+```
