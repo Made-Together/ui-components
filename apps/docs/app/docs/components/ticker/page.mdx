@@ -7,17 +7,17 @@ description:
 import { Callout } from "nextra/components";
 import { ComponentShowcase } from "../../../components/component-showcase";
 import {
-  BasicAutoScrollTextExample,
-  DynamicAutoScrollTextExample,
-  FadesAutoScrollTextExample,
-  FixedWidthAutoScrollTextExample,
-  NotificationAutoScrollTextExample,
-  PlayerRowAutoScrollTextExample,
-  ShortTextAutoScrollTextExample,
-  SpeedsAutoScrollTextExample,
+  BasicTickerExample,
+  DynamicTickerExample,
+  FadesTickerExample,
+  FixedWidthTickerExample,
+  NotificationTickerExample,
+  PlayerRowTickerExample,
+  ShortTextTickerExample,
+  SpeedsTickerExample,
 } from "./_examples";
 
-# AutoScrollText
+# Ticker
 
 A Spotify-style ticker for long text. The component measures both its
 container and its content; when the text overflows, it scrolls
@@ -25,10 +25,10 @@ back-and-forth at a configurable speed with gradient fade masks on the
 edges. When it fits, the component does nothing — no animation, no mask,
 no layout cost.
 
-<ComponentShowcase preview={<BasicAutoScrollTextExample />}>
+<ComponentShowcase preview={<BasicTickerExample />}>
 
 ```tsx
-import { AutoScrollText } from "@made-together/ui/autoscroll-text";
+import { Ticker } from "@made-together/ui/ticker";
 
 export function NewsTicker() {
   return (
@@ -36,17 +36,17 @@ export function NewsTicker() {
       <span className="shrink-0 rounded border border-white/30 px-2.5 py-1 text-sm font-medium">
         News
       </span>
-      <AutoScrollText.Root
+      <Ticker.Root
         className="flex-1"
         startDelay={2000}
         endDelay={2000}
         scrollSpeed={40}
       >
-        <AutoScrollText.Content>
+        <Ticker.Content>
           Health Closes Pre-Seed Funding to Automate Healthcare Compliance and
           Risk Management
-        </AutoScrollText.Content>
-      </AutoScrollText.Root>
+        </Ticker.Content>
+      </Ticker.Root>
     </div>
   );
 }
@@ -57,33 +57,33 @@ export function NewsTicker() {
 ## Import
 
 ```tsx
-import { AutoScrollText } from "@made-together/ui/autoscroll-text";
+import { Ticker } from "@made-together/ui/ticker";
 ```
 
 The component is exported as a compound object — both sub-components are
-properties of `AutoScrollText`:
+properties of `Ticker`:
 
 ```tsx
-AutoScrollText.Root;
-AutoScrollText.Content;
+Ticker.Root;
+Ticker.Content;
 ```
 
 ## Composition
 
-AutoScrollText is a two-part component. `Root` measures and animates;
+Ticker is a two-part component. `Root` measures and animates;
 `Content` renders the actual text.
 
 ```tsx
-<AutoScrollText.Root>
-  <AutoScrollText.Content>Some long text that may overflow…</AutoScrollText.Content>
-</AutoScrollText.Root>
+<Ticker.Root>
+  <Ticker.Content>Some long text that may overflow…</Ticker.Content>
+</Ticker.Root>
 ```
 
-- **`AutoScrollText.Root`** renders a `<div>` with
+- **`Ticker.Root`** renders a `<div>` with
   `overflow: hidden; white-space: nowrap`. Watches its width and the inner
   content's width via a `ResizeObserver`; when content exceeds container,
   it kicks off the scroll loop.
-- **`AutoScrollText.Content`** renders a `<span>` that receives a **string**
+- **`Ticker.Content`** renders a `<span>` that receives a **string**
   child. The string is required (not arbitrary JSX) so the component can
   detect content changes and reset the animation cleanly.
 
@@ -102,11 +102,11 @@ Drop the component into any container that has a constrained width. When
 the text fits, nothing animates.
 
 ```tsx
-<AutoScrollText.Root className="flex-1">
-  <AutoScrollText.Content>
+<Ticker.Root className="flex-1">
+  <Ticker.Content>
     Some long string that may or may not overflow its container.
-  </AutoScrollText.Content>
-</AutoScrollText.Root>
+  </Ticker.Content>
+</Ticker.Root>
 ```
 
 ### Short text (no scrolling)
@@ -114,12 +114,12 @@ the text fits, nothing animates.
 If the content fits, the component stays static — no mask, no transform,
 no animation. This is the same component, just with shorter text.
 
-<ComponentShowcase preview={<ShortTextAutoScrollTextExample />}>
+<ComponentShowcase preview={<ShortTextTickerExample />}>
 
 ```tsx
-<AutoScrollText.Root>
-  <AutoScrollText.Content>Short text that fits</AutoScrollText.Content>
-</AutoScrollText.Root>
+<Ticker.Root>
+  <Ticker.Content>Short text that fits</Ticker.Content>
+</Ticker.Root>
 ```
 
 </ComponentShowcase>
@@ -130,19 +130,19 @@ Pass `containerWidth` (in pixels) to pin the track to an exact width
 regardless of parent layout — useful inside flex parents that would
 otherwise let the child grow.
 
-<ComponentShowcase preview={<FixedWidthAutoScrollTextExample />}>
+<ComponentShowcase preview={<FixedWidthTickerExample />}>
 
 ```tsx
-<AutoScrollText.Root
+<Ticker.Root
   containerWidth={200}
   className="rounded bg-neutral-100 px-2 py-1"
   startDelay={1500}
   scrollSpeed={30}
 >
-  <AutoScrollText.Content>
+  <Ticker.Content>
     This is a much longer text that will definitely overflow the 200px container
-  </AutoScrollText.Content>
-</AutoScrollText.Root>
+  </Ticker.Content>
+</Ticker.Root>
 ```
 
 </ComponentShowcase>
@@ -151,12 +151,12 @@ otherwise let the child grow.
 
 `scrollSpeed` is in pixels per second. Same text, three tempos.
 
-<ComponentShowcase preview={<SpeedsAutoScrollTextExample />}>
+<ComponentShowcase preview={<SpeedsTickerExample />}>
 
 ```tsx
-<AutoScrollText.Root scrollSpeed={25}>…</AutoScrollText.Root>
-<AutoScrollText.Root scrollSpeed={50}>…</AutoScrollText.Root>
-<AutoScrollText.Root scrollSpeed={100}>…</AutoScrollText.Root>
+<Ticker.Root scrollSpeed={25}>…</Ticker.Root>
+<Ticker.Root scrollSpeed={50}>…</Ticker.Root>
+<Ticker.Root scrollSpeed={100}>…</Ticker.Root>
 ```
 
 </ComponentShowcase>
@@ -167,11 +167,11 @@ otherwise let the child grow.
 a subtle hint of clipping, a wide value reads as a deliberate dramatic
 effect.
 
-<ComponentShowcase preview={<FadesAutoScrollTextExample />}>
+<ComponentShowcase preview={<FadesTickerExample />}>
 
 ```tsx
-<AutoScrollText.Root fadeWidth={12}>…</AutoScrollText.Root>
-<AutoScrollText.Root fadeWidth={48}>…</AutoScrollText.Root>
+<Ticker.Root fadeWidth={12}>…</Ticker.Root>
+<Ticker.Root fadeWidth={48}>…</Ticker.Root>
 ```
 
 </ComponentShowcase>
@@ -184,25 +184,25 @@ component pauses before starting and at the end of each pass. Defaults are
 for active feeds.
 
 ```tsx
-<AutoScrollText.Root startDelay={3000} endDelay={1500}>
-  <AutoScrollText.Content>…</AutoScrollText.Content>
-</AutoScrollText.Root>
+<Ticker.Root startDelay={3000} endDelay={1500}>
+  <Ticker.Content>…</Ticker.Content>
+</Ticker.Root>
 ```
 
 ### Dynamic text
 
-Updating the `children` of `AutoScrollText.Content` cleanly resets the
+Updating the `children` of `Ticker.Content` cleanly resets the
 animation. The component re-measures and decides whether to scroll based
 on the new content's width.
 
-<ComponentShowcase preview={<DynamicAutoScrollTextExample />}>
+<ComponentShowcase preview={<DynamicTickerExample />}>
 
 ```tsx
 const [text, setText] = useState("Original text");
 
-<AutoScrollText.Root>
-  <AutoScrollText.Content>{text}</AutoScrollText.Content>
-</AutoScrollText.Root>;
+<Ticker.Root>
+  <Ticker.Content>{text}</Ticker.Content>
+</Ticker.Root>;
 ```
 
 </ComponentShowcase>
@@ -214,19 +214,19 @@ const [text, setText] = useState("Original text");
 Inline label, scrolling headline, trailing icon. Only the headline runs —
 the surrounding chrome stays put.
 
-<ComponentShowcase preview={<BasicAutoScrollTextExample />}>
+<ComponentShowcase preview={<BasicTickerExample />}>
 
 ```tsx
 <div className="flex items-center gap-3 rounded-lg bg-neutral-900 px-3 py-2.5 text-white">
   <span className="shrink-0 rounded border border-white/30 px-2.5 py-1 text-sm font-medium">
     News
   </span>
-  <AutoScrollText.Root className="flex-1" startDelay={2000} scrollSpeed={40}>
-    <AutoScrollText.Content>
+  <Ticker.Root className="flex-1" startDelay={2000} scrollSpeed={40}>
+    <Ticker.Content>
       Health Closes Pre-Seed Funding to Automate Healthcare Compliance and Risk
       Management
-    </AutoScrollText.Content>
-  </AutoScrollText.Root>
+    </Ticker.Content>
+  </Ticker.Root>
   <ArrowRight className="size-5 shrink-0 opacity-60" />
 </div>
 ```
@@ -238,31 +238,31 @@ the surrounding chrome stays put.
 Two stacked scrollers with independent delays — title runs first, artist
 follows. Each `Root` has its own animation loop and measurements.
 
-<ComponentShowcase preview={<PlayerRowAutoScrollTextExample />}>
+<ComponentShowcase preview={<PlayerRowTickerExample />}>
 
 ```tsx
 <div className="flex items-center gap-4 rounded-xl bg-emerald-900 p-4">
   <div className="size-14 shrink-0 rounded-md bg-emerald-700" />
   <div className="min-w-0 flex-1 space-y-1">
-    <AutoScrollText.Root
+    <Ticker.Root
       className="font-medium text-white"
       startDelay={3000}
       endDelay={2000}
       scrollSpeed={35}
     >
-      <AutoScrollText.Content>
+      <Ticker.Content>
         Bohemian Rhapsody - 2011 Remaster (Super Deluxe Edition)
-      </AutoScrollText.Content>
-    </AutoScrollText.Root>
-    <AutoScrollText.Root
+      </Ticker.Content>
+    </Ticker.Root>
+    <Ticker.Root
       className="text-sm text-emerald-200"
       startDelay={3500}
       scrollSpeed={30}
     >
-      <AutoScrollText.Content>
+      <Ticker.Content>
         Queen • A Night at the Opera (Deluxe Remastered Version)
-      </AutoScrollText.Content>
-    </AutoScrollText.Root>
+      </Ticker.Content>
+    </Ticker.Root>
   </div>
 </div>
 ```
@@ -274,7 +274,7 @@ follows. Each `Root` has its own animation loop and measurements.
 A pulsing status dot paired with a scrolling message — the mask hides
 clipping at both edges so the strip reads as live.
 
-<ComponentShowcase preview={<NotificationAutoScrollTextExample />}>
+<ComponentShowcase preview={<NotificationTickerExample />}>
 
 ```tsx
 <div className="flex items-center gap-3 rounded-lg bg-blue-600 px-4 py-3">
@@ -282,12 +282,12 @@ clipping at both edges so the strip reads as live.
     <span className="absolute inline-flex size-full animate-ping rounded-full bg-white opacity-75" />
     <span className="relative inline-flex size-2 rounded-full bg-white" />
   </span>
-  <AutoScrollText.Root className="flex-1 font-medium text-white" startDelay={2500} scrollSpeed={45}>
-    <AutoScrollText.Content>
+  <Ticker.Root className="flex-1 font-medium text-white" startDelay={2500} scrollSpeed={45}>
+    <Ticker.Content>
       System update available: Version 2.4.1 includes performance improvements
       and bug fixes. Click here to learn more.
-    </AutoScrollText.Content>
-  </AutoScrollText.Root>
+    </Ticker.Content>
+  </Ticker.Root>
 </div>
 ```
 
@@ -295,7 +295,7 @@ clipping at both edges so the strip reads as live.
 
 ## API Reference
 
-### AutoScrollText.Root
+### Ticker.Root
 
 Renders a `<div>` with `relative overflow-hidden whitespace-nowrap`.
 Measures its width and the inner content's `scrollWidth`, then drives a
@@ -317,15 +317,15 @@ back-and-forth scroll animation when content overflows. Extends all native
 Built-in attributes: `aria-live="polite"`.
 
 Data attributes:
-`data-slot="autoscroll-text-root"`,
+`data-slot="ticker-root"`,
 `data-state="idle" | "scrolling"`,
 `data-overflowing` (empty string when content overflows, otherwise absent).
 
-### AutoScrollText.Content
+### Ticker.Content
 
 Renders an `inline-block` `<span>` that holds the text. The component
 registers itself with the root via context — there's only one
-`AutoScrollText.Content` per root.
+`Ticker.Content` per root.
 
 | Prop        | Type                                                       | Default      | Description                                                                                                                       |
 | ----------- | ---------------------------------------------------------- | ------------ | --------------------------------------------------------------------------------------------------------------------------------- |
@@ -334,11 +334,11 @@ registers itself with the root via context — there's only one
 | `style`     | `React.CSSProperties`                                      | —            | Merged with the component's `will-change: transform` (only applied while scrolling).                                              |
 | `...rest`   | `Omit<React.ComponentPropsWithoutRef<"span">, "children">` | —            | Forwarded to the underlying `<span>`.                                                                                              |
 
-Data attributes: `data-slot="autoscroll-text-content"`.
+Data attributes: `data-slot="ticker-content"`.
 
 ### Accessibility
 
-- `AutoScrollText.Root` sets `aria-live="polite"` so screen readers
+- `Ticker.Root` sets `aria-live="polite"` so screen readers
   announce content updates without interrupting.
 - Because animation runs on `transform` only (no text recreation), screen
   readers see a stable string regardless of scroll state.
@@ -350,7 +350,7 @@ Data attributes: `data-slot="autoscroll-text-content"`.
 
 ```ts
 import type {
-  AutoScrollTextContentProps,
-  AutoScrollTextRootProps,
-} from "@made-together/ui/autoscroll-text";
+  TickerContentProps,
+  TickerRootProps,
+} from "@made-together/ui/ticker";
 ```

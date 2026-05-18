@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Turborepo monorepo (pnpm workspaces, Node >= 20, see `.nvmrc`: 20.19.5). The `@repo/ui` package is the actual deliverable — a headless React component library. The `apps/playground` (port 3000) and `apps/docs` (port 3001) Next.js 16 apps exist to develop and showcase those components.
 
-Component scope is tracked in `ROADMAP.md` (Carousel, Marquee, Accordion, Tabs, AutoScrollText, StackedContent, Swappable, TextReveal, TextSplit, NumberFlow, FixedScrollableArea). New components go in `packages/ui/src/<component>/` as a folder containing `<component>.tsx`, `index.ts`, `<component>.test.tsx`, and `README.md` (see the `carousel/` scaffold).
+Component scope is tracked in `ROADMAP.md` (Carousel, Marquee, Accordion, Tabs, Ticker, StackedContent, Swappable, TextReveal, TextSplit, NumberFlow, FixedScrollableArea). New components go in `packages/ui/src/<component>/` as a folder containing `<component>.tsx`, `index.ts`, `<component>.test.tsx`, and `README.md` (see the `carousel/` scaffold).
 
 ## Commands
 

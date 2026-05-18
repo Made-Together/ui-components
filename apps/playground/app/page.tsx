@@ -1,7 +1,7 @@
 "use client";
 
 import { Accordion } from "@repo/ui/accordion";
-import { AutoScrollText } from "@repo/ui/autoscroll-text";
+import { Ticker } from "@repo/ui/ticker";
 import { Carousel } from "@repo/ui/carousel";
 import { Marquee } from "@repo/ui/marquee";
 import { Swappable } from "@repo/ui/swappable";
@@ -156,7 +156,7 @@ export default function Home() {
 
       <header className="flex flex-col gap-2">
         <span className="text-xs font-medium uppercase tracking-[0.2em] text-neutral-500">
-          AutoScrollText
+          Ticker
         </span>
         <h2 className="text-2xl font-semibold tracking-tight">
           Overflow-aware text scroller
@@ -165,24 +165,24 @@ export default function Home() {
           Spotify-style ticker that only scrolls when text overflows its
           container. Composition API:{" "}
           <code className="rounded bg-neutral-100 px-1 py-0.5 text-xs">
-            AutoScrollText.Root
+            Ticker.Root
           </code>{" "}
           measures and animates,{" "}
           <code className="rounded bg-neutral-100 px-1 py-0.5 text-xs">
-            AutoScrollText.Content
+            Ticker.Content
           </code>{" "}
           renders the text.
         </p>
       </header>
 
-      <AutoScrollNewsTicker />
-      <AutoScrollShortText />
-      <AutoScrollFixedWidth />
-      <AutoScrollSpotify />
-      <AutoScrollSpeeds />
-      <AutoScrollFades />
-      <AutoScrollDynamic />
-      <AutoScrollNotification />
+      <TickerNews />
+      <TickerShortText />
+      <TickerFixedWidth />
+      <TickerSpotify />
+      <TickerSpeeds />
+      <TickerFades />
+      <TickerDynamic />
+      <TickerNotification />
 
       <div aria-hidden="true" className="h-px w-full bg-neutral-200" />
 
@@ -240,11 +240,11 @@ function ArrowRight({ className }: { className?: string }) {
   );
 }
 
-function AutoScrollNewsTicker() {
+function TickerNews() {
   return (
     <section className="flex flex-col gap-4">
       <Heading
-        eyebrow="AutoScrollText 01"
+        eyebrow="Ticker 01"
         title="News ticker"
         description="Inline label, scrolling headline, trailing icon. Only the headline runs when it overflows."
       />
@@ -252,210 +252,210 @@ function AutoScrollNewsTicker() {
         <span className="shrink-0 rounded border border-stone-400 px-2.5 py-1 text-sm font-medium text-stone-200">
           News
         </span>
-        <AutoScrollText.Root
+        <Ticker.Root
           className="flex-1 text-stone-200"
           startDelay={2000}
           endDelay={2000}
           scrollSpeed={40}
         >
-          <AutoScrollText.Content>
+          <Ticker.Content>
             Health Closes Pre-Seed Funding to Automate Healthcare Compliance and
             Risk Management
-          </AutoScrollText.Content>
-        </AutoScrollText.Root>
+          </Ticker.Content>
+        </Ticker.Root>
         <ArrowRight className="size-5 shrink-0 text-stone-400" />
       </div>
     </section>
   );
 }
 
-function AutoScrollShortText() {
+function TickerShortText() {
   return (
     <section className="flex flex-col gap-4">
       <Heading
-        eyebrow="AutoScrollText 02"
+        eyebrow="Ticker 02"
         title="Short text (no scrolling)"
         description="When text fits inside the container, the component stays static and no mask is applied."
       />
       <div className="rounded-lg border border-neutral-200 bg-white p-4">
-        <AutoScrollText.Root className="text-neutral-900">
-          <AutoScrollText.Content>Short text that fits</AutoScrollText.Content>
-        </AutoScrollText.Root>
+        <Ticker.Root className="text-neutral-900">
+          <Ticker.Content>Short text that fits</Ticker.Content>
+        </Ticker.Root>
       </div>
     </section>
   );
 }
 
-function AutoScrollFixedWidth() {
+function TickerFixedWidth() {
   return (
     <section className="flex flex-col gap-4">
       <Heading
-        eyebrow="AutoScrollText 03"
+        eyebrow="Ticker 03"
         title="Fixed width (200px)"
         description="containerWidth pins the track to an exact pixel width regardless of parent layout."
       />
       <div className="rounded-lg border border-neutral-200 bg-white p-4">
-        <AutoScrollText.Root
+        <Ticker.Root
           containerWidth={200}
           className="rounded bg-neutral-100 px-2 py-1 text-neutral-900"
           startDelay={1500}
           scrollSpeed={30}
         >
-          <AutoScrollText.Content>
+          <Ticker.Content>
             This is a much longer text that will definitely overflow the 200px
             container
-          </AutoScrollText.Content>
-        </AutoScrollText.Root>
+          </Ticker.Content>
+        </Ticker.Root>
       </div>
     </section>
   );
 }
 
-function AutoScrollSpotify() {
+function TickerSpotify() {
   return (
     <section className="flex flex-col gap-4">
       <Heading
-        eyebrow="AutoScrollText 04"
+        eyebrow="Ticker 04"
         title="Player row"
         description="Two stacked scrollers with independent delays — title runs first, artist follows."
       />
       <div className="flex items-center gap-4 rounded-xl bg-emerald-900 p-4">
         <div className="size-14 shrink-0 rounded-md bg-emerald-700" />
         <div className="min-w-0 flex-1 space-y-1">
-          <AutoScrollText.Root
+          <Ticker.Root
             className="font-medium text-white"
             startDelay={3000}
             endDelay={2000}
             scrollSpeed={35}
           >
-            <AutoScrollText.Content>
+            <Ticker.Content>
               Bohemian Rhapsody - 2011 Remaster (Super Deluxe Edition)
-            </AutoScrollText.Content>
-          </AutoScrollText.Root>
-          <AutoScrollText.Root
+            </Ticker.Content>
+          </Ticker.Root>
+          <Ticker.Root
             className="text-sm text-emerald-200"
             startDelay={3500}
             scrollSpeed={30}
           >
-            <AutoScrollText.Content>
+            <Ticker.Content>
               Queen • A Night at the Opera (Deluxe Remastered Version)
-            </AutoScrollText.Content>
-          </AutoScrollText.Root>
+            </Ticker.Content>
+          </Ticker.Root>
         </div>
       </div>
     </section>
   );
 }
 
-function AutoScrollSpeeds() {
+function TickerSpeeds() {
   return (
     <section className="flex flex-col gap-4">
       <Heading
-        eyebrow="AutoScrollText 05"
+        eyebrow="Ticker 05"
         title="Different scroll speeds"
         description="scrollSpeed is in pixels per second — same text, three tempos."
       />
       <div className="flex flex-col gap-3">
         <div className="rounded-lg border border-neutral-200 bg-white p-3">
           <p className="mb-1 text-xs text-neutral-500">Slow (25px/s)</p>
-          <AutoScrollText.Root
+          <Ticker.Root
             className="text-neutral-900"
             scrollSpeed={25}
             startDelay={1000}
           >
-            <AutoScrollText.Content>
+            <Ticker.Content>
               A slow scrolling text that takes its time to reveal all the
               content gradually
-            </AutoScrollText.Content>
-          </AutoScrollText.Root>
+            </Ticker.Content>
+          </Ticker.Root>
         </div>
         <div className="rounded-lg border border-neutral-200 bg-white p-3">
           <p className="mb-1 text-xs text-neutral-500">Medium (50px/s)</p>
-          <AutoScrollText.Root
+          <Ticker.Root
             className="text-neutral-900"
             scrollSpeed={50}
             startDelay={1000}
           >
-            <AutoScrollText.Content>
+            <Ticker.Content>
               A medium speed scrolling text that moves at a comfortable pace for
               reading
-            </AutoScrollText.Content>
-          </AutoScrollText.Root>
+            </Ticker.Content>
+          </Ticker.Root>
         </div>
         <div className="rounded-lg border border-neutral-200 bg-white p-3">
           <p className="mb-1 text-xs text-neutral-500">Fast (100px/s)</p>
-          <AutoScrollText.Root
+          <Ticker.Root
             className="text-neutral-900"
             scrollSpeed={100}
             startDelay={1000}
           >
-            <AutoScrollText.Content>
+            <Ticker.Content>
               A fast scrolling text that quickly reveals the content - good for
               shorter delays
-            </AutoScrollText.Content>
-          </AutoScrollText.Root>
+            </Ticker.Content>
+          </Ticker.Root>
         </div>
       </div>
     </section>
   );
 }
 
-function AutoScrollFades() {
+function TickerFades() {
   return (
     <section className="flex flex-col gap-4">
       <Heading
-        eyebrow="AutoScrollText 06"
+        eyebrow="Ticker 06"
         title="Custom fade widths"
         description="fadeWidth controls the gradient mask on each edge — subtle vs. dramatic."
       />
       <div className="flex flex-col gap-3">
         <div className="rounded-lg border border-neutral-200 bg-white p-3">
           <p className="mb-1 text-xs text-neutral-500">Narrow fade (12px)</p>
-          <AutoScrollText.Root
+          <Ticker.Root
             className="text-neutral-900"
             fadeWidth={12}
             startDelay={1500}
           >
-            <AutoScrollText.Content>
+            <Ticker.Content>
               This text has a narrow fade mask on the edges creating a subtle
               transition effect
-            </AutoScrollText.Content>
-          </AutoScrollText.Root>
+            </Ticker.Content>
+          </Ticker.Root>
         </div>
         <div className="rounded-lg border border-neutral-200 bg-white p-3">
           <p className="mb-1 text-xs text-neutral-500">Wide fade (48px)</p>
-          <AutoScrollText.Root
+          <Ticker.Root
             className="text-neutral-900"
             fadeWidth={48}
             startDelay={1500}
           >
-            <AutoScrollText.Content>
+            <Ticker.Content>
               This text has a wide fade mask on the edges creating a more
               dramatic gradient effect
-            </AutoScrollText.Content>
-          </AutoScrollText.Root>
+            </Ticker.Content>
+          </Ticker.Root>
         </div>
       </div>
     </section>
   );
 }
 
-function AutoScrollDynamic() {
+function TickerDynamic() {
   const [dynamicText, setDynamicText] = useState(
     "This text can be changed dynamically to test re-renders and animation reset!",
   );
   return (
     <section className="flex flex-col gap-4">
       <Heading
-        eyebrow="AutoScrollText 07"
+        eyebrow="Ticker 07"
         title="Dynamic text updates"
         description="Animation cleanly resets when content changes — the component re-measures and decides whether to scroll."
       />
       <div className="flex flex-col gap-3">
         <div className="rounded-lg border border-neutral-200 bg-white p-4">
-          <AutoScrollText.Root className="text-neutral-900" startDelay={1500}>
-            <AutoScrollText.Content>{dynamicText}</AutoScrollText.Content>
-          </AutoScrollText.Root>
+          <Ticker.Root className="text-neutral-900" startDelay={1500}>
+            <Ticker.Content>{dynamicText}</Ticker.Content>
+          </Ticker.Root>
         </div>
         <div className="flex flex-wrap gap-2">
           <button
@@ -493,11 +493,11 @@ function AutoScrollDynamic() {
   );
 }
 
-function AutoScrollNotification() {
+function TickerNotification() {
   return (
     <section className="flex flex-col gap-4">
       <Heading
-        eyebrow="AutoScrollText 08"
+        eyebrow="Ticker 08"
         title="Notification banner"
         description="Pulsing status dot + scrolling message. Mask hides clipping at both edges."
       />
@@ -506,16 +506,16 @@ function AutoScrollNotification() {
           <span className="absolute inline-flex size-full animate-ping rounded-full bg-white opacity-75" />
           <span className="relative inline-flex size-2 rounded-full bg-white" />
         </span>
-        <AutoScrollText.Root
+        <Ticker.Root
           className="flex-1 font-medium text-white"
           startDelay={2500}
           scrollSpeed={45}
         >
-          <AutoScrollText.Content>
+          <Ticker.Content>
             System update available: Version 2.4.1 includes performance
             improvements and bug fixes. Click here to learn more.
-          </AutoScrollText.Content>
-        </AutoScrollText.Root>
+          </Ticker.Content>
+        </Ticker.Root>
       </div>
     </section>
   );

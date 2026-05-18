@@ -5,7 +5,7 @@ const meta: MetaRecord = {
   carousel: "Carousel",
   marquee: "Marquee",
   tabs: "Tabs",
-  "autoscroll-text": "AutoScrollText",
+  ticker: "Ticker",
   swappable: "Swappable",
   "number-flow": "NumberFlow",
   "scroll-stack": "ScrollStack",

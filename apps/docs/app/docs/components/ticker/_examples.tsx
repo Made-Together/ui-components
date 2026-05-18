@@ -1,6 +1,6 @@
 "use client";
 
-import { AutoScrollText } from "@repo/ui/autoscroll-text";
+import { Ticker } from "@repo/ui/ticker";
 import { useState } from "react";
 
 function ArrowRight({ className }: { className?: string }) {
@@ -21,145 +21,145 @@ function ArrowRight({ className }: { className?: string }) {
   );
 }
 
-export function BasicAutoScrollTextExample() {
+export function BasicTickerExample() {
   return (
     <div className="flex w-full max-w-md items-center gap-3 rounded-lg bg-foreground px-3 py-2.5 text-background">
       <span className="shrink-0 rounded border border-background/30 px-2.5 py-1 text-sm font-medium">
         News
       </span>
-      <AutoScrollText.Root
+      <Ticker.Root
         className="flex-1"
         startDelay={2000}
         endDelay={2000}
         scrollSpeed={40}
       >
-        <AutoScrollText.Content>
+        <Ticker.Content>
           Health Closes Pre-Seed Funding to Automate Healthcare Compliance and
           Risk Management
-        </AutoScrollText.Content>
-      </AutoScrollText.Root>
+        </Ticker.Content>
+      </Ticker.Root>
       <ArrowRight className="size-5 shrink-0 opacity-60" />
     </div>
   );
 }
 
-export function ShortTextAutoScrollTextExample() {
+export function ShortTextTickerExample() {
   return (
     <div className="w-full max-w-md rounded-lg border border-border bg-card p-4">
-      <AutoScrollText.Root className="text-foreground">
-        <AutoScrollText.Content>Short text that fits</AutoScrollText.Content>
-      </AutoScrollText.Root>
+      <Ticker.Root className="text-foreground">
+        <Ticker.Content>Short text that fits</Ticker.Content>
+      </Ticker.Root>
     </div>
   );
 }
 
-export function FixedWidthAutoScrollTextExample() {
+export function FixedWidthTickerExample() {
   return (
     <div className="w-full max-w-md rounded-lg border border-border bg-card p-4">
-      <AutoScrollText.Root
+      <Ticker.Root
         containerWidth={200}
         className="rounded bg-secondary px-2 py-1 text-foreground"
         startDelay={1500}
         scrollSpeed={30}
       >
-        <AutoScrollText.Content>
+        <Ticker.Content>
           This is a much longer text that will definitely overflow the 200px
           container
-        </AutoScrollText.Content>
-      </AutoScrollText.Root>
+        </Ticker.Content>
+      </Ticker.Root>
     </div>
   );
 }
 
-export function SpeedsAutoScrollTextExample() {
+export function SpeedsTickerExample() {
   return (
     <div className="flex w-full max-w-md flex-col gap-2">
       <div className="rounded-lg border border-border bg-card p-3">
         <p className="mb-1 text-xs text-muted-foreground">Slow (25px/s)</p>
-        <AutoScrollText.Root
+        <Ticker.Root
           className="text-foreground"
           scrollSpeed={25}
           startDelay={1000}
         >
-          <AutoScrollText.Content>
+          <Ticker.Content>
             A slow scrolling text that takes its time to reveal all the content
             gradually
-          </AutoScrollText.Content>
-        </AutoScrollText.Root>
+          </Ticker.Content>
+        </Ticker.Root>
       </div>
       <div className="rounded-lg border border-border bg-card p-3">
         <p className="mb-1 text-xs text-muted-foreground">Medium (50px/s)</p>
-        <AutoScrollText.Root
+        <Ticker.Root
           className="text-foreground"
           scrollSpeed={50}
           startDelay={1000}
         >
-          <AutoScrollText.Content>
+          <Ticker.Content>
             A medium speed scrolling text that moves at a comfortable pace for
             reading
-          </AutoScrollText.Content>
-        </AutoScrollText.Root>
+          </Ticker.Content>
+        </Ticker.Root>
       </div>
       <div className="rounded-lg border border-border bg-card p-3">
         <p className="mb-1 text-xs text-muted-foreground">Fast (100px/s)</p>
-        <AutoScrollText.Root
+        <Ticker.Root
           className="text-foreground"
           scrollSpeed={100}
           startDelay={1000}
         >
-          <AutoScrollText.Content>
+          <Ticker.Content>
             A fast scrolling text that quickly reveals the content - good for
             shorter delays
-          </AutoScrollText.Content>
-        </AutoScrollText.Root>
+          </Ticker.Content>
+        </Ticker.Root>
       </div>
     </div>
   );
 }
 
-export function FadesAutoScrollTextExample() {
+export function FadesTickerExample() {
   return (
     <div className="flex w-full max-w-md flex-col gap-2">
       <div className="rounded-lg border border-border bg-card p-3">
         <p className="mb-1 text-xs text-muted-foreground">Narrow fade (12px)</p>
-        <AutoScrollText.Root
+        <Ticker.Root
           className="text-foreground"
           fadeWidth={12}
           startDelay={1500}
         >
-          <AutoScrollText.Content>
+          <Ticker.Content>
             This text has a narrow fade mask on the edges creating a subtle
             transition effect
-          </AutoScrollText.Content>
-        </AutoScrollText.Root>
+          </Ticker.Content>
+        </Ticker.Root>
       </div>
       <div className="rounded-lg border border-border bg-card p-3">
         <p className="mb-1 text-xs text-muted-foreground">Wide fade (48px)</p>
-        <AutoScrollText.Root
+        <Ticker.Root
           className="text-foreground"
           fadeWidth={48}
           startDelay={1500}
         >
-          <AutoScrollText.Content>
+          <Ticker.Content>
             This text has a wide fade mask on the edges creating a more
             dramatic gradient effect
-          </AutoScrollText.Content>
-        </AutoScrollText.Root>
+          </Ticker.Content>
+        </Ticker.Root>
       </div>
     </div>
   );
 }
 
-export function DynamicAutoScrollTextExample() {
+export function DynamicTickerExample() {
   const [text, setText] = useState(
     "This text can be changed dynamically to test re-renders and animation reset!",
   );
   return (
     <div className="flex w-full max-w-md flex-col gap-3">
       <div className="rounded-lg border border-border bg-card p-4">
-        <AutoScrollText.Root className="text-foreground" startDelay={1500}>
-          <AutoScrollText.Content>{text}</AutoScrollText.Content>
-        </AutoScrollText.Root>
+        <Ticker.Root className="text-foreground" startDelay={1500}>
+          <Ticker.Content>{text}</Ticker.Content>
+        </Ticker.Root>
       </div>
       <div className="flex flex-wrap gap-2">
         <button
@@ -196,52 +196,52 @@ export function DynamicAutoScrollTextExample() {
   );
 }
 
-export function PlayerRowAutoScrollTextExample() {
+export function PlayerRowTickerExample() {
   return (
     <div className="flex w-full max-w-md items-center gap-4 rounded-xl bg-emerald-900 p-4">
       <div className="size-14 shrink-0 rounded-md bg-emerald-700" />
       <div className="min-w-0 flex-1 space-y-1">
-        <AutoScrollText.Root
+        <Ticker.Root
           className="font-medium text-white"
           startDelay={3000}
           endDelay={2000}
           scrollSpeed={35}
         >
-          <AutoScrollText.Content>
+          <Ticker.Content>
             Bohemian Rhapsody - 2011 Remaster (Super Deluxe Edition)
-          </AutoScrollText.Content>
-        </AutoScrollText.Root>
-        <AutoScrollText.Root
+          </Ticker.Content>
+        </Ticker.Root>
+        <Ticker.Root
           className="text-sm text-emerald-200"
           startDelay={3500}
           scrollSpeed={30}
         >
-          <AutoScrollText.Content>
+          <Ticker.Content>
             Queen • A Night at the Opera (Deluxe Remastered Version)
-          </AutoScrollText.Content>
-        </AutoScrollText.Root>
+          </Ticker.Content>
+        </Ticker.Root>
       </div>
     </div>
   );
 }
 
-export function NotificationAutoScrollTextExample() {
+export function NotificationTickerExample() {
   return (
     <div className="flex w-full max-w-md items-center gap-3 rounded-lg bg-blue-600 px-4 py-3">
       <span className="relative flex size-2 shrink-0">
         <span className="absolute inline-flex size-full animate-ping rounded-full bg-white opacity-75" />
         <span className="relative inline-flex size-2 rounded-full bg-white" />
       </span>
-      <AutoScrollText.Root
+      <Ticker.Root
         className="flex-1 font-medium text-white"
         startDelay={2500}
         scrollSpeed={45}
       >
-        <AutoScrollText.Content>
+        <Ticker.Content>
           System update available: Version 2.4.1 includes performance
           improvements and bug fixes. Click here to learn more.
-        </AutoScrollText.Content>
-      </AutoScrollText.Root>
+        </Ticker.Content>
+      </Ticker.Root>
     </div>
   );
 }

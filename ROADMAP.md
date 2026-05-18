@@ -6,7 +6,7 @@
 - [x] Marquee
 - [x] Accordion
 - [x] Tabs
-- [x] AutoScrollText
+- [x] Ticker
 - [x] ScrollStack
 - [x] Swappable
 - [ ] TextReveal
