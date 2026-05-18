@@ -13,6 +13,7 @@
 - [ ] TextSplit
 - [x] NumberFlow
 - [ ] FixedScrollableArea
+- [ ] TypeAhead
 
 ## Todos
 
