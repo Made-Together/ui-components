@@ -1,0 +1,295 @@
+---
+description:
+  A headless, scroll-driven word-by-word text reveal for React. Words animate
+  in as the section crosses the viewport; replayable or one-shot, with full
+  control over the per-word transform.
+---
+
+import { Callout } from "nextra/components";
+import { ComponentShowcase } from "../../../components/component-showcase";
+import {
+  BasicTextRevealExample,
+  ColorTransformTextRevealExample,
+  ComposedWordTextRevealExample,
+  CustomTransformTextRevealExample,
+  OnceTextRevealExample,
+} from "./_examples";
+
+# TextReveal
+
+A scroll-driven reveal primitive. Wraps a tall container and animates the
+text inside it word-by-word as the user scrolls the section through the
+viewport. The component owns the scroll plumbing — you own the typography,
+the layout, and the per-word transform.
+
+<ComponentShowcase preview={<BasicTextRevealExample />}>
+
+```tsx
+import { TextReveal } from "@made-together/ui/text-reveal";
+
+export function BasicTextReveal() {
+  return (
+    <TextReveal.Root className="relative min-h-[180vh]">
+      <div className="sticky top-0 flex h-screen items-center justify-center px-6">
+        <TextReveal.Text className="max-w-3xl text-center text-4xl font-medium leading-snug">
+          Headless components, beautiful animations, and zero opinions on how
+          your product should look.
+        </TextReveal.Text>
+      </div>
+    </TextReveal.Root>
+  );
+}
+```
+
+</ComponentShowcase>
+
+## Import
+
+```tsx
+import { TextReveal } from "@made-together/ui/text-reveal";
+```
+
+The component is exported as a compound object — every sub-component is a
+property of `TextReveal`:
+
+```tsx
+TextReveal.Root;
+TextReveal.Text;
+TextReveal.Word;
+```
+
+## Composition
+
+`TextReveal.Root` is the scroll track. Give it a tall height — the height
+determines how much scroll distance the reveal occupies. Place a `sticky`
+child inside to pin the words while the user scrolls past the track:
+
+```tsx
+<TextReveal.Root className="relative min-h-[200vh]">
+  <div className="sticky top-0 flex h-screen items-center">
+    <TextReveal.Text className="text-4xl">
+      The quick brown fox jumps over the lazy dog.
+    </TextReveal.Text>
+  </div>
+</TextReveal.Root>
+```
+
+- **`TextReveal.Root`** renders a `<div>` and wires up `motion`'s `useScroll`
+  against itself. It exposes the resulting progress (latched if `once`) to
+  descendants via context.
+- **`TextReveal.Text`** accepts a plain string, splits it on whitespace, and
+  renders each word through `TextReveal.Word`. Use the `transform` prop to
+  customise the reveal.
+- **`TextReveal.Word`** is the lower-level primitive — one animated word that
+  reads its slice of the root progress. Compose words manually when you need
+  arbitrary surrounding markup (links, highlights, mixed elements).
+
+<Callout type="info">
+  The reveal is driven by the root's intersection with the viewport, not by a
+  manual offset on `TextReveal.Text`. That means you can place the text
+  wherever you like inside the root — `sticky`, centered, in a grid cell —
+  and the timing tracks the surrounding scroll container.
+</Callout>
+
+## Usage
+
+### Replayable vs one-shot
+
+By default the reveal is reversible: scrolling back up plays the outro and
+hides the words again. Pass `once` to latch progress on the way down so the
+animation only plays a single time.
+
+<ComponentShowcase preview={<OnceTextRevealExample />}>
+
+```tsx
+<TextReveal.Root once className="relative min-h-[180vh]">
+  <div className="sticky top-0 flex h-screen items-center">
+    <TextReveal.Text className="text-4xl">
+      This reveal runs exactly once.
+    </TextReveal.Text>
+  </div>
+</TextReveal.Root>
+```
+
+</ComponentShowcase>
+
+### Custom intro & outro
+
+`TextReveal.Text` and `TextReveal.Word` accept a `transform` prop — a
+function that receives a `MotionValue<number>` for the word's local progress
+(`0 → 1` while the word's slice is active) and returns any `MotionStyle`.
+
+Compose `useTransform` calls inside the function to drive opacity, translate,
+blur, scale, color — whatever your reveal needs. Because the function runs
+inside the word's render, you can call hooks freely (just keep their order
+stable).
+
+<ComponentShowcase preview={<CustomTransformTextRevealExample />}>
+
+```tsx
+import { useTransform } from "motion/react";
+
+<TextReveal.Text
+  className="text-4xl"
+  transform={(p) => ({
+    opacity: useTransform(p, [0, 0.5], [0, 1]),
+    y: useTransform(p, [0, 1], [24, 0]),
+    filter: useTransform(p, [0, 1], ["blur(10px)", "blur(0px)"]),
+  })}
+>
+  Translate, blur, fade — the transform prop is just a function of the
+  per-word scroll progress.
+</TextReveal.Text>;
+```
+
+</ComponentShowcase>
+
+### Color reveal
+
+A classic "ink in" effect — let opacity stay at 1 and animate `color`
+between a muted shade and the foreground.
+
+<ComponentShowcase preview={<ColorTransformTextRevealExample />}>
+
+```tsx
+<TextReveal.Text
+  className="text-4xl"
+  transform={(p) => ({
+    color: useTransform(
+      p,
+      [0, 1],
+      ["rgb(156 163 175 / 0.35)", "rgb(23 23 23)"],
+    ),
+  })}
+>
+  Drive color, not opacity. Each word inks in as it crosses its slice of the
+  page scroll.
+</TextReveal.Text>
+```
+
+</ComponentShowcase>
+
+### Composing with `TextReveal.Word`
+
+When you need richer markup than a single string — inline links, highlighted
+spans, mixed elements — drop `TextReveal.Text` and render `TextReveal.Word`
+directly. Pass each word its `index` and the shared `total` so the slice math
+lines up.
+
+<ComponentShowcase preview={<ComposedWordTextRevealExample />}>
+
+```tsx
+const words = ["Composition", "over", "configuration", "—", "always."];
+
+<p className="flex flex-wrap gap-x-3 gap-y-2 text-4xl">
+  {words.map((word, i) => (
+    <TextReveal.Word
+      key={word}
+      index={i}
+      total={words.length}
+      transform={(p) => ({
+        opacity: useTransform(p, [0, 0.6], [0.1, 1]),
+        y: useTransform(p, [0, 1], [16, 0]),
+      })}
+    >
+      {i === words.length - 1 ? (
+        <span className="rounded-md bg-foreground/10 px-2 py-0.5 font-mono">
+          {word}
+        </span>
+      ) : (
+        word
+      )}
+    </TextReveal.Word>
+  ))}
+</p>;
+```
+
+</ComponentShowcase>
+
+### Reduced motion
+
+When the user has `prefers-reduced-motion: reduce` set, every word skips its
+transform and renders directly in the `revealed` state. No additional setup
+required — the component reads the media query via `motion`'s
+`useReducedMotion` hook.
+
+## API Reference
+
+### TextReveal.Root
+
+The scroll track. Owns a ref + `useScroll` and exposes a latched progress
+`MotionValue` to descendants via context. Renders a `<div>`.
+
+| Prop        | Type                                    | Default                       | Description                                                                                                                                                          |
+| ----------- | --------------------------------------- | ----------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `once`      | `boolean`                               | `false`                       | When `true`, latches progress so it only ever increases. The outro never plays, even when scrolling back up.                                                         |
+| `offset`    | `motion`'s `ScrollOffset`               | `["start end", "end start"]`  | Where the reveal starts and ends, relative to the viewport. Forwarded straight to `useScroll`.                                                                       |
+| `className` | `string`                                | —                             | Merged via `cn` onto the underlying `<div>`. The root has no built-in sizing — give it a height (e.g. `min-h-[180vh]`) so there is scroll distance for the reveal. |
+| `...rest`   | `React.ComponentPropsWithoutRef<"div">` | —                             | Forwarded to the underlying `<div>`.                                                                                                                                 |
+
+Data attributes:
+`data-slot="text-reveal-root"`,
+`data-once` (empty string when `once`, otherwise absent).
+
+### TextReveal.Text
+
+Splits a plain-string child on whitespace and renders each word through
+`TextReveal.Word`. For richer composition use `TextReveal.Word` directly.
+
+| Prop             | Type                                                                  | Default               | Description                                                                                                                                  |
+| ---------------- | --------------------------------------------------------------------- | --------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| `children`       | `string`                                                              | **required**          | The text to reveal. Must be a single string — no nested elements.                                                                            |
+| `as`             | `ElementType`                                                         | `"span"`              | Element rendered as the outer wrapper.                                                                                                       |
+| `transform`      | `(localProgress: MotionValue<number>) => MotionStyle`                 | `({ opacity: p })`    | Per-word transform builder. Receives the word's local progress (`0 → 1`) and returns any `MotionStyle` — opacity, translate, blur, color. |
+| `revealAt`       | `number`                                                              | `0.5`                 | Local-progress threshold at which a word flips its `data-state` from `"hidden"` to `"revealed"`. Visual reveal is governed by `transform`. |
+| `wordClassName`  | `string`                                                              | —                     | Class applied to every word `<motion.span>`. Handy for shared typography defaults.                                                          |
+| `className`      | `string`                                                              | —                     | Merged via `cn` onto the outer element.                                                                                                      |
+| `...rest`        | `Omit<React.ComponentPropsWithoutRef<"span">, "children">`            | —                     | Forwarded to the outer element.                                                                                                              |
+
+Data attributes: `data-slot="text-reveal-text"`.
+
+### TextReveal.Word
+
+Lower-level primitive — one animated word. Renders a `motion.span`.
+
+| Prop          | Type                                                                  | Default               | Description                                                                                  |
+| ------------- | --------------------------------------------------------------------- | --------------------- | -------------------------------------------------------------------------------------------- |
+| `index`       | `number`                                                              | **required**          | Zero-based position of this word inside the overall reveal.                                  |
+| `total`       | `number`                                                              | **required**          | Total number of words participating in the reveal. Used with `index` to compute the slice. |
+| `transform`   | `(localProgress: MotionValue<number>) => MotionStyle`                 | `({ opacity: p })`    | Per-word transform builder. Same signature as `TextReveal.Text`.                            |
+| `revealAt`    | `number`                                                              | `0.5`                 | Local-progress threshold for the `data-state` flip.                                          |
+| `className`   | `string`                                                              | —                     | Merged via `cn` onto the underlying `motion.span`.                                           |
+| `...rest`     | `Omit<HTMLMotionProps<"span">, "children">`                           | —                     | Forwarded to the underlying `motion.span`.                                                   |
+
+Data attributes:
+`data-slot="text-reveal-word"`,
+`data-state="hidden" | "revealed"`,
+`data-index="<n>"`.
+
+### Transform signature
+
+```ts
+import type { TextRevealTransform } from "@made-together/ui/text-reveal";
+
+const fade: TextRevealTransform = (p) => ({ opacity: p });
+
+const slideUp: TextRevealTransform = (p) => ({
+  opacity: useTransform(p, [0, 0.4], [0, 1]),
+  y: useTransform(p, [0, 1], [20, 0]),
+});
+```
+
+Because the function runs inside the word's render, you can call hooks such
+as `useTransform`, `useSpring`, or `useMotionTemplate` directly — keep the
+hook order stable across renders, as usual.
+
+### Exported types
+
+```ts
+import type {
+  TextRevealRootProps,
+  TextRevealTextProps,
+  TextRevealTransform,
+  TextRevealWordProps,
+} from "@made-together/ui/text-reveal";
+```

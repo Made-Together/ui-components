@@ -10,6 +10,7 @@ const meta: MetaRecord = {
   "number-flow": "NumberFlow",
   "scroll-stack": "ScrollStack",
   "type-ahead": "TypeAhead",
+  "text-reveal": "TextReveal",
 };
 
 export default meta;
