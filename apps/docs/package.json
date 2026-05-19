@@ -4,9 +4,12 @@
   "type": "module",
   "private": true,
   "scripts": {
+    "predev": "pnpm generate:changelog",
     "dev": "next dev --port 3001",
+    "prebuild": "pnpm generate:changelog",
     "build": "next build",
     "postbuild": "pagefind --site .next/server/app --output-path public/_pagefind",
+    "generate:changelog": "node ./scripts/generate-changelog.mjs",
     "start": "next start",
     "lint": "biome check .",
     "check-types": "next typegen && tsc --noEmit"
