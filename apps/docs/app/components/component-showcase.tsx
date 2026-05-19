@@ -2,7 +2,10 @@
 
 import {
   type ReactNode,
+  type RefObject,
+  createContext,
   useCallback,
+  useContext,
   useEffect,
   useLayoutEffect,
   useRef,
@@ -10,6 +13,19 @@ import {
 } from "react";
 
 const COLLAPSED_HEIGHT = 128;
+const DEFAULT_SCROLLABLE_PREVIEW_HEIGHT = 600;
+
+const ShowcaseScrollContainerContext =
+  createContext<RefObject<HTMLDivElement | null> | null>(null);
+
+/**
+ * Read the scroll container exposed by an enclosing `ComponentShowcase` when
+ * it was rendered with `scrollablePreview`. Returns `null` outside that mode —
+ * callers should pass the ref through only when defined.
+ */
+export function useShowcaseScrollContainer() {
+  return useContext(ShowcaseScrollContainerContext);
+}
 
 interface ComponentShowcaseProps {
   /**
@@ -23,6 +39,18 @@ interface ComponentShowcaseProps {
    */
   children: ReactNode;
   className?: string;
+  /**
+   * When `true`, the preview area becomes a fixed-height, vertically
+   * scrollable container. Children rendered inside `preview` can read the
+   * underlying scroll element via `useShowcaseScrollContainer()` and pass it
+   * to scroll-driven primitives (e.g. `TextReveal.Root`'s `container` prop).
+   */
+  scrollablePreview?: boolean;
+  /**
+   * Height (in px) of the preview area when `scrollablePreview` is `true`.
+   * @default 600
+   */
+  previewHeight?: number;
 }
 
 const useIsomorphicLayoutEffect =
@@ -32,11 +60,14 @@ export function ComponentShowcase({
   preview,
   children,
   className,
+  scrollablePreview = false,
+  previewHeight = DEFAULT_SCROLLABLE_PREVIEW_HEIGHT,
 }: ComponentShowcaseProps) {
   const [expanded, setExpanded] = useState(false);
   const [overflows, setOverflows] = useState(false);
   const [fullHeight, setFullHeight] = useState<number | null>(null);
   const codeRef = useRef<HTMLDivElement>(null);
+  const previewScrollRef = useRef<HTMLDivElement | null>(null);
 
   const measure = useCallback(() => {
     const node = codeRef.current;
@@ -77,7 +108,23 @@ export function ComponentShowcase({
       data-slot="component-showcase"
       data-state={expanded ? "expanded" : "collapsed"}
     >
-      <div className="overflow-x-hidden bg-background min-h-56 p-6 flex items-center justify-center">{preview}</div>
+      {scrollablePreview ? (
+        <ShowcaseScrollContainerContext.Provider value={previewScrollRef}>
+          <div
+            ref={previewScrollRef}
+            data-slot="component-showcase-preview"
+            data-scrollable=""
+            style={{ height: previewHeight }}
+            className="overflow-y-auto overflow-x-hidden bg-background"
+          >
+            {preview}
+          </div>
+        </ShowcaseScrollContainerContext.Provider>
+      ) : (
+        <div className="overflow-x-hidden bg-background min-h-56 p-6 flex items-center justify-center">
+          {preview}
+        </div>
+      )}
       <div className="relative border-t border-border">
         <div
           ref={codeRef}

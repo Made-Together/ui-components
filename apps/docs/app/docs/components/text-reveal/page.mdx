@@ -22,7 +22,7 @@ text inside it word-by-word as the user scrolls the section through the
 viewport. The component owns the scroll plumbing — you own the typography,
 the layout, and the per-word transform.
 
-<ComponentShowcase preview={<BasicTextRevealExample />}>
+<ComponentShowcase scrollablePreview preview={<BasicTextRevealExample />}>
 
 ```tsx
 import { TextReveal } from "@made-together/ui/text-reveal";
@@ -99,7 +99,7 @@ By default the reveal is reversible: scrolling back up plays the outro and
 hides the words again. Pass `once` to latch progress on the way down so the
 animation only plays a single time.
 
-<ComponentShowcase preview={<OnceTextRevealExample />}>
+<ComponentShowcase scrollablePreview preview={<OnceTextRevealExample />}>
 
 ```tsx
 <TextReveal.Root once className="relative min-h-[180vh]">
@@ -124,7 +124,7 @@ blur, scale, color — whatever your reveal needs. Because the function runs
 inside the word's render, you can call hooks freely (just keep their order
 stable).
 
-<ComponentShowcase preview={<CustomTransformTextRevealExample />}>
+<ComponentShowcase scrollablePreview preview={<CustomTransformTextRevealExample />}>
 
 ```tsx
 import { useTransform } from "motion/react";
@@ -149,7 +149,7 @@ import { useTransform } from "motion/react";
 A classic "ink in" effect — let opacity stay at 1 and animate `color`
 between a muted shade and the foreground.
 
-<ComponentShowcase preview={<ColorTransformTextRevealExample />}>
+<ComponentShowcase scrollablePreview preview={<ColorTransformTextRevealExample />}>
 
 ```tsx
 <TextReveal.Text
@@ -176,7 +176,7 @@ spans, mixed elements — drop `TextReveal.Text` and render `TextReveal.Word`
 directly. Pass each word its `index` and the shared `total` so the slice math
 lines up.
 
-<ComponentShowcase preview={<ComposedWordTextRevealExample />}>
+<ComponentShowcase scrollablePreview preview={<ComposedWordTextRevealExample />}>
 
 ```tsx
 const words = ["Composition", "over", "configuration", "—", "always."];
@@ -224,6 +224,7 @@ The scroll track. Owns a ref + `useScroll` and exposes a latched progress
 | ----------- | --------------------------------------- | ----------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `once`      | `boolean`                               | `false`                       | When `true`, latches progress so it only ever increases. The outro never plays, even when scrolling back up.                                                         |
 | `offset`    | `motion`'s `ScrollOffset`               | `["start end", "end start"]`  | Where the reveal starts and ends, relative to the viewport. Forwarded straight to `useScroll`.                                                                       |
+| `container` | `RefObject<HTMLElement \| null>`        | —                             | Optional scroll container to track instead of the window. When set, `offset` is interpreted relative to this element's scroll position.                              |
 | `className` | `string`                                | —                             | Merged via `cn` onto the underlying `<div>`. The root has no built-in sizing — give it a height (e.g. `min-h-[180vh]`) so there is scroll distance for the reveal. |
 | `...rest`   | `React.ComponentPropsWithoutRef<"div">` | —                             | Forwarded to the underlying `<div>`.                                                                                                                                 |
 

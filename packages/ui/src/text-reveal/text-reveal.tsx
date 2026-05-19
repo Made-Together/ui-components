@@ -11,7 +11,12 @@ import {
   useScroll,
   useTransform,
 } from "motion/react";
-import type { ComponentPropsWithoutRef, ElementType, ReactNode } from "react";
+import type {
+  ComponentPropsWithoutRef,
+  ElementType,
+  ReactNode,
+  RefObject,
+} from "react";
 import {
   createContext,
   forwardRef,
@@ -56,11 +61,18 @@ interface TextRevealRootProps extends ComponentPropsWithoutRef<"div"> {
    * @default ["start end", "end start"]
    */
   offset?: ScrollOffset;
+  /**
+   * Optional scroll container to track instead of the window. When provided,
+   * `offset` is interpreted relative to this element's scroll position rather
+   * than the viewport. Useful when the reveal lives inside a fixed-height,
+   * internally-scrollable wrapper (e.g. a documentation preview).
+   */
+  container?: RefObject<HTMLElement | null>;
 }
 
 const Root = forwardRef<HTMLDivElement, TextRevealRootProps>(
   function TextRevealRoot(
-    { once = false, offset, className, children, ...rest },
+    { once = false, offset, container, className, children, ...rest },
     forwardedRef,
   ) {
     const innerRef = useRef<HTMLDivElement | null>(null);
@@ -76,6 +88,7 @@ const Root = forwardRef<HTMLDivElement, TextRevealRootProps>(
 
     const { scrollYProgress } = useScroll({
       target: innerRef,
+      container: container as RefObject<HTMLElement> | undefined,
       offset: offset ?? ["start end", "end start"],
     });
 
