@@ -14,6 +14,7 @@ export default function Home() {
             alt="Homepage hero"
             width={1280}
             height={1000}
+            loading="eager"
             className="w-full h-auto object-cover object-center absolute inset-0"
           />
         </div>

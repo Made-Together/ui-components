@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Together UI",
+  title: "@made-together/ui Documentation",
   description: "A collection of components for your Next.js application.",
 };
 
@@ -40,7 +40,12 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" dir="ltr" suppressHydrationWarning>
+    <html
+      lang="en"
+      dir="ltr"
+      data-scroll-behavior="smooth"
+      suppressHydrationWarning
+    >
       <Head>
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       </Head>
@@ -53,7 +58,7 @@ export default async function RootLayout({
           pageMap={await getPageMap()}
           sidebar={{ autoCollapse: true }}
           // docsRepositoryBase="https://github.com/shuding/nextra/tree/main/docs"
-          // ... Your additional layout options
+          // ... Additional layout options
         >
           {children}
         </Layout>
