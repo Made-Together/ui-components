@@ -1,6 +1,6 @@
 "use client";
 
-import { Carousel } from "@repo/ui/carousel";
+import { Carousel } from "@made-together/ui/carousel";
 
 const slides = [
   { title: "Aurora", hue: "from-indigo-500 to-fuchsia-500" },

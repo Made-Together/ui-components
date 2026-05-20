@@ -1,6 +1,6 @@
 "use client";
 
-import { TypeAhead } from "@repo/ui/type-ahead";
+import { TypeAhead } from "@made-together/ui/type-ahead";
 import { useState } from "react";
 
 export function BasicTypeAheadExample() {

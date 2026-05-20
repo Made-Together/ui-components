@@ -1,6 +1,6 @@
 "use client";
 
-import { continuous, NumberFlow } from "@repo/ui/number-flow";
+import { continuous, NumberFlow } from "@made-together/ui/number-flow";
 import { useEffect, useState } from "react";
 
 function useTicker(values: readonly number[], intervalMs = 2000) {

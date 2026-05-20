@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Repository
 
-Turborepo monorepo (pnpm workspaces, Node >= 20, see `.nvmrc`: 20.19.5). The `@repo/ui` package is the actual deliverable — a headless React component library. The `apps/playground` (port 3000) and `apps/docs` (port 3001) Next.js 16 apps exist to develop and showcase those components.
+Turborepo monorepo (pnpm workspaces, Node >= 20, see `.nvmrc`: 20.19.5). The `@made-together/ui` package is the actual deliverable — a headless React component library. The `apps/playground` (port 3000) and `apps/docs` (port 3001) Next.js 16 apps exist to develop and showcase those components.
 
 Component scope is tracked in `ROADMAP.md` (Carousel, Marquee, Accordion, Tabs, Ticker, StackedContent, Swappable, TextReveal, TextSplit, NumberFlow, FixedScrollableArea). New components go in `packages/ui/src/<component>/` as a folder containing `<component>.tsx`, `index.ts`, `<component>.test.tsx`, and `README.md` (see the `carousel/` scaffold).
 
@@ -18,18 +18,18 @@ Run from the repo root unless noted. Turbo handles task graph + caching.
 - `pnpm check` — Biome check at the root (whole repo).
 - `pnpm format` — Biome format-write at the root.
 - `pnpm check-types` — `tsc --noEmit` across packages; apps run `next typegen` first.
-- Filter to one workspace: `pnpm exec turbo dev --filter=playground` (or `docs`, `@repo/ui`).
-- New UI component scaffold: `pnpm --filter @repo/ui generate:component`.
+- Filter to one workspace: `pnpm exec turbo dev --filter=playground` (or `docs`, `@made-together/ui`).
+- New UI component scaffold: `pnpm --filter @made-together/ui generate:component`.
 
 There is no test runner wired up yet — `*.test.tsx` files exist but no `test` script is defined.
 
 ## Architecture notes
 
-- **`@repo/ui` exports raw source**: `"exports": { "./*": ["./src/*/index.ts", "./src/*.tsx"] }`. No build step — consumers (Next.js apps) transpile the source directly. Import as `@repo/ui/<name>`: folder-based components resolve to `./src/<name>/index.ts` first, falling back to single-file `./src/<name>.tsx`. Folder layout (preferred for new components) needs an `index.ts` re-export.
+- **`@made-together/ui` exports raw source**: `"exports": { "./*": ["./src/*/index.ts", "./src/*.tsx"] }`. No build step — consumers (Next.js apps) transpile the source directly. Import as `@made-together/ui/<name>`: folder-based components resolve to `./src/<name>/index.ts` first, falling back to single-file `./src/<name>.tsx`. Folder layout (preferred for new components) needs an `index.ts` re-export.
 - **Peer deps** declare `react ^17 || ^18 || ^19` and `motion ^12`. Animation work should use `motion` (Framer Motion successor), not add new animation deps.
-- **Tailwind v4** is a peer dependency of `@repo/ui` (`tailwindcss ^4.0.0`), used by `apps/playground` and `apps/docs` (via `@tailwindcss/postcss`). Components remain headless by default; when styling is needed inside `@repo/ui`, use Tailwind utility classes, and always keep them overridable via `className` (merged last) so consumers can replace any default.
+- **Tailwind v4** is a peer dependency of `@made-together/ui` (`tailwindcss ^4.0.0`), used by `apps/playground` and `apps/docs` (via `@tailwindcss/postcss`). Components remain headless by default; when styling is needed inside `@made-together/ui`, use Tailwind utility classes, and always keep them overridable via `className` (merged last) so consumers can replace any default.
 - **Client components**: source files use `"use client"` at the top (see `button.tsx`); keep that on any component using hooks, refs, or browser APIs so Next.js App Router consumers work.
-- **TypeScript configs** live in `packages/typescript-config` (`base.json`, `nextjs.json`, `react-library.json`) and are referenced via `@repo/typescript-config` workspace dep.
+- **TypeScript configs** live in `packages/typescript-config` (`base.json`, `nextjs.json`, `react-library.json`) and are referenced via `@made-together/typescript-config` workspace dep.
 - **Biome 2.4** is the single linter+formatter (replaced ESLint/Prettier per recent commit). Settings: 2-space indent, double quotes, semicolons always, organize-imports on. The root `pnpm lint` runs per-package `biome check .`; `pnpm check` runs Biome across everything including the root.
 
 ## Component guidelines
@@ -62,7 +62,7 @@ Animations should enhance usability and spatial understanding — not become vis
 When generating new components or modifying existing ones:
 
 - Preserve composition-first APIs.
-- Avoid introducing styling opinions into @repo/ui.
+- Avoid introducing styling opinions into @made-together/ui.
 - Prefer extensibility over convenience shortcuts.
 - Maintain accessibility semantics and keyboard interactions.
 - All composites should be react forwardRef's and their props should extend the parent element's props.

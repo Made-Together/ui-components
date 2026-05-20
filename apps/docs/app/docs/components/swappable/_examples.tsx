@@ -1,6 +1,6 @@
 "use client";
 
-import { Swappable } from "@repo/ui/swappable";
+import { Swappable } from "@made-together/ui/swappable";
 import { Logos } from "./_logos";
 
 type Logo = (typeof Logos)[number];

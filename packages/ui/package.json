@@ -1,9 +1,22 @@
 {
-  "name": "@repo/ui",
+  "name": "@made-together/ui",
   "version": "0.1.0",
-  "private": true,
   "type": "module",
   "sideEffects": false,
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Made-Together/ui-components.git",
+    "directory": "packages/ui"
+  },
+  "homepage": "https://github.com/Made-Together/ui-components#readme",
+  "bugs": {
+    "url": "https://github.com/Made-Together/ui-components/issues"
+  },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
   "files": [
     "dist"
   ],
@@ -24,7 +37,7 @@
   },
   "devDependencies": {
     "@biomejs/biome": "^2.4.15",
-    "@repo/typescript-config": "workspace:*",
+    "@made-together/typescript-config": "workspace:*",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",
     "@testing-library/user-event": "^14.6.1",

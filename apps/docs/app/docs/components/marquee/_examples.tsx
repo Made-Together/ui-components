@@ -1,6 +1,6 @@
 "use client";
 
-import { Marquee } from "@repo/ui/marquee";
+import { Marquee } from "@made-together/ui/marquee";
 
 const words = [
   "Motion",

@@ -1,6 +1,6 @@
 "use client";
 
-import { Ticker } from "@repo/ui/ticker";
+import { Ticker } from "@made-together/ui/ticker";
 import { useState } from "react";
 
 function ArrowRight({ className }: { className?: string }) {

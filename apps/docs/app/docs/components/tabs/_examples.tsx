@@ -1,6 +1,6 @@
 "use client";
 
-import { Tabs } from "@repo/ui/tabs";
+import { Tabs } from "@made-together/ui/tabs";
 import { useState } from "react";
 
 const settingsTabs = [
