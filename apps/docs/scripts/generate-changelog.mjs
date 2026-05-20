@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import { execFileSync } from "node:child_process";
 import { existsSync } from "node:fs";
 import { readFile, writeFile } from "node:fs/promises";
 import { dirname, join, relative } from "node:path";
@@ -7,7 +8,44 @@ import { fileURLToPath } from "node:url";
 const here = dirname(fileURLToPath(import.meta.url));
 const repoRoot = join(here, "..", "..", "..");
 const sourceChangelog = join(repoRoot, "packages/ui/CHANGELOG.md");
+const sourceChangelogRel = relative(repoRoot, sourceChangelog);
 const outFile = join(here, "..", "app/docs/changelog/page.mdx");
+
+function git(args) {
+  try {
+    return execFileSync("git", args, {
+      cwd: repoRoot,
+      encoding: "utf8",
+      stdio: ["ignore", "pipe", "ignore"],
+    }).trim();
+  } catch {
+    return "";
+  }
+}
+
+function getRepoUrl() {
+  const raw = git(["config", "--get", "remote.origin.url"]);
+  if (!raw) return null;
+  // git@github.com:owner/repo(.git) → https://github.com/owner/repo
+  const ssh = raw.match(/^git@([^:]+):(.+?)(?:\.git)?$/);
+  if (ssh) return `https://${ssh[1]}/${ssh[2]}`;
+  return raw.replace(/\.git$/, "");
+}
+
+function getVersionDate(version) {
+  // Find the oldest commit that introduced this `## <version>` heading
+  // in the source CHANGELOG.md. `%cs` is the committer date as YYYY-MM-DD.
+  const out = git([
+    "log",
+    "--reverse",
+    "--format=%cs",
+    `-S## ${version}`,
+    "--",
+    sourceChangelogRel,
+  ]);
+  if (!out) return null;
+  return out.split("\n")[0].trim() || null;
+}
 
 const FRONTMATTER = `---
 description:
@@ -43,13 +81,47 @@ function escapeJsxLikeAngleBrackets(md) {
     .join("\n");
 }
 
+const DATE_FORMATTER = new Intl.DateTimeFormat("en-US", {
+  month: "long",
+  day: "numeric",
+  year: "numeric",
+  timeZone: "UTC",
+});
+
+function formatDate(iso) {
+  // iso is YYYY-MM-DD from `git log --format=%cs`
+  const [y, m, d] = iso.split("-").map(Number);
+  if (!y || !m || !d) return iso;
+  return DATE_FORMATTER.format(new Date(Date.UTC(y, m - 1, d)));
+}
+
+function annotateVersionHeadings(md) {
+  return md.replace(/^##\s+(\S+)[ \t]*$/gm, (line, version) => {
+    const date = getVersionDate(version);
+    return date ? `## ${version} | ${formatDate(date)}` : line;
+  });
+}
+
+function linkifyCommitPrefixes(md, repoUrl) {
+  if (!repoUrl) {
+    // No remote configured — just drop the noisy hash prefix.
+    return md.replace(/^(\s*[-*])\s+([0-9a-f]{7,40}):\s+/gm, "$1 ");
+  }
+  return md.replace(
+    /^(\s*[-*])\s+([0-9a-f]{7,40}):\s+/gm,
+    (_m, bullet, sha) => `${bullet} [\`${sha}\`](${repoUrl}/commit/${sha}) — `,
+  );
+}
+
 async function buildBody() {
   if (!existsSync(sourceChangelog)) {
     return PLACEHOLDER_BODY;
   }
   const raw = await readFile(sourceChangelog, "utf8");
   const stripped = stripLeadingH1(raw).trimStart();
-  const safe = escapeJsxLikeAngleBrackets(stripped);
+  const dated = annotateVersionHeadings(stripped);
+  const linked = linkifyCommitPrefixes(dated, getRepoUrl());
+  const safe = escapeJsxLikeAngleBrackets(linked);
   return `\n${safe.trimEnd()}\n`;
 }
 
