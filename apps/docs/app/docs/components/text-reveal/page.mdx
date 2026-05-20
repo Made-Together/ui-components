@@ -1,42 +1,57 @@
 ---
 description:
-  A headless, scroll-driven word-by-word text reveal for React. Words animate
-  in as the section crosses the viewport; replayable or one-shot, with full
-  control over the per-word transform.
+  A headless, word-by-word text reveal for React. Drive it with scroll by
+  default, or take full control via a 0–100 `progress` prop. Compose any
+  per-word transform — opacity, translate, blur, color — without touching
+  the plumbing.
 ---
 
 import { Callout } from "nextra/components";
 import { ComponentShowcase } from "../../../components/component-showcase";
 import {
-  BasicTextRevealExample,
   ColorTransformTextRevealExample,
   ComposedWordTextRevealExample,
   CustomTransformTextRevealExample,
-  OnceTextRevealExample,
+  InteractiveTextRevealExample,
+  ScrollMarginTextRevealExample,
+  ScrollTextRevealExample,
 } from "./_examples";
 
 # TextReveal
 
-A scroll-driven reveal primitive. Wraps a tall container and animates the
-text inside it word-by-word as the user scrolls the section through the
-viewport. The component owns the scroll plumbing — you own the typography,
-the layout, and the per-word transform.
+A word-by-word reveal primitive. By default the reveal is scroll-driven —
+the words animate in as the section moves through the viewport. Pass
+`progress` and the component flips into a fully controlled mode where you
+own the value (perfect for sliders, programmatic playback, hero entrances,
+or anything that shouldn't depend on scroll).
 
-<ComponentShowcase scrollablePreview preview={<BasicTextRevealExample />}>
+The component owns the per-word splitting and motion plumbing — you own
+the typography, the layout, and the per-word transform.
+
+<ComponentShowcase preview={<InteractiveTextRevealExample />}>
 
 ```tsx
 import { TextReveal } from "@made-together/ui/text-reveal";
+import { useState } from "react";
 
-export function BasicTextReveal() {
+export function InteractiveTextReveal() {
+  const [progress, setProgress] = useState(40);
   return (
-    <TextReveal.Root className="relative min-h-[180vh]">
-      <div className="sticky top-0 flex h-screen items-center justify-center px-6">
-        <TextReveal.Text className="max-w-3xl text-center text-4xl font-medium leading-snug">
-          Headless components, beautiful animations, and zero opinions on how
-          your product should look.
+    <>
+      <TextReveal.Root progress={progress}>
+        <TextReveal.Text className="text-3xl font-medium">
+          Lorem ipsum dolor sit amet consectetur adipiscing elit sed do
+          eiusmod tempor incididunt ut labore et dolore magna aliqua.
         </TextReveal.Text>
-      </div>
-    </TextReveal.Root>
+      </TextReveal.Root>
+      <input
+        type="range"
+        min={0}
+        max={100}
+        value={progress}
+        onChange={(e) => setProgress(Number(e.target.value))}
+      />
+    </>
   );
 }
 ```
@@ -60,9 +75,10 @@ TextReveal.Word;
 
 ## Composition
 
-`TextReveal.Root` is the scroll track. Give it a tall height — the height
-determines how much scroll distance the reveal occupies. Place a `sticky`
-child inside to pin the words while the user scrolls past the track:
+`TextReveal.Root` is the orchestrator. In its **default scroll mode** give
+it a tall height — the height determines how much scroll distance the
+reveal occupies — and place a `sticky` child inside to pin the words while
+the user scrolls past:
 
 ```tsx
 <TextReveal.Root className="relative min-h-[200vh]">
@@ -74,57 +90,66 @@ child inside to pin the words while the user scrolls past the track:
 </TextReveal.Root>
 ```
 
-- **`TextReveal.Root`** renders a `<div>` and wires up `motion`'s `useScroll`
-  against itself. It exposes the resulting progress (latched if `once`) to
+In **controlled mode** the layout is up to you — the Root is just a
+container that propagates `progress` to descendants via context. No height
+or sticky wrapper required.
+
+- **`TextReveal.Root`** wires up `motion`'s `useScroll` against itself
+  (scroll mode) or normalizes the `progress` prop to a `MotionValue`
+  (controlled mode). Either way, it exposes the resulting progress to
   descendants via context.
-- **`TextReveal.Text`** accepts a plain string, splits it on whitespace, and
-  renders each word through `TextReveal.Word`. Use the `transform` prop to
-  customise the reveal.
-- **`TextReveal.Word`** is the lower-level primitive — one animated word that
-  reads its slice of the root progress. Compose words manually when you need
-  arbitrary surrounding markup (links, highlights, mixed elements).
+- **`TextReveal.Text`** accepts a plain string, splits it on whitespace,
+  and renders each word through `TextReveal.Word`. Use the `transform`
+  prop to customise the reveal.
+- **`TextReveal.Word`** is the lower-level primitive — one animated word
+  that reads its slice of the root progress. Compose words manually when
+  you need arbitrary surrounding markup (links, highlights, mixed
+  elements).
 
 <Callout type="info">
-  The reveal is driven by the root's intersection with the viewport, not by a
-  manual offset on `TextReveal.Text`. That means you can place the text
-  wherever you like inside the root — `sticky`, centered, in a grid cell —
-  and the timing tracks the surrounding scroll container.
+  In scroll mode the reveal is driven by the root's intersection with the
+  viewport — not by any manual offset on `TextReveal.Text`. Place the text
+  wherever you like inside the root (sticky, centered, in a grid cell) and
+  the timing tracks the surrounding scroll container.
 </Callout>
 
-## Usage
+## Controlled vs scroll
 
-### Replayable vs one-shot
+The `progress` prop on `TextReveal.Root` is the switch:
 
-By default the reveal is reversible: scrolling back up plays the outro and
-hides the words again. Pass `once` to latch progress on the way down so the
-animation only plays a single time.
+- **Omitted** → scroll mode. `useScroll` runs internally, optionally
+  scoped to a `container` ref and shaped by `offset`.
+- **Provided** (`0`–`100`) → controlled mode. Scroll plumbing is bypassed
+  entirely. Drive the value from a slider, a timeline, an IntersectionObserver,
+  a test, a Storybook control — anything that produces a number.
 
-<ComponentShowcase scrollablePreview preview={<OnceTextRevealExample />}>
+The same per-word transforms work in both modes — internally `progress` is
+always normalized to `0–1`, so `useTransform(p, [0, 1], …)` calls in your
+transform builders behave identically either way.
 
 ```tsx
-<TextReveal.Root once className="relative min-h-[180vh]">
-  <div className="sticky top-0 flex h-screen items-center">
-    <TextReveal.Text className="text-4xl">
-      This reveal runs exactly once.
-    </TextReveal.Text>
-  </div>
-</TextReveal.Root>
+// Scroll mode (default)
+<TextReveal.Root className="min-h-[200vh]">…</TextReveal.Root>
+
+// Controlled mode
+<TextReveal.Root progress={42}>…</TextReveal.Root>
 ```
 
-</ComponentShowcase>
+## Usage
 
 ### Custom intro & outro
 
 `TextReveal.Text` and `TextReveal.Word` accept a `transform` prop — a
-function that receives a `MotionValue<number>` for the word's local progress
-(`0 → 1` while the word's slice is active) and returns any `MotionStyle`.
+function that receives a `MotionValue<number>` for the word's local
+progress (`0 → 1` while the word's slice is active) and returns any
+`MotionStyle`.
 
-Compose `useTransform` calls inside the function to drive opacity, translate,
-blur, scale, color — whatever your reveal needs. Because the function runs
-inside the word's render, you can call hooks freely (just keep their order
-stable).
+Compose `useTransform` calls inside the function to drive opacity,
+translate, blur, scale, color — whatever your reveal needs. Because the
+function runs inside the word's render, you can call hooks freely (just
+keep their order stable).
 
-<ComponentShowcase scrollablePreview preview={<CustomTransformTextRevealExample />}>
+<ComponentShowcase preview={<CustomTransformTextRevealExample />}>
 
 ```tsx
 import { useTransform } from "motion/react";
@@ -137,8 +162,7 @@ import { useTransform } from "motion/react";
     filter: useTransform(p, [0, 1], ["blur(10px)", "blur(0px)"]),
   })}
 >
-  Translate, blur, fade — the transform prop is just a function of the
-  per-word scroll progress.
+  Lorem ipsum dolor sit amet…
 </TextReveal.Text>;
 ```
 
@@ -149,7 +173,7 @@ import { useTransform } from "motion/react";
 A classic "ink in" effect — let opacity stay at 1 and animate `color`
 between a muted shade and the foreground.
 
-<ComponentShowcase scrollablePreview preview={<ColorTransformTextRevealExample />}>
+<ComponentShowcase preview={<ColorTransformTextRevealExample />}>
 
 ```tsx
 <TextReveal.Text
@@ -162,8 +186,7 @@ between a muted shade and the foreground.
     ),
   })}
 >
-  Drive color, not opacity. Each word inks in as it crosses its slice of the
-  page scroll.
+  Lorem ipsum dolor sit amet…
 </TextReveal.Text>
 ```
 
@@ -171,65 +194,141 @@ between a muted shade and the foreground.
 
 ### Composing with `TextReveal.Word`
 
-When you need richer markup than a single string — inline links, highlighted
-spans, mixed elements — drop `TextReveal.Text` and render `TextReveal.Word`
-directly. Pass each word its `index` and the shared `total` so the slice math
-lines up.
+When you need richer markup than a single string — inline links,
+highlighted spans, mixed elements — drop `TextReveal.Text` and render
+`TextReveal.Word` directly. Pass each word its `index` and the shared
+`total` so the slice math lines up.
 
-<ComponentShowcase scrollablePreview preview={<ComposedWordTextRevealExample />}>
+<ComponentShowcase preview={<ComposedWordTextRevealExample />}>
 
 ```tsx
-const words = ["Composition", "over", "configuration", "—", "always."];
+const words = ["Lorem", "ipsum", "dolor", "sit", "amet."];
 
-<p className="flex flex-wrap gap-x-3 gap-y-2 text-4xl">
-  {words.map((word, i) => (
-    <TextReveal.Word
-      key={word}
-      index={i}
-      total={words.length}
-      transform={(p) => ({
-        opacity: useTransform(p, [0, 0.6], [0.1, 1]),
-        y: useTransform(p, [0, 1], [16, 0]),
-      })}
-    >
-      {i === words.length - 1 ? (
-        <span className="rounded-md bg-foreground/10 px-2 py-0.5 font-mono">
-          {word}
-        </span>
-      ) : (
-        word
-      )}
-    </TextReveal.Word>
-  ))}
-</p>;
+<TextReveal.Root progress={65}>
+  <p className="flex flex-wrap gap-x-3 gap-y-2 text-4xl">
+    {words.map((word, i) => (
+      <TextReveal.Word
+        key={word}
+        index={i}
+        total={words.length}
+        transform={(p) => ({
+          opacity: useTransform(p, [0, 0.6], [0.1, 1]),
+          y: useTransform(p, [0, 1], [16, 0]),
+        })}
+      >
+        {i === words.length - 1 ? (
+          <span className="rounded-md bg-foreground/10 px-2 py-0.5 font-mono">
+            {word}
+          </span>
+        ) : (
+          word
+        )}
+      </TextReveal.Word>
+    ))}
+  </p>
+</TextReveal.Root>;
 ```
 
 </ComponentShowcase>
 
+### Scroll-driven
+
+Omit `progress` to fall back to the default scroll-driven behavior. Give
+the root some height — the example below uses a normal preview box, so the
+reveal animates as you scroll **this docs page** past it. In your own app
+you'd typically use `min-h-[200vh]` and a `sticky` inner wrapper.
+
+<ComponentShowcase preview={<ScrollTextRevealExample />}>
+
+```tsx
+<TextReveal.Root className="relative min-h-[200vh]">
+  <div className="sticky top-0 flex h-screen items-center">
+    <TextReveal.Text className="text-4xl">
+      Lorem ipsum dolor sit amet consectetur adipiscing elit.
+    </TextReveal.Text>
+  </div>
+</TextReveal.Root>
+```
+
+</ComponentShowcase>
+
+### Tuning the scroll trigger
+
+By default the reveal starts the moment the section touches the viewport
+bottom and finishes the instant it leaves the top. That can feel too
+eager — words flicker as soon as the section appears and complete while
+the reader is still mid-sentence. `startMargin` and `endMargin` let you
+push those endpoints inward so the reveal only runs through the
+"comfortable" middle of the section's pass through the viewport.
+
+Both props accept either a **number** (percentage of the total scroll
+range, `0–100`) or a **CSS length string** — `"100px"`, `"20vh"`,
+`"30dvh"`, `"5rem"`, `"15%"`, anything the browser understands. String
+values are measured at runtime, so any unit works.
+
+Both default to **`20`** (i.e. 20% on each side), which gives a soft
+trigger out of the box.
+
+<ComponentShowcase preview={<ScrollMarginTextRevealExample />}>
+
+```tsx
+<TextReveal.Root startMargin="35vh" endMargin="35vh">
+  <TextReveal.Text className="text-4xl">
+    Lorem ipsum dolor sit amet consectetur adipiscing elit.
+  </TextReveal.Text>
+</TextReveal.Root>
+```
+
+</ComponentShowcase>
+
+<Callout type="info">
+  `startMargin` and `endMargin` are scroll-mode only. In controlled mode
+  the consumer owns the value directly, so trimming the trigger range
+  doesn't apply.
+</Callout>
+
+### Replayable vs one-shot
+
+By default the reveal is reversible: in scroll mode, scrolling back up
+plays the outro; in controlled mode, lowering `progress` rewinds the
+reveal. Pass `once` to latch progress so it only ever increases — the
+outro never plays, regardless of mode.
+
+```tsx
+<TextReveal.Root once progress={progress}>
+  …
+</TextReveal.Root>
+```
+
 ### Reduced motion
 
-When the user has `prefers-reduced-motion: reduce` set, every word skips its
-transform and renders directly in the `revealed` state. No additional setup
-required — the component reads the media query via `motion`'s
+When the user has `prefers-reduced-motion: reduce` set, every word skips
+its transform and renders directly in the `revealed` state. No additional
+setup required — the component reads the media query via `motion`'s
 `useReducedMotion` hook.
 
 ## API Reference
 
 ### TextReveal.Root
 
-The scroll track. Owns a ref + `useScroll` and exposes a latched progress
-`MotionValue` to descendants via context. Renders a `<div>`.
+Container that exposes a `MotionValue<number>` (range `0–1`) to
+descendants via context. Renders a `<div>`. Operates in one of two modes
+depending on whether `progress` is provided.
 
 | Prop        | Type                                    | Default                       | Description                                                                                                                                                          |
 | ----------- | --------------------------------------- | ----------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `once`      | `boolean`                               | `false`                       | When `true`, latches progress so it only ever increases. The outro never plays, even when scrolling back up.                                                         |
-| `offset`    | `motion`'s `ScrollOffset`               | `["start end", "end start"]`  | Where the reveal starts and ends, relative to the viewport. Forwarded straight to `useScroll`.                                                                       |
-| `container` | `RefObject<HTMLElement \| null>`        | —                             | Optional scroll container to track instead of the window. When set, `offset` is interpreted relative to this element's scroll position.                              |
-| `className` | `string`                                | —                             | Merged via `cn` onto the underlying `<div>`. The root has no built-in sizing — give it a height (e.g. `min-h-[180vh]`) so there is scroll distance for the reveal. |
+| `progress`  | `number`                                | —                             | When defined, switches to **controlled mode**. Percentage `0–100` (clamped) that drives the reveal directly. When omitted, the root runs in scroll mode.            |
+| `once`      | `boolean`                               | `false`                       | When `true`, latches progress so it only ever increases. The outro never plays. Honored in both modes.                                                              |
+| `offset`    | `motion`'s `ScrollOffset`               | `["start end", "end start"]`  | **Scroll mode only.** Where the reveal starts and ends, relative to the viewport. Forwarded straight to `useScroll`. Ignored when `progress` is provided.           |
+| `container` | `RefObject<HTMLElement \| null>`        | —                             | **Scroll mode only.** Optional scroll container to track instead of the window. Ignored when `progress` is provided.                                                |
+| `startMargin` | `number \| string`                    | `20`                          | **Scroll mode only.** Delays the start of the reveal. Number = percentage of the scroll range; string = any CSS length (`"100px"`, `"20vh"`, `"30dvh"`, `"5rem"`, …). |
+| `endMargin`   | `number \| string`                    | `20`                          | **Scroll mode only.** Advances the end of the reveal. Same value shape as `startMargin`.                                                                            |
+| `className` | `string`                                | —                             | Merged via `cn` onto the underlying `<div>`. In scroll mode, give it a height (e.g. `min-h-[200vh]`) so there is scroll distance for the reveal.                   |
 | `...rest`   | `React.ComponentPropsWithoutRef<"div">` | —                             | Forwarded to the underlying `<div>`.                                                                                                                                 |
 
 Data attributes:
 `data-slot="text-reveal-root"`,
+`data-mode="scroll" | "controlled"`,
 `data-once` (empty string when `once`, otherwise absent).
 
 ### TextReveal.Text
@@ -280,9 +379,9 @@ const slideUp: TextRevealTransform = (p) => ({
 });
 ```
 
-Because the function runs inside the word's render, you can call hooks such
-as `useTransform`, `useSpring`, or `useMotionTemplate` directly — keep the
-hook order stable across renders, as usual.
+Because the function runs inside the word's render, you can call hooks
+such as `useTransform`, `useSpring`, or `useMotionTemplate` directly —
+keep the hook order stable across renders, as usual.
 
 ### Exported types
 

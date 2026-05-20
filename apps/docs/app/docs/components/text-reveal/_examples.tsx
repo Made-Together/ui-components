@@ -2,64 +2,68 @@
 
 import { TextReveal } from "@repo/ui/text-reveal";
 import { useTransform } from "motion/react";
-import { useShowcaseScrollContainer } from "../../../components/component-showcase";
+import { useId, useState } from "react";
 
-// Total scroll track inside the showcase's 600px preview viewport. Three
-// times the viewport gives a comfortable reveal distance without forcing the
-// reader through a huge scrub.
-const TRACK_CLASS = "relative h-[1800px]";
-// Fills the preview viewport so the text locks centered while scrolling.
-const STICKY_CLASS =
-  "sticky top-0 flex h-[600px] items-center justify-center px-6";
+const LOREM =
+  "Lorem ipsum dolor sit amet consectetur adipiscing elit sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.";
 
-export function BasicTextRevealExample() {
-  const container = useShowcaseScrollContainer();
+const PREVIEW_CLASS =
+  "flex w-full max-h-[528px] flex-col items-center justify-center gap-8 px-6 py-12";
+const TEXT_CLASS =
+  "max-w-3xl text-balance text-center text-2xl font-medium leading-snug text-foreground sm:text-3xl md:text-4xl";
+
+interface ProgressSliderProps {
+  value: number;
+  onChange: (next: number) => void;
+  label?: string;
+}
+
+function ProgressSlider({
+  value,
+  onChange,
+  label = "Progress",
+}: ProgressSliderProps) {
+  const id = useId();
   return (
-    <TextReveal.Root
-      container={container ?? undefined}
-      offset={["start start", "end end"]}
-      className={TRACK_CLASS}
-    >
-      <div className={STICKY_CLASS}>
-        <TextReveal.Text className="max-w-3xl text-balance text-center text-3xl font-medium leading-snug text-foreground sm:text-4xl md:text-5xl">
-          Headless components, beautiful animations, and zero opinions on how
-          your product should look.
-        </TextReveal.Text>
+    <div className="flex w-full max-w-md flex-col gap-2">
+      <div className="flex items-center justify-between text-xs text-muted-foreground">
+        <label htmlFor={id} className="font-medium">
+          {label}
+        </label>
+        <span className="font-mono tabular-nums">{value}%</span>
       </div>
-    </TextReveal.Root>
+      <input
+        id={id}
+        type="range"
+        min={0}
+        max={100}
+        value={value}
+        onChange={(event) => onChange(Number(event.target.value))}
+        className="h-1.5 w-full cursor-pointer appearance-none rounded-full bg-secondary accent-foreground"
+      />
+    </div>
   );
 }
 
-export function OnceTextRevealExample() {
-  const container = useShowcaseScrollContainer();
+export function InteractiveTextRevealExample() {
+  const [progress, setProgress] = useState(40);
   return (
-    <TextReveal.Root
-      once
-      container={container ?? undefined}
-      offset={["start start", "end end"]}
-      className={TRACK_CLASS}
-    >
-      <div className={STICKY_CLASS}>
-        <TextReveal.Text className="max-w-3xl text-balance text-center text-3xl font-medium leading-snug text-foreground sm:text-4xl md:text-5xl">
-          This reveal runs exactly once. Scroll back up and the words stay put
-          — perfect for hero sections that should never re-animate.
-        </TextReveal.Text>
-      </div>
-    </TextReveal.Root>
+    <div className={PREVIEW_CLASS}>
+      <TextReveal.Root progress={progress}>
+        <TextReveal.Text className={TEXT_CLASS}>{LOREM}</TextReveal.Text>
+      </TextReveal.Root>
+      <ProgressSlider value={progress} onChange={setProgress} />
+    </div>
   );
 }
 
 export function CustomTransformTextRevealExample() {
-  const container = useShowcaseScrollContainer();
+  const [progress, setProgress] = useState(60);
   return (
-    <TextReveal.Root
-      container={container ?? undefined}
-      offset={["start start", "end end"]}
-      className={TRACK_CLASS}
-    >
-      <div className={STICKY_CLASS}>
+    <div className={PREVIEW_CLASS}>
+      <TextReveal.Root progress={progress}>
         <TextReveal.Text
-          className="max-w-3xl text-balance text-center text-3xl font-medium leading-snug text-foreground sm:text-4xl md:text-5xl"
+          className={TEXT_CLASS}
           transform={(p) => ({
             // biome-ignore lint/correctness/useHookAtTopLevel: invoked inside TextReveal.Word's render
             opacity: useTransform(p, [0, 0.5], [0, 1]),
@@ -69,25 +73,21 @@ export function CustomTransformTextRevealExample() {
             filter: useTransform(p, [0, 1], ["blur(10px)", "blur(0px)"]),
           })}
         >
-          Translate, blur, fade — the transform prop is just a function of the
-          per-word scroll progress.
+          {LOREM}
         </TextReveal.Text>
-      </div>
-    </TextReveal.Root>
+      </TextReveal.Root>
+      <ProgressSlider value={progress} onChange={setProgress} />
+    </div>
   );
 }
 
 export function ColorTransformTextRevealExample() {
-  const container = useShowcaseScrollContainer();
+  const [progress, setProgress] = useState(50);
   return (
-    <TextReveal.Root
-      container={container ?? undefined}
-      offset={["start start", "end end"]}
-      className={TRACK_CLASS}
-    >
-      <div className={STICKY_CLASS}>
+    <div className={PREVIEW_CLASS}>
+      <TextReveal.Root progress={progress}>
         <TextReveal.Text
-          className="max-w-3xl text-balance text-center text-3xl font-medium leading-snug sm:text-4xl md:text-5xl"
+          className={TEXT_CLASS}
           transform={(p) => ({
             // biome-ignore lint/correctness/useHookAtTopLevel: invoked inside TextReveal.Word's render
             color: useTransform(
@@ -96,27 +96,21 @@ export function ColorTransformTextRevealExample() {
               ["rgb(156 163 175 / 0.35)", "rgb(23 23 23)"],
             ),
           })}
-          wordClassName="dark:[--reveal-end:theme(colors.neutral.50)]"
         >
-          Drive color, not opacity. Each word smoothly inks in as it crosses
-          its slice of the page scroll.
+          {LOREM}
         </TextReveal.Text>
-      </div>
-    </TextReveal.Root>
+      </TextReveal.Root>
+      <ProgressSlider value={progress} onChange={setProgress} />
+    </div>
   );
 }
 
 export function ComposedWordTextRevealExample() {
-  const container = useShowcaseScrollContainer();
-  const words = ["Composition", "over", "configuration", "—", "always."];
+  const words = ["Lorem", "ipsum", "dolor", "sit", "amet."];
   return (
-    <TextReveal.Root
-      container={container ?? undefined}
-      offset={["start start", "end end"]}
-      className={TRACK_CLASS}
-    >
-      <div className={STICKY_CLASS}>
-        <p className="flex max-w-3xl flex-wrap justify-center gap-x-3 gap-y-2 text-balance text-center text-3xl font-medium leading-snug text-foreground sm:text-4xl md:text-5xl">
+    <div className={PREVIEW_CLASS}>
+      <TextReveal.Root progress={65}>
+        <p className="flex max-w-3xl flex-wrap justify-center gap-x-3 gap-y-2 text-balance text-center text-2xl font-medium leading-snug text-foreground sm:text-3xl md:text-4xl">
           {words.map((word, i) => (
             <TextReveal.Word
               key={word}
@@ -140,7 +134,27 @@ export function ComposedWordTextRevealExample() {
             </TextReveal.Word>
           ))}
         </p>
-      </div>
-    </TextReveal.Root>
+      </TextReveal.Root>
+    </div>
+  );
+}
+
+export function ScrollTextRevealExample() {
+  return (
+    <div className={PREVIEW_CLASS}>
+      <TextReveal.Root>
+        <TextReveal.Text className={TEXT_CLASS}>This is a text</TextReveal.Text>
+      </TextReveal.Root>
+    </div>
+  );
+}
+
+export function ScrollMarginTextRevealExample() {
+  return (
+    <div className={PREVIEW_CLASS}>
+      <TextReveal.Root startMargin="35vh" endMargin="35vh">
+        <TextReveal.Text className={TEXT_CLASS}>{LOREM}</TextReveal.Text>
+      </TextReveal.Root>
+    </div>
   );
 }
