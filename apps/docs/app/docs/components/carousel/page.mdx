@@ -212,6 +212,25 @@ the user-interaction behavior, or `autoplay={false}` to disable it entirely.
 Pass `options={{ loop: true }}` to wrap in both directions. With looping
 enabled, `Carousel.Previous` and `Carousel.Next` never disable.
 
+### Wheel gestures
+
+Horizontal trackpad swipes and horizontal mouse-wheel events over the
+viewport advance the carousel by one snap at a time. Only horizontal-dominant
+deltas are consumed — vertical scrolling passes straight through to the
+page, so the carousel never blocks scrolling past it. Pass
+`wheelGestures={false}` to disable.
+
+```tsx
+<Carousel.Root wheelGestures={false}>…</Carousel.Root>
+```
+
+<Callout type="info">
+  Each consumed gesture moves the carousel by one snap, with a short cooldown
+  between moves so a single inertial trackpad swipe doesn't skip multiple
+  slides. Only horizontal deltas (`deltaX`) are consumed; vertical carousels
+  are not affected by this feature.
+</Callout>
+
 ### Multi-slide layouts
 
 Slide width is just CSS — set `flex-[0_0_33.333%]` (or any other basis) on
@@ -363,6 +382,7 @@ sub-component. Extends all native `div` props.
 | `options`     | `undefined` | Embla [options](https://www.embla-carousel.com/api/options/) (e.g. `loop`, `align`, `dragFree`, `axis`, `slidesToScroll`). |
 | `plugins`     | `undefined` | Embla [plugins](https://www.embla-carousel.com/plugins/). If you supply your own `Autoplay()` here, the `autoplay` prop is ignored. |
 | `autoplay`    | `true`      | Configures the built-in autoplay plugin. Pass `false` to disable, or an options object to override delays and behavior. |
+| `wheelGestures` | `true`    | Enables horizontal wheel/trackpad gestures on the viewport. Only horizontal-dominant deltas advance the carousel; vertical scrolling passes through. Pass `false` to disable. |
 | `onApiChange` | `undefined` | Fired whenever the Embla API reference changes. Useful for wiring up custom listeners.                                  |
 
 Data attributes: `data-slot="carousel-root"`.
