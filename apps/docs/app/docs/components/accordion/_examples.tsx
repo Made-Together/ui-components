@@ -5,28 +5,28 @@ import { useState } from "react";
 
 const faqItems = [
   {
-    value: "headless",
-    title: "Is the accordion headless?",
+    value: "a",
+    title: "Lorem ipsum dolor sit amet?",
     content:
-      "Yes. The component ships with semantic markup (ul > li > h3 > button) and ARIA wiring only — visual styling, spacing and transitions are all up to the consumer via className and data-state.",
+      "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
   },
   {
-    value: "a11y",
-    title: "What about keyboard support?",
+    value: "b",
+    title: "Duis aute irure dolor in reprehenderit?",
     content:
-      "Triggers expose aria-expanded and aria-controls, and the panel is a region labelled by its trigger. Use ArrowDown / ArrowUp to move between triggers, Home jumps to the first, End to the last.",
+      "Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Curabitur pretium tincidunt lacus, nulla gravida orci a odio nullam varius.",
   },
   {
-    value: "controlled",
-    title: "Can I control the open state?",
+    value: "c",
+    title: "Nulla facilisi morbi tempus iaculis?",
     content:
-      "Yes — pass value + onValueChange for controlled usage, or defaultValue to leave the component in charge. Both single (string) and multiple (string[]) modes are supported.",
+      "Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt.",
   },
   {
-    value: "animation",
-    title: "How do I animate the panel?",
+    value: "d",
+    title: "Quis autem vel eum iure reprehenderit?",
     content:
-      'Every part exposes data-state="open" | "closed" so you can drive CSS transitions or motion variants. The default Accordion.Content already animates open/close via grid-template-rows.',
+      "At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti quos dolores et quas molestias excepturi sint occaecati cupiditate non provident.",
   },
 ];
 
@@ -48,6 +48,42 @@ function ChevronDown({ className }: { className?: string }) {
   );
 }
 
+function Plus({ className }: { className?: string }) {
+  return (
+    <svg
+      aria-hidden="true"
+      viewBox="0 0 20 20"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={1.75}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+    >
+      <title>Plus</title>
+      <path d="M10 4.5v11M4.5 10h11" />
+    </svg>
+  );
+}
+
+function Minus({ className }: { className?: string }) {
+  return (
+    <svg
+      aria-hidden="true"
+      viewBox="0 0 20 20"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={1.75}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+    >
+      <title>Minus</title>
+      <path d="M4.5 10h11" />
+    </svg>
+  );
+}
+
 export function BasicAccordionExample() {
   return (
     <Accordion.Root
@@ -60,7 +96,7 @@ export function BasicAccordionExample() {
           <Accordion.Heading>
             <Accordion.Trigger className="group flex w-full items-center justify-between gap-4 px-5 py-4 text-left text-sm font-medium text-foreground hover:bg-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
               {item.title}
-              <Accordion.Indicator className="text-muted-foreground">
+              <Accordion.Indicator className="text-muted-foreground data-[state=open]:-rotate-180">
                 <ChevronDown className="size-4" />
               </Accordion.Indicator>
             </Accordion.Trigger>
@@ -90,7 +126,7 @@ export function MultipleAccordionExample() {
           <Accordion.Heading>
             <Accordion.Trigger className="flex w-full items-center justify-between gap-4 px-4 py-3 text-left text-sm font-medium hover:bg-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
               {item.title}
-              <Accordion.Indicator className="">
+              <Accordion.Indicator className="data-[state=open]:-rotate-180">
                 <ChevronDown className="size-3.5" />
               </Accordion.Indicator>
             </Accordion.Trigger>
@@ -118,7 +154,7 @@ export function ControlledAccordionExample() {
               setValue((cur) => (cur === item.value ? null : item.value))
             }
             data-active={value === item.value || undefined}
-            className="rounded-full border border-border px-3 py-1 font-medium text-muted-foreground transition hover:text-foreground data-[active]:border-foreground data-[active]:bg-foreground data-[active]:text-background"
+            className="rounded-full border border-border px-3 py-1 font-medium text-muted-foreground transition-all hover:text-foreground data-[active]:border-foreground data-[active]:bg-foreground data-[active]:text-background"
           >
             {item.value}
           </button>
@@ -142,7 +178,7 @@ export function ControlledAccordionExample() {
             <Accordion.Heading>
               <Accordion.Trigger className="flex w-full items-center justify-between gap-4 px-5 py-4 text-left text-sm font-medium text-foreground hover:bg-secondary">
                 {item.title}
-                <Accordion.Indicator className="text-muted-foreground">
+                <Accordion.Indicator className="text-muted-foreground data-[state=open]:-rotate-180">
                   <ChevronDown className="size-4" />
                 </Accordion.Indicator>
               </Accordion.Trigger>
@@ -179,7 +215,7 @@ export function DisabledAccordionExample() {
                   Disabled
                 </span>
               ) : (
-                <Accordion.Indicator className="text-muted-foreground">
+                <Accordion.Indicator className="text-muted-foreground data-[state=open]:-rotate-180">
                   <ChevronDown className="size-4" />
                 </Accordion.Indicator>
               )}
@@ -207,9 +243,64 @@ export function NonCollapsibleAccordionExample() {
           <Accordion.Heading>
             <Accordion.Trigger className="flex w-full items-center justify-between gap-4 px-5 py-4 text-left text-sm font-medium text-foreground hover:bg-secondary">
               {item.title}
-              <Accordion.Indicator className="text-muted-foreground">
+              <Accordion.Indicator className="text-muted-foreground data-[state=open]:-rotate-180">
                 <ChevronDown className="size-4" />
               </Accordion.Indicator>
+            </Accordion.Trigger>
+          </Accordion.Heading>
+          <Accordion.Content className="px-5 text-sm leading-relaxed text-muted-foreground">
+            {item.content}
+          </Accordion.Content>
+        </Accordion.Item>
+      ))}
+    </Accordion.Root>
+  );
+}
+
+export function PlusMinusAccordionExample() {
+  return (
+    <Accordion.Root
+      type="single"
+      defaultValue="headless"
+      className="w-full max-w-xl divide-y divide-border overflow-hidden rounded-2xl border border-border bg-card"
+    >
+      {faqItems.map((item) => (
+        <Accordion.Item key={item.value} value={item.value}>
+          <Accordion.Heading>
+            <Accordion.Trigger className="flex w-full items-center justify-between gap-4 px-5 py-4 text-left text-sm font-medium text-foreground hover:bg-secondary">
+              {item.title}
+              <Accordion.Indicator className="flex size-6 items-center justify-center text-muted-foreground">
+                {({ open }) =>
+                  open ? (
+                    <Minus className="size-3.5" />
+                  ) : (
+                    <Plus className="size-3.5" />
+                  )
+                }
+              </Accordion.Indicator>
+            </Accordion.Trigger>
+          </Accordion.Heading>
+          <Accordion.Content className="px-5 text-sm leading-relaxed text-muted-foreground">
+            {item.content}
+          </Accordion.Content>
+        </Accordion.Item>
+      ))}
+    </Accordion.Root>
+  );
+}
+
+export function NoIndicatorAccordionExample() {
+  return (
+    <Accordion.Root
+      type="single"
+      defaultValue="headless"
+      className="w-full max-w-xl divide-y divide-border overflow-hidden rounded-2xl border border-border bg-card"
+    >
+      {faqItems.map((item) => (
+        <Accordion.Item key={item.value} value={item.value}>
+          <Accordion.Heading>
+            <Accordion.Trigger className="flex w-full items-center justify-between gap-4 px-5 py-4 text-left text-sm font-medium text-foreground hover:bg-secondary data-[state=open]:text-foreground">
+              <span>{item.title}</span>
             </Accordion.Trigger>
           </Accordion.Heading>
           <Accordion.Content className="px-5 text-sm leading-relaxed text-muted-foreground">

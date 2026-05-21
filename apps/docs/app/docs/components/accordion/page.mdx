@@ -12,7 +12,9 @@ import {
   ControlledAccordionExample,
   DisabledAccordionExample,
   MultipleAccordionExample,
+  NoIndicatorAccordionExample,
   NonCollapsibleAccordionExample,
+  PlusMinusAccordionExample,
 } from "./_examples";
 
 # Accordion
@@ -29,9 +31,9 @@ on every part so you can drive transitions purely from CSS.
 import { Accordion } from "@made-together/ui/accordion";
 
 const faqItems = [
-  { value: "headless", title: "Is the accordion headless?", content: "…" },
-  { value: "a11y", title: "What about keyboard support?", content: "…" },
-  { value: "controlled", title: "Can I control the open state?", content: "…" },
+  { value: "headless", title: "Lorem ipsum dolor sit amet?", content: "…" },
+  { value: "a11y", title: "Duis aute irure dolor?", content: "…" },
+  { value: "controlled", title: "Nulla facilisi morbi tempus?", content: "…" },
 ];
 
 export function BasicAccordion() {
@@ -46,7 +48,7 @@ export function BasicAccordion() {
           <Accordion.Heading>
             <Accordion.Trigger className="flex w-full items-center justify-between gap-4 px-5 py-4 text-left text-sm font-medium hover:bg-neutral-50">
               {item.title}
-              <Accordion.Indicator className="text-neutral-500">
+              <Accordion.Indicator className="text-neutral-500 data-[state=open]:-rotate-180">
                 <ChevronDown className="size-4" />
               </Accordion.Indicator>
             </Accordion.Trigger>
@@ -119,7 +121,10 @@ sibling of `Heading`:
   trigger. The default styles animate `grid-template-rows` from `0fr` to
   `1fr`, giving you a smooth height transition without measuring anything.
 - **`Accordion.Indicator`** is an optional decorative `<span>` that mirrors
-  the item's `data-state` — handy for a chevron that rotates on open.
+  the item's `data-state`. It applies no transform by default — drive
+  transitions yourself via `data-[state=open]:…` classes, or pass a function
+  as children (`{({ open }) => …}`) to render different content per state
+  (great for plus/minus pairs).
 
 <Callout type="info">
   Open state lives in a ref + per-key listener map inside `Accordion.Root`.
@@ -233,22 +238,61 @@ are skipped during keyboard navigation, and the item exposes
 
 </ComponentShowcase>
 
+### Plus / minus icons
+
+For indicators that need to change content between states (not just
+transform), pass a function as children. The render prop receives the item's
+`open` state, so you can return a different icon for each.
+
+<ComponentShowcase preview={<PlusMinusAccordionExample />}>
+
+```tsx
+<Accordion.Indicator className="grid size-6 place-items-center rounded-full bg-foreground/5 text-muted-foreground">
+  {({ open }) =>
+    open ? <Minus className="size-3.5" /> : <Plus className="size-3.5" />
+  }
+</Accordion.Indicator>
+```
+
+</ComponentShowcase>
+
+### Without an indicator
+
+`Accordion.Indicator` is fully optional. Omit it entirely when the trigger
+content already communicates the open state — e.g. when you're styling the
+trigger label itself via `data-[state=open]:…` or relying solely on the
+panel slide.
+
+<ComponentShowcase preview={<NoIndicatorAccordionExample />}>
+
+```tsx
+<Accordion.Trigger className="flex w-full items-center justify-between gap-4 px-5 py-4">
+  <span>{item.title}</span>
+  <span className="text-xs uppercase tracking-wide text-muted-foreground">
+    {item.value}
+  </span>
+</Accordion.Trigger>
+```
+
+</ComponentShowcase>
+
 ### Animating the panel
 
 The default `Accordion.Content` animates open/close via a
 `grid-template-rows: 0fr → 1fr` transition — no JS measurement, no layout
 thrash. Every part also exposes `data-state="open" | "closed"`, so you can
 add your own transitions on the trigger, the indicator, or any nested
-element.
+element. `Accordion.Indicator` ships a `transition: transform` base so any
+transform you add animates smoothly without extra classes.
 
 ```tsx
-<Accordion.Indicator className="transition-transform data-[state=open]:-rotate-180">
+<Accordion.Indicator className="data-[state=open]:-rotate-180">
   <ChevronDown />
 </Accordion.Indicator>
 ```
 
-The library already applies `-rotate-180` on open by default — you only
-need to override or extend if you want a different transform.
+No transform is applied by default — rotation, scaling, or any other open
+state styling is opt-in via `data-[state=open]:…` classes on the indicator.
 
 ## Examples
 
@@ -270,7 +314,7 @@ ring color picks up the open state via `data-[state=open]`.
       <Accordion.Heading>
         <Accordion.Trigger className="flex w-full items-center justify-between gap-4 px-4 py-3 text-left text-sm font-medium">
           {item.title}
-          <Accordion.Indicator className="grid size-6 place-items-center rounded-full bg-neutral-100">
+          <Accordion.Indicator className="grid size-6 place-items-center rounded-full bg-neutral-100 data-[state=open]:-rotate-180">
             <ChevronDown className="size-3.5" />
           </Accordion.Indicator>
         </Accordion.Trigger>
@@ -413,13 +457,15 @@ default, with `motion-reduce:transition-none` honoring the user's preference.
 ### Accordion.Indicator
 
 Decorative `<span>` rendered inside the trigger. Mirrors `data-state` and
-rotates by `-180deg` on open by default.
+ships a `transition: transform` base so any open-state transform you add via
+`className` animates smoothly. No transform is applied by default — drive
+rotation, scale, etc. yourself with `data-[state=open]:…` classes.
 
-| Prop        | Type                                     | Default | Description                                                                                  |
-| ----------- | ---------------------------------------- | ------- | -------------------------------------------------------------------------------------------- |
-| `className` | `string`                                 | —       | Merged via `cn` — defaults include the rotate-on-open transition you can override or extend. |
-| `children`  | `React.ReactNode`                        | —       | The icon (chevron, plus/minus, etc.) to render inside the indicator.                         |
-| `...rest`   | `React.ComponentPropsWithoutRef<"span">` | —       | Forwarded to the underlying `<span>`.                                                         |
+| Prop        | Type                                                              | Default | Description                                                                                                                                                       |
+| ----------- | ----------------------------------------------------------------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `className` | `string`                                                          | —       | Merged via `cn`. Add `data-[state=open]:…` utilities here to drive transitions on open/close.                                                                     |
+| `children`  | `React.ReactNode \| (({ open }: { open: boolean }) => React.ReactNode)` | —       | Either a static node (typical chevron usage) or a function returning a node per state — pass a function to swap icons on open/close (e.g. plus → minus).         |
+| `...rest`   | `React.ComponentPropsWithoutRef<"span">`                          | —       | Forwarded to the underlying `<span>`.                                                                                                                              |
 
 `aria-hidden="true"` is always set so the indicator never announces to
 assistive tech. Data attributes: `data-slot="accordion-indicator"`,
