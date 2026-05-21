@@ -23,7 +23,7 @@
 - [ ] More tests..?
 
 # Docs
-- [ ] Fix the accordion documentation examples styling
+- [x] Fix the accordion documentation examples styling
 - [x] Diversify the examples on carousel documentation; maybe add unsplash images?
 - [ ] Add better examples on marquee documentation
 - [ ] Do a double check and remove any `...rest` props on component documentations
