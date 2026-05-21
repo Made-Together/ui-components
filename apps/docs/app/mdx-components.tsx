@@ -1,6 +1,7 @@
 import { useMDXComponents as getThemeComponents } from "nextra-theme-docs";
 import type {
   ComponentPropsWithoutRef,
+  ComponentType,
   HTMLAttributes,
   TableHTMLAttributes,
   ThHTMLAttributes,
@@ -52,6 +53,23 @@ function Td(props: ComponentPropsWithoutRef<"td">) {
 
 const themeComponents = getThemeComponents();
 
+// Nextra's `pre` is the full code-block render (outer wrapper, copy button,
+// shiki spans). We re-use it so we don't lose those features, and only
+// override the visual chrome via `!important` so our classes win against
+// Nextra's prefixed `x:` defaults (ring, bg, rounding).
+const ThemePre = themeComponents.pre as ComponentType<
+  ComponentPropsWithoutRef<"pre">
+>;
+
+function Pre({ className, ...props }: ComponentPropsWithoutRef<"pre">) {
+  return (
+    <ThemePre
+      {...props}
+      className={`${className ?? ""} rounded-lg bg-foreground/2 dark:bg-foreground/3 ring-0!`.trim()}
+    />
+  );
+}
+
 const tableComponents = {
   table: Table,
   thead: Thead,
@@ -61,12 +79,17 @@ const tableComponents = {
   td: Td,
 };
 
+const codeComponents = {
+  pre: Pre,
+};
+
 export function useMDXComponents(
   components: Record<string, React.ComponentType<unknown>>,
 ) {
   return {
     ...themeComponents,
     ...tableComponents,
+    ...codeComponents,
     ...components,
   };
 }

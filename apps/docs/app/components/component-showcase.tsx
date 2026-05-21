@@ -1,9 +1,9 @@
 "use client";
 
 import {
+  createContext,
   type ReactNode,
   type RefObject,
-  createContext,
   useCallback,
   useContext,
   useEffect,
@@ -125,7 +125,7 @@ export function ComponentShowcase({
           {preview}
         </div>
       )}
-      <div className="relative border-t border-border">
+      <div className="relative border-t border-border [&_pre]:rounded-t-none">
         <div
           ref={codeRef}
           style={{ maxHeight }}
