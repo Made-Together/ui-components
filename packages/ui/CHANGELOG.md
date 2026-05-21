@@ -1,5 +1,20 @@
 # @repo/ui
 
+## 0.2.0
+
+### Minor Changes
+
+- 810ae6a: Updated default values handling for gap and duration in `<Marquee />` component, messing with tailwind directed css values.
+
+### Patch Changes
+
+- e98eb22: Enhanced `<Accordion.Indicator /> component with state-based content rendering and improved CSS transitions.
+- ceb0b69: Implemented additional default behaviour on the `<Carousel />` component.
+
+  It now fully supports horizontal mouse scrolling.
+
+  Also, fixed autoplay behaviour on user interaction - it now resets the autoplay timer for the next slide after user interaction.
+
 ## 0.1.0
 
 ### Minor Changes
