@@ -112,6 +112,15 @@ interface CarouselRootProps extends react.ComponentPropsWithoutRef<"div"> {
    */
   autoplay?: CarouselAutoplay;
   /**
+   * Enables horizontal wheel/trackpad gestures over the viewport. Only
+   * horizontal wheel deltas (e.g. trackpad two-finger horizontal swipes,
+   * horizontal mouse wheels) advance the carousel; vertical scrolling passes
+   * through to the page untouched. Pass `false` to disable.
+   *
+   * @default true
+   */
+  wheelGestures?: boolean;
+  /**
    * Callback function that is called when the Embla API changes.
    *
    * @param api - The new Embla API.
@@ -121,7 +130,15 @@ interface CarouselRootProps extends react.ComponentPropsWithoutRef<"div"> {
 
 const Root = react.forwardRef<HTMLDivElement, CarouselRootProps>(
   function CarouselRoot(
-    { options, plugins, autoplay = true, onApiChange, children, ...rest },
+    {
+      options,
+      plugins,
+      autoplay = true,
+      wheelGestures = true,
+      onApiChange,
+      children,
+      ...rest
+    },
     ref,
   ) {
     const resolvedPlugins = react.useMemo(() => {
@@ -153,6 +170,37 @@ const Root = react.forwardRef<HTMLDivElement, CarouselRootProps>(
       if (autoplay === false) return;
       emblaApi.plugins().autoplay?.play();
     }, [emblaApi, autoplay]);
+
+    react.useEffect(() => {
+      if (!emblaApi || wheelGestures === false) return;
+      const viewport = emblaApi.rootNode();
+      if (!viewport) return;
+
+      let cooldown = false;
+      let cooldownTimer: ReturnType<typeof setTimeout> | undefined;
+
+      const onWheel = (event: WheelEvent) => {
+        const { deltaX, deltaY } = event;
+        // Only act on horizontal-dominant gestures so vertical page
+        // scrolling is never hijacked.
+        if (Math.abs(deltaX) <= Math.abs(deltaY)) return;
+        if (Math.abs(deltaX) < 10) return;
+        event.preventDefault();
+        if (cooldown) return;
+        if (deltaX > 0) emblaApi.scrollNext();
+        else emblaApi.scrollPrev();
+        cooldown = true;
+        cooldownTimer = setTimeout(() => {
+          cooldown = false;
+        }, 400);
+      };
+
+      viewport.addEventListener("wheel", onWheel, { passive: false });
+      return () => {
+        viewport.removeEventListener("wheel", onWheel);
+        if (cooldownTimer) clearTimeout(cooldownTimer);
+      };
+    }, [emblaApi, wheelGestures]);
 
     react.useEffect(() => {
       onApiChange?.(emblaApi);
