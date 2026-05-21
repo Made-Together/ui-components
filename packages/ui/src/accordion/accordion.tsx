@@ -352,10 +352,11 @@ const ACCORDION_BEHAVIORAL_CSS = `
 [data-slot="accordion-indicator"] {
   display: inline-flex;
   flex-shrink: 0;
-  transition: transform 200ms ease-out;
-}
-[data-slot="accordion-indicator"][data-state="open"] {
-  transform: rotate(-180deg);
+  transition:
+    transform 200ms ease-out,
+    rotate 200ms ease-out,
+    scale 200ms ease-out,
+    translate 200ms ease-out;
 }
 @media (prefers-reduced-motion: reduce) {
   [data-slot="accordion-trigger"],
@@ -548,13 +549,22 @@ const Content = forwardRef<HTMLDivElement, AccordionContentProps>(
   },
 );
 
-interface AccordionIndicatorProps extends ComponentPropsWithoutRef<"span"> {
-  children?: ReactNode;
+interface AccordionIndicatorProps
+  extends Omit<ComponentPropsWithoutRef<"span">, "children"> {
+  /**
+   * Indicator content. Pass a ReactNode for a static icon (typically paired
+   * with a `data-[state=open]:…` className for the open transform), or a
+   * function `({ open }) => ReactNode` to render different content per state
+   * — useful for plus/minus pairs.
+   */
+  children?: ReactNode | ((state: { open: boolean }) => ReactNode);
 }
 
 const Indicator = forwardRef<HTMLSpanElement, AccordionIndicatorProps>(
   function AccordionIndicator({ className, children, ...rest }, ref) {
     const item = useAccordionItem("Accordion.Indicator");
+    const resolved =
+      typeof children === "function" ? children({ open: item.open }) : children;
     return (
       <span
         ref={ref}
@@ -564,7 +574,7 @@ const Indicator = forwardRef<HTMLSpanElement, AccordionIndicatorProps>(
         className={cn(className)}
         {...rest}
       >
-        {children}
+        {resolved}
       </span>
     );
   },
@@ -616,8 +626,13 @@ type AccordionComposition = {
    */
   Content: typeof Content;
   /**
-   * Decorative indicator (e.g. chevron) rendered inside the trigger. Mirrors
-   * `data-state` from the item so it can be animated via CSS.
+   * Decorative indicator (e.g. chevron, plus/minus) rendered inside the
+   * trigger. Mirrors `data-state` from the item so it can be animated via
+   * CSS — e.g. rotate a chevron with
+   * `className="data-[state=open]:-rotate-180"`. For per-state content swaps
+   * (plus → minus, custom icons), pass a function as children:
+   * `{({ open }) => (open ? <Minus /> : <Plus />)}`. No rotation is applied
+   * by default — every visual decision lives with the consumer.
    */
   Indicator: typeof Indicator;
 };
