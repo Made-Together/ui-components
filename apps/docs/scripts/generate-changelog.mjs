@@ -63,6 +63,40 @@ function stripLeadingH1(md) {
   return md.replace(/^#\s+.*\n+/, "");
 }
 
+function normalizeComponentTags(md) {
+  const lines = md.split("\n");
+  let inFence = false;
+  return lines
+    .map((line) => {
+      if (/^\s*```/.test(line)) {
+        inFence = !inFence;
+        return line;
+      }
+      if (inFence) return line;
+      return line.replace(
+        /(`{1,2})?<(\/?)([A-Za-z][A-Za-z0-9]*(?:\s*\.\s*[A-Za-z][A-Za-z0-9]*)*)([^>`]*)>(`{1,2})?/g,
+        (match, lead, slash, name, rest, trail) => {
+          if (!lead && !trail) return match;
+          if (rest.includes("://")) return match;
+          const cap = name
+            .split(".")
+            .map((part) => {
+              const p = part.trim();
+              return p ? p[0].toUpperCase() + p.slice(1) : p;
+            })
+            .join(".");
+          if (slash === "/") return `</${cap}>`;
+          const trimmed = rest.trim();
+          const isSelfClose = trimmed.endsWith("/");
+          const body = isSelfClose ? trimmed.slice(0, -1).trim() : trimmed;
+          const attrs = body ? ` ${body}` : "";
+          return isSelfClose ? `<${cap}${attrs} />` : `<${cap}${attrs}>`;
+        },
+      );
+    })
+    .join("\n");
+}
+
 function escapeJsxLikeAngleBrackets(md) {
   const lines = md.split("\n");
   let inFence = false;
@@ -98,7 +132,8 @@ function formatDate(iso) {
 function annotateVersionHeadings(md) {
   return md.replace(/^##\s+(\S+)[ \t]*$/gm, (line, version) => {
     const date = getVersionDate(version);
-    return date ? `## ${version} | ${formatDate(date)}` : line;
+    if (!date) return line;
+    return `## ${version}\n\n<p className="text-base text-muted-foreground -mb-3">\n  Released: ${formatDate(date)}\n</p>`;
   });
 }
 
@@ -119,10 +154,11 @@ async function buildBody() {
   }
   const raw = await readFile(sourceChangelog, "utf8");
   const stripped = stripLeadingH1(raw).trimStart();
-  const dated = annotateVersionHeadings(stripped);
-  const linked = linkifyCommitPrefixes(dated, getRepoUrl());
-  const safe = escapeJsxLikeAngleBrackets(linked);
-  return `\n${safe.trimEnd()}\n`;
+  const linked = linkifyCommitPrefixes(stripped, getRepoUrl());
+  const normalized = normalizeComponentTags(linked);
+  const safe = escapeJsxLikeAngleBrackets(normalized);
+  const dated = annotateVersionHeadings(safe);
+  return `\n${dated.trimEnd()}\n`;
 }
 
 async function main() {
