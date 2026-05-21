@@ -27,23 +27,13 @@ reset is invisible regardless of how wide your container is.
 ```tsx
 import { Marquee } from "@made-together/ui/marquee";
 
-const words = [
-  "Motion",
-  "Layout",
-  "Tokens",
-  "A11y",
-  "Composition",
-  "Tailwind",
-  "React",
-];
-
 export function BasicMarquee() {
   return (
     <Marquee.Root className="rounded-xl border [--gap:2rem] [--duration:35s]">
-      {words.map((word) => (
-        <Marquee.Item key={word}>
+      {items.map((item) => (
+        <Marquee.Item key={item}>
           <span className="inline-flex items-center rounded-full border bg-white px-4 py-2 text-sm font-medium shadow-sm">
-            {word}
+            {item}
           </span>
         </Marquee.Item>
       ))}
@@ -83,7 +73,7 @@ scoped animation CSS, and the duplication that keeps the loop seamless.
 ```
 
 - **`Marquee.Root`** renders a clipped `<div>` and injects a `<style>` block
-  scoped to the instance via a `useId()`-derived token, so multiple marquees
+  scoped to the instance via a derived token, so multiple marquees
   on the same page never share keyframes.
 - **`Marquee.Item`** renders a `<div>` with `data-marquee-item` and
   `flex-shrink: 0` applied automatically.

@@ -1,25 +1,25 @@
 "use client";
 
 import { Marquee } from "@made-together/ui/marquee";
+import { Logos } from "../swappable/_logos";
 
 const words = [
-  "Motion",
-  "Layout",
-  "Tokens",
-  "A11y",
-  "Composition",
-  "Tailwind",
-  "React",
+  "lorem",
+  "ipsum",
+  "dolor",
+  "sit",
+  "amet",
+  "consectetur",
+  "adipiscing",
+  "elit",
 ];
-
-const logos = ["Acme", "Globex", "Initech", "Umbrella", "Soylent", "Hooli"];
 
 export function BasicMarqueeExample() {
   return (
-    <Marquee.Root className="w-full rounded-xl border border-border bg-card [--gap:2rem] [--duration:35s]">
+    <Marquee.Root className="w-full rounded-xl border border-border bg-card [--gap:0.775rem] [--duration:35s]">
       {words.map((word) => (
         <Marquee.Item key={word}>
-          <span className="inline-flex items-center rounded-full border border-border bg-background px-4 py-2 text-sm font-medium text-foreground shadow-sm">
+          <span className="inline-flex items-center rounded-full border border-border bg-background px-4 py-2 text-sm font-medium text-foreground">
             {word}
           </span>
         </Marquee.Item>
@@ -32,7 +32,7 @@ export function ReverseMarqueeExample() {
   return (
     <Marquee.Root
       reverse
-      className="w-full rounded-xl bg-foreground text-background [--gap:1.25rem] [--duration:18s]"
+      className="w-full rounded-xl bg-foreground text-background [--gap:0.575rem] [--duration:18s]"
     >
       {words.map((word) => (
         <Marquee.Item key={word}>
@@ -49,13 +49,16 @@ export function PauseOnHoverMarqueeExample() {
   return (
     <Marquee.Root
       pauseOnHover
-      className="w-full cursor-default rounded-xl border border-dashed border-border bg-card [--gap:2rem] [--duration:28s]"
+      className="w-full cursor-default py-6! rounded-xl border border-dashed border-border bg-card [--gap:0.333rem] [--duration:28s]"
     >
-      {logos.map((logo) => (
-        <Marquee.Item key={logo}>
-          <span className="text-base font-semibold uppercase tracking-[0.2em] text-muted-foreground">
-            {logo}
-          </span>
+      {Logos.map((Logo, i) => (
+        <Marquee.Item
+          // biome-ignore lint/suspicious/noArrayIndexKey: stable static list
+          key={i}
+        >
+          <div className="flex h-10 w-28 items-center justify-center [&_img]:max-h-full [&_img]:max-w-full [&_img]:object-contain">
+            <Logo />
+          </div>
         </Marquee.Item>
       ))}
     </Marquee.Root>
@@ -87,7 +90,7 @@ export function VerticalMarqueeExample() {
 
 export function FastMarqueeExample() {
   return (
-    <Marquee.Root className="w-full rounded-xl bg-card [--gap:1rem] [--duration:6s]">
+    <Marquee.Root className="w-full rounded-xl bg-card [--gap:1rem] [--duration:2s]">
       {words.map((word) => (
         <Marquee.Item key={word}>
           <span className="inline-flex items-center rounded-md bg-foreground/5 px-3 py-1.5 text-sm font-medium text-foreground">
@@ -105,11 +108,14 @@ export function LogoCloudMarqueeExample() {
       pauseOnHover
       className="w-full rounded-xl bg-card [--gap:3rem] [--duration:30s]"
     >
-      {logos.map((logo) => (
-        <Marquee.Item key={logo}>
-          <span className="text-xl font-bold tracking-tight text-muted-foreground transition-colors hover:text-foreground">
-            {logo}
-          </span>
+      {Logos.map((Logo, i) => (
+        <Marquee.Item
+          // biome-ignore lint/suspicious/noArrayIndexKey: stable static list
+          key={i}
+        >
+          <div className="flex h-12 w-32 items-center justify-center opacity-70 grayscale transition hover:opacity-100 hover:grayscale-0 [&_img]:max-h-full [&_img]:max-w-full [&_img]:object-contain">
+            <Logo />
+          </div>
         </Marquee.Item>
       ))}
     </Marquee.Root>
