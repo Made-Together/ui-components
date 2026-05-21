@@ -29,8 +29,6 @@ function cssScopeToken(raw: string): string {
 
 function marqueeScopedCss(scope: string): string {
   return `[data-marquee-instance="${scope}"] {
-  --duration: 40s;
-  --gap: 1rem;
   display: flex;
   overflow: hidden;
   padding: 0.5rem;
@@ -45,7 +43,7 @@ function marqueeScopedCss(scope: string): string {
   display: flex;
   height: max-content;
   width: max-content;
-  gap: var(--gap);
+  gap: var(--gap, 1rem);
 }
 [data-marquee-instance="${scope}"][data-marquee-vertical="false"] > [data-marquee-track] {
   flex-direction: row;
@@ -57,7 +55,7 @@ function marqueeScopedCss(scope: string): string {
   display: flex;
   flex-shrink: 0;
   justify-content: space-around;
-  gap: var(--gap);
+  gap: var(--gap, 1rem);
 }
 [data-marquee-instance="${scope}"][data-marquee-vertical="false"] [data-marquee-copy] {
   flex-direction: row;
@@ -82,10 +80,10 @@ function marqueeScopedCss(scope: string): string {
   }
 }
 [data-marquee-instance="${scope}"][data-marquee-vertical="false"] > [data-marquee-track] {
-  animation: bt-marquee-x-${scope} var(--duration) infinite linear;
+  animation: bt-marquee-x-${scope} var(--duration, 40s) infinite linear;
 }
 [data-marquee-instance="${scope}"][data-marquee-vertical="true"] > [data-marquee-track] {
-  animation: bt-marquee-y-${scope} var(--duration) linear infinite;
+  animation: bt-marquee-y-${scope} var(--duration, 40s) linear infinite;
 }
 [data-marquee-instance="${scope}"][data-marquee-reverse="true"] > [data-marquee-track] {
   animation-direction: reverse;
