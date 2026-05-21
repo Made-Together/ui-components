@@ -177,6 +177,13 @@ buttons. Buttons auto-disable when you reach an edge.
 Autoplay is enabled by default. Pass an options object to tune the delay or
 the user-interaction behavior, or `autoplay={false}` to disable it entirely.
 
+User interaction — drag, prev/next buttons, navigation items, or any call
+to the `scrollPrev` / `scrollNext` / `scrollTo` helpers from `useCarousel` —
+resets the autoplay countdown rather than stopping it. This is achieved by
+defaulting `stopOnInteraction` to `false` and calling the plugin's `reset()`
+on interaction. Pass `autoplay={{ stopOnInteraction: true }}` if you want
+the older "stop on first interaction" behavior.
+
 <ComponentShowcase preview={<AutoplayCarouselExample />}>
 
 ```tsx
@@ -381,7 +388,7 @@ sub-component. Extends all native `div` props.
 | ------------- | ----------- | ------------------------------------------------------------------------------------------------------------------------ |
 | `options`     | `undefined` | Embla [options](https://www.embla-carousel.com/api/options/) (e.g. `loop`, `align`, `dragFree`, `axis`, `slidesToScroll`). |
 | `plugins`     | `undefined` | Embla [plugins](https://www.embla-carousel.com/plugins/). If you supply your own `Autoplay()` here, the `autoplay` prop is ignored. |
-| `autoplay`    | `true`      | Configures the built-in autoplay plugin. Pass `false` to disable, or an options object to override delays and behavior. |
+| `autoplay`    | `true`      | Configures the built-in autoplay plugin. Pass `false` to disable, or an options object to override delays and behavior. Defaults `stopOnInteraction` to `false` so interaction resets the timer rather than halting autoplay. |
 | `wheelGestures` | `true`    | Enables horizontal wheel/trackpad gestures on the viewport. Only horizontal-dominant deltas advance the carousel; vertical scrolling passes through. Pass `false` to disable. |
 | `onApiChange` | `undefined` | Fired whenever the Embla API reference changes. Useful for wiring up custom listeners.                                  |
 

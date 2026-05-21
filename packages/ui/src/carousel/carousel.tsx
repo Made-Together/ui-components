@@ -145,30 +145,51 @@ const Root = react.forwardRef<HTMLDivElement, CarouselRootProps>(
       const list = plugins ? [...plugins] : [];
       const userHasAutoplay = list.some((p) => p?.name === "autoplay");
       if (autoplay !== false && !userHasAutoplay) {
-        list.push(Autoplay(typeof autoplay === "object" ? autoplay : {}));
+        const userOptions = typeof autoplay === "object" ? autoplay : {};
+        // Default `stopOnInteraction` to false so user interaction resets
+        // the autoplay timer instead of halting it outright. Pair this with
+        // the `pointerDown` listener and the scroll helpers below, which
+        // call `autoplay.reset()` to restart the countdown.
+        list.push(Autoplay({ stopOnInteraction: false, ...userOptions }));
       }
       return list;
     }, [plugins, autoplay]);
 
     const [emblaRef, emblaApi] = useEmblaCarousel(options, resolvedPlugins);
 
-    const scrollPrev = react.useCallback(
-      () => emblaApi?.scrollPrev(),
-      [emblaApi],
-    );
-    const scrollNext = react.useCallback(
-      () => emblaApi?.scrollNext(),
-      [emblaApi],
-    );
+    const resetAutoplay = react.useCallback(() => {
+      emblaApi?.plugins().autoplay?.reset();
+    }, [emblaApi]);
+
+    const scrollPrev = react.useCallback(() => {
+      emblaApi?.scrollPrev();
+      resetAutoplay();
+    }, [emblaApi, resetAutoplay]);
+    const scrollNext = react.useCallback(() => {
+      emblaApi?.scrollNext();
+      resetAutoplay();
+    }, [emblaApi, resetAutoplay]);
     const scrollTo = react.useCallback(
-      (index: number) => emblaApi?.scrollTo(index),
-      [emblaApi],
+      (index: number) => {
+        emblaApi?.scrollTo(index);
+        resetAutoplay();
+      },
+      [emblaApi, resetAutoplay],
     );
 
     react.useEffect(() => {
       if (!emblaApi) return;
       if (autoplay === false) return;
       emblaApi.plugins().autoplay?.play();
+    }, [emblaApi, autoplay]);
+
+    react.useEffect(() => {
+      if (!emblaApi || autoplay === false) return;
+      const reset = () => emblaApi.plugins().autoplay?.reset();
+      emblaApi.on("pointerDown", reset);
+      return () => {
+        emblaApi.off("pointerDown", reset);
+      };
     }, [emblaApi, autoplay]);
 
     react.useEffect(() => {
