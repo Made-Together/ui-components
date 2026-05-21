@@ -16,7 +16,7 @@
 ## Todos
 
 # Components
-- [ ] Add side mouse scroll listeners on carousel
+- [x] Add side mouse scroll listeners on carousel
 - [ ] Fix marquee speed prop aint working
 - [ ] Add autoplay / timer / progress tracking on Tabs component
 - [ ] On NumberFlow, implement continuous plugin default, add animateInView functionality
