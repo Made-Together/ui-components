@@ -13,6 +13,8 @@ import {
   LoopingCarouselExample,
   MultiSlideCarouselExample,
   NumberedNavCarouselExample,
+  ResponsiveCarouselExample,
+  VerticalCarouselExample,
 } from "./_examples";
 
 # Carousel
@@ -28,12 +30,28 @@ navigation — with every visual choice left to you.
 import { Carousel } from "@made-together/ui/carousel";
 
 const slides = [
-  { title: "Aurora", hue: "from-indigo-500 to-fuchsia-500" },
-  { title: "Tidepool", hue: "from-cyan-500 to-teal-500" },
-  { title: "Ember", hue: "from-amber-500 to-rose-500" },
-  { title: "Moss", hue: "from-emerald-500 to-lime-500" },
-  { title: "Dusk", hue: "from-slate-700 to-slate-900" },
+  { title: "Aurora" },
+  { title: "Tidepool" },
+  { title: "Ember" },
+  { title: "Moss" },
+  { title: "Dusk" },
 ];
+
+function SimpleSlide({ index }: { index: number }) {
+  return (
+    <div
+      data-slot="card"
+      className="flex flex-col gap-4 overflow-hidden rounded-xl bg-card text-card-foreground ring-1 ring-foreground/10"
+    >
+      <div
+        data-slot="card-content"
+        className="flex aspect-video items-center justify-center p-6"
+      >
+        <span className="text-3xl font-semibold">{index + 1}</span>
+      </div>
+    </div>
+  );
+}
 
 export function BasicCarousel() {
   return (
@@ -46,11 +64,7 @@ export function BasicCarousel() {
               index={i}
               className="min-w-0 flex-[0_0_100%] pr-3 last:pr-0"
             >
-              <div
-                className={`aspect-video rounded-2xl bg-linear-to-br ${slide.hue} p-6 text-white`}
-              >
-                <h3 className="text-2xl font-semibold">{slide.title}</h3>
-              </div>
+              <SimpleSlide index={i} />
             </Carousel.Slide>
           ))}
         </Carousel.Container>
@@ -62,15 +76,15 @@ export function BasicCarousel() {
             <Carousel.NavigationItem
               key={slide.title}
               index={i}
-              className="block h-2 w-2 rounded-full bg-neutral-300 transition-[width,background-color] duration-300 data-[state=active]:w-5 data-[state=active]:bg-neutral-900"
+              className="block h-2 w-2 rounded-full bg-neutral-300 transition-[width,background-color] duration-300 data-[state=active]:w-5 data-[state=active]:bg-foreground"
             />
           ))}
         </Carousel.Navigation>
         <div className="flex gap-2">
-          <Carousel.Previous className="rounded-full border px-4 py-2 text-sm font-medium disabled:opacity-40">
+          <Carousel.Previous className="rounded-full border border-border px-4 py-2 text-sm font-medium disabled:opacity-40">
             Prev
           </Carousel.Previous>
-          <Carousel.Next className="rounded-full border px-4 py-2 text-sm font-medium disabled:opacity-40">
+          <Carousel.Next className="rounded-full border border-border px-4 py-2 text-sm font-medium disabled:opacity-40">
             Next
           </Carousel.Next>
         </div>
@@ -189,13 +203,13 @@ the older "stop on first interaction" behavior.
 ```tsx
 <Carousel.Root
   options={{ loop: true, align: "start" }}
-  autoplay={{ delay: 2500, stopOnInteraction: false }}
+  autoplay={{ delay: 2500 }}
 >
   <Carousel.Viewport className="overflow-hidden rounded-2xl">
     <Carousel.Container className="flex">
       {slides.map((slide, i) => (
         <Carousel.Slide key={slide.title} index={i} className="flex-[0_0_100%]">
-          <SlideCard {...slide} />
+          <SimpleSlide index={i} />
         </Carousel.Slide>
       ))}
     </Carousel.Container>
@@ -205,7 +219,7 @@ the older "stop on first interaction" behavior.
       <Carousel.NavigationItem
         key={slide.title}
         index={i}
-        className="h-2 w-2 rounded-full bg-neutral-300 data-[state=active]:w-5 data-[state=active]:bg-neutral-900"
+        className="h-2 w-2 rounded-full bg-neutral-300 data-[state=active]:w-5 data-[state=active]:bg-foreground"
       />
     ))}
   </Carousel.Navigation>
@@ -243,6 +257,53 @@ page, so the carousel never blocks scrolling past it. Pass
 Slide width is just CSS — set `flex-[0_0_33.333%]` (or any other basis) on
 `Carousel.Slide` to show multiple slides per view. Pair with
 `options={{ dragFree: true }}` for momentum scrolling that doesn't snap.
+
+### Responsive slide counts
+
+Because slide width is just CSS, you can change how many slides are visible
+per breakpoint by composing Tailwind's `basis-*` utilities. Pair with
+`shrink-0 grow-0` so the flex item honors the basis exactly — embla expects
+slides to be fixed-width children, not flex-grow items.
+
+```tsx
+<Carousel.Slide
+  index={i}
+  className="min-w-0 shrink-0 grow-0 basis-full pr-3 md:basis-1/2 lg:basis-1/3"
+>
+  …
+</Carousel.Slide>
+```
+
+### Vertical orientation
+
+Pass `options={{ axis: "y" }}` for a vertical carousel. Two CSS adjustments
+are required on the consumer side:
+
+- `Carousel.Container` becomes `flex-col` instead of `flex` (row direction
+  doesn't apply).
+- `Carousel.Viewport` needs a defined height (e.g. `h-72`) since the parent
+  no longer constrains the slides' axis.
+
+`Carousel.Previous` / `Carousel.Next` continue to work — they call
+`scrollPrev` / `scrollNext`, which embla maps to the configured axis.
+
+```tsx
+<Carousel.Root options={{ axis: "y" }}>
+  <Carousel.Viewport className="h-72 overflow-hidden rounded-2xl">
+    <Carousel.Container className="flex h-full flex-col">
+      {slides.map((slide, i) => (
+        <Carousel.Slide
+          key={slide.title}
+          index={i}
+          className="min-h-0 flex-[0_0_100%]"
+        >
+          …
+        </Carousel.Slide>
+      ))}
+    </Carousel.Container>
+  </Carousel.Viewport>
+</Carousel.Root>
+```
 
 ### Custom navigation
 
@@ -295,8 +356,8 @@ viewport — inactive slides get scaled and faded via `data-[state=inactive]`.
           index={i}
           className="group min-w-0 flex-[0_0_70%] pr-3"
         >
-          <div className="transition-[transform,opacity] duration-500 group-data-[state=inactive]:scale-95 group-data-[state=inactive]:opacity-50">
-            <SlideCard {...slide} />
+          <div className="transition-all duration-500 group-data-[state=inactive]:scale-95 group-data-[state=inactive]:opacity-50">
+            <SimpleSlide index={i} />
           </div>
         </Carousel.Slide>
       ))}
@@ -304,10 +365,10 @@ viewport — inactive slides get scaled and faded via `data-[state=inactive]`.
   </Carousel.Viewport>
 
   <div className="mt-4 flex justify-center gap-2">
-    <Carousel.Previous className="grid size-9 place-items-center rounded-full bg-neutral-900 text-white">
+    <Carousel.Previous className="grid size-9 place-items-center rounded-full bg-foreground text-background">
       ←
     </Carousel.Previous>
-    <Carousel.Next className="grid size-9 place-items-center rounded-full bg-neutral-900 text-white">
+    <Carousel.Next className="grid size-9 place-items-center rounded-full bg-foreground text-background">
       →
     </Carousel.Next>
   </div>
@@ -332,7 +393,7 @@ Three slides per view with momentum scrolling instead of snapping.
           index={i}
           className="min-w-0 flex-[0_0_33.333%] pr-3"
         >
-          <SlideCard {...item} compact />
+          <SimpleSlide index={i} />
         </Carousel.Slide>
       ))}
     </Carousel.Container>
@@ -355,7 +416,7 @@ pills with active state.
     <Carousel.Container className="flex">
       {slides.map((slide, i) => (
         <Carousel.Slide key={slide.title} index={i} className="flex-[0_0_100%]">
-          <SlideCard {...slide} />
+          <SimpleSlide index={i} />
         </Carousel.Slide>
       ))}
     </Carousel.Container>
@@ -366,12 +427,76 @@ pills with active state.
         key={slide.title}
         index={i}
         aria-label={`Go to ${slide.title}`}
-        className="grid size-8 place-items-center rounded-full border text-xs font-medium data-[state=active]:border-neutral-900 data-[state=active]:bg-neutral-900 data-[state=active]:text-white"
+        className="grid size-8 place-items-center rounded-full border border-border text-xs font-medium data-[state=active]:border-foreground data-[state=active]:bg-foreground data-[state=active]:text-background"
       >
         {i + 1}
       </Carousel.NavigationItem>
     ))}
   </Carousel.Navigation>
+</Carousel.Root>
+```
+
+</ComponentShowcase>
+
+### Vertical orientation
+
+A vertical carousel — `axis: "y"` plus a fixed-height viewport and a
+`flex-col` container.
+
+<ComponentShowcase preview={<VerticalCarouselExample />}>
+
+```tsx
+<Carousel.Root options={{ axis: "y", align: "start" }}>
+  <Carousel.Viewport className="h-72 overflow-hidden rounded-2xl">
+    <Carousel.Container className="flex h-full flex-col">
+      {slides.map((slide, i) => (
+        <Carousel.Slide
+          key={slide.title}
+          index={i}
+          className="min-h-0 flex-[0_0_100%]"
+        >
+          <div className="flex h-full items-center justify-center rounded-xl bg-card text-card-foreground ring-1 ring-foreground/10">
+            <span className="text-3xl font-semibold">{i + 1}</span>
+          </div>
+        </Carousel.Slide>
+      ))}
+    </Carousel.Container>
+  </Carousel.Viewport>
+  <div className="mt-4 flex items-center justify-center gap-2">
+    <Carousel.Previous className="grid size-9 place-items-center rounded-full border border-border">
+      ↑
+    </Carousel.Previous>
+    <Carousel.Next className="grid size-9 place-items-center rounded-full border border-border">
+      ↓
+    </Carousel.Next>
+  </div>
+</Carousel.Root>
+```
+
+</ComponentShowcase>
+
+### Responsive slide counts
+
+One slide per view on mobile, two on `md`, three on `lg` — all from one
+`className` on `Carousel.Slide`. No JS breakpoint logic required.
+
+<ComponentShowcase preview={<ResponsiveCarouselExample />}>
+
+```tsx
+<Carousel.Root options={{ align: "start" }}>
+  <Carousel.Viewport className="overflow-hidden">
+    <Carousel.Container className="flex">
+      {items.map((item, i) => (
+        <Carousel.Slide
+          key={item.id}
+          index={i}
+          className="min-w-0 shrink-0 grow-0 basis-full pr-3 md:basis-1/2 lg:basis-1/3"
+        >
+          <SimpleSlide index={i} />
+        </Carousel.Slide>
+      ))}
+    </Carousel.Container>
+  </Carousel.Viewport>
 </Carousel.Root>
 ```
 

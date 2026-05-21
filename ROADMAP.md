@@ -24,7 +24,7 @@
 
 # Docs
 - [ ] Fix the accordion documentation examples styling
-- [ ] Diversify the examples on carousel documentation; maybe add unsplash images?
+- [x] Diversify the examples on carousel documentation; maybe add unsplash images?
 - [ ] Add better examples on marquee documentation
 - [ ] Do a double check and remove any `...rest` props on component documentations
 - [ ] Maybe add a custom better <pre/> component on mdx-components

@@ -3,34 +3,25 @@
 import { Carousel } from "@made-together/ui/carousel";
 
 const slides = [
-  { title: "Aurora", hue: "from-indigo-500 to-fuchsia-500" },
-  { title: "Tidepool", hue: "from-cyan-500 to-teal-500" },
-  { title: "Ember", hue: "from-amber-500 to-rose-500" },
-  { title: "Moss", hue: "from-emerald-500 to-lime-500" },
-  { title: "Dusk", hue: "from-slate-700 to-slate-900" },
+  { title: "Aurora" },
+  { title: "Tidepool" },
+  { title: "Ember" },
+  { title: "Moss" },
+  { title: "Dusk" },
 ];
 
-function SlideCard({
-  title,
-  hue,
-  index,
-  compact,
-}: {
-  title: string;
-  hue: string;
-  index: number;
-  compact?: boolean;
-}) {
+function SimpleSlide({ index }: { index: number }) {
   return (
     <div
-      className={`relative flex w-full flex-col justify-between overflow-hidden rounded-2xl bg-linear-to-br ${hue} p-6 text-white shadow-lg ${
-        compact ? "aspect-square" : "aspect-video"
-      }`}
+      data-slot="card"
+      className="flex flex-col gap-4 overflow-hidden rounded-xl bg-foreground/10 text-card-foreground"
     >
-      <span className="text-xs font-medium uppercase tracking-[0.2em] opacity-80">
-        Slide {String(index + 1).padStart(2, "0")}
-      </span>
-      <h3 className="text-2xl font-semibold tracking-tight">{title}</h3>
+      <div
+        data-slot="card-content"
+        className="flex aspect-video items-center justify-center p-6"
+      >
+        <span className="text-3xl font-semibold">{index + 1}</span>
+      </div>
     </div>
   );
 }
@@ -50,7 +41,7 @@ export function BasicCarouselExample() {
               index={i}
               className="min-w-0 flex-[0_0_100%] pr-3 last:pr-0"
             >
-              <SlideCard {...slide} index={i} />
+              <SimpleSlide index={i} />
             </Carousel.Slide>
           ))}
         </Carousel.Container>
@@ -87,17 +78,17 @@ export function AutoplayCarouselExample() {
     <Carousel.Root
       className="relative w-full max-w-2xl"
       options={{ loop: true, align: "start" }}
-      autoplay={{ delay: 2500, stopOnInteraction: false }}
+      autoplay={{ delay: 2500 }}
     >
       <Carousel.Viewport className="overflow-hidden rounded-2xl">
-        <Carousel.Container className="flex">
+        <Carousel.Container className="flex gap-4">
           {slides.map((slide, i) => (
             <Carousel.Slide
               key={slide.title}
               index={i}
               className="min-w-0 flex-[0_0_100%]"
             >
-              <SlideCard {...slide} index={i} />
+              <SimpleSlide index={i} />
             </Carousel.Slide>
           ))}
         </Carousel.Container>
@@ -133,8 +124,8 @@ export function LoopingCarouselExample() {
               index={i}
               className="group min-w-0 flex-[0_0_70%] pr-3"
             >
-              <div className="transition-[transform,opacity] duration-500 group-data-[state=inactive]:scale-95 group-data-[state=inactive]:opacity-50">
-                <SlideCard {...slide} index={i} />
+              <div className="transition-all duration-500 group-data-[state=inactive]:scale-95 group-data-[state=inactive]:opacity-50">
+                <SimpleSlide index={i} />
               </div>
             </Carousel.Slide>
           ))}
@@ -154,6 +145,7 @@ export function LoopingCarouselExample() {
 }
 
 export function MultiSlideCarouselExample() {
+  const items = [...slides, ...slides];
   return (
     <Carousel.Root
       autoplay={false}
@@ -162,14 +154,14 @@ export function MultiSlideCarouselExample() {
     >
       <Carousel.Viewport className="overflow-hidden">
         <Carousel.Container className="flex">
-          {[...slides, ...slides].map((slide, i) => (
+          {items.map((slide, i) => (
             <Carousel.Slide
               // biome-ignore lint/suspicious/noArrayIndexKey: stable demo fixture
               key={`${slide.title}-${i}`}
               index={i}
               className="min-w-0 flex-[0_0_33.333%] pr-3"
             >
-              <SlideCard {...slide} index={i} compact />
+              <SimpleSlide index={i} />
             </Carousel.Slide>
           ))}
         </Carousel.Container>
@@ -191,9 +183,9 @@ export function NumberedNavCarouselExample() {
             <Carousel.Slide
               key={slide.title}
               index={i}
-              className="min-w-0 flex-[0_0_100%]"
+              className="min-w-0 flex-[0_0_100%] pr-3"
             >
-              <SlideCard {...slide} index={i} />
+              <SimpleSlide index={i} />
             </Carousel.Slide>
           ))}
         </Carousel.Container>
@@ -213,6 +205,75 @@ export function NumberedNavCarouselExample() {
           </Carousel.NavigationItem>
         ))}
       </Carousel.Navigation>
+    </Carousel.Root>
+  );
+}
+
+export function VerticalCarouselExample() {
+  return (
+    <Carousel.Root
+      autoplay={false}
+      className="relative w-full max-w-sm"
+      options={{ axis: "y", align: "start" }}
+    >
+      <Carousel.Viewport className="h-72 overflow-hidden rounded-2xl">
+        <Carousel.Container className="flex h-full flex-col">
+          {slides.map((slide, i) => (
+            <Carousel.Slide
+              key={slide.title}
+              index={i}
+              className="min-h-0 flex-[0_0_100%] pb-4 last:pb-0"
+            >
+              <div
+                data-slot="card"
+                className="flex h-full items-center justify-center rounded-xl text-card-foreground bg-foreground/10"
+              >
+                <span className="text-3xl font-semibold">{i + 1}</span>
+              </div>
+            </Carousel.Slide>
+          ))}
+        </Carousel.Container>
+      </Carousel.Viewport>
+      <div className="mt-4 flex items-center justify-center gap-2">
+        <Carousel.Previous
+          aria-label="Previous slide"
+          className="grid size-9 place-items-center rounded-full border border-border transition hover:bg-secondary disabled:cursor-not-allowed disabled:opacity-40"
+        >
+          ↑
+        </Carousel.Previous>
+        <Carousel.Next
+          aria-label="Next slide"
+          className="grid size-9 place-items-center rounded-full border border-border transition hover:bg-secondary disabled:cursor-not-allowed disabled:opacity-40"
+        >
+          ↓
+        </Carousel.Next>
+      </div>
+    </Carousel.Root>
+  );
+}
+
+export function ResponsiveCarouselExample() {
+  const items = [...slides, ...slides];
+  return (
+    <Carousel.Root
+      autoplay={false}
+      className="w-full max-w-2xl"
+      options={{ align: "start" }}
+    >
+      <Carousel.Viewport className="overflow-hidden">
+        <Carousel.Container className="flex">
+          {items.map((slide, i) => (
+            <Carousel.Slide
+              // biome-ignore lint/suspicious/noArrayIndexKey: stable demo fixture
+              key={`${slide.title}-${i}`}
+              index={i}
+              className="min-w-0 shrink-0 grow-0 basis-full pr-3 md:basis-1/2 lg:basis-1/3"
+            >
+              <SimpleSlide index={i} />
+            </Carousel.Slide>
+          ))}
+        </Carousel.Container>
+      </Carousel.Viewport>
     </Carousel.Root>
   );
 }
