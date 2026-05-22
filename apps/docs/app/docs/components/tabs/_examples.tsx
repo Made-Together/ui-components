@@ -46,7 +46,7 @@ export function BasicTabsExample() {
             >
               <Tabs.Separator />
               <span className="text-foreground">{tab.label}</span>
-              <Tabs.Indicator className="rounded-full bg-background py-3 ring-1 ring-border" />
+              <Tabs.Indicator className="rounded-full bg-background py-3 ring-0! shadow-none!" />
             </Tabs.Trigger>
           ))}
         </Tabs.List>
@@ -77,10 +77,11 @@ export function VerticalTabsExample() {
             <Tabs.Trigger
               key={tab.id}
               id={tab.id}
-              className="h-9 w-full justify-start px-3"
+              className="h-9 w-full justify-start px-3 text-foreground/50 data-[state=active]:text-foreground transition-colors"
             >
+              <Tabs.Separator />
               {tab.label}
-              <Tabs.Indicator className="rounded-lg bg-background shadow-sm ring-1 ring-border" />
+              <Tabs.Indicator className="rounded-lg bg-background py-3 ring-0! shadow-none!" />
             </Tabs.Trigger>
           ))}
         </Tabs.List>
@@ -231,8 +232,7 @@ export function AutoplayTabsExample() {
             >
               <Tabs.Separator />
               <span className="text-foreground">{tab.label}</span>
-              <Tabs.Indicator className="rounded-full bg-background py-3 ring-1 ring-border" />
-              <Tabs.Progress className="inset-x-2 bottom-1 h-0.5 rounded-full bg-foreground/60" />
+              <Tabs.Indicator className="rounded-full bg-background py-3 ring-0! shadow-none!" />
             </Tabs.Trigger>
           ))}
         </Tabs.List>
