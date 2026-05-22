@@ -39,10 +39,14 @@ export function BasicTabsExample() {
           className="rounded-full bg-secondary p-1"
         >
           {settingsTabs.map((tab) => (
-            <Tabs.Trigger key={tab.id} id={tab.id} className="flex-1">
+            <Tabs.Trigger
+              key={tab.id}
+              id={tab.id}
+              className="flex-1 py-2 text-foreground"
+            >
               <Tabs.Separator />
-              {tab.label}
-              <Tabs.Indicator className="rounded-full bg-background shadow-sm ring-1 ring-border" />
+              <span className="text-foreground">{tab.label}</span>
+              <Tabs.Indicator className="rounded-full bg-background py-3 ring-1 ring-border" />
             </Tabs.Trigger>
           ))}
         </Tabs.List>
@@ -152,10 +156,14 @@ export function ManualActivationTabsExample() {
           className="rounded-full bg-secondary p-1"
         >
           {settingsTabs.map((tab) => (
-            <Tabs.Trigger key={tab.id} id={tab.id} className="flex-1">
+            <Tabs.Trigger
+              key={tab.id}
+              id={tab.id}
+              className="flex-1 py-2 text-foreground"
+            >
               <Tabs.Separator />
-              {tab.label}
-              <Tabs.Indicator className="rounded-full bg-background shadow-sm ring-1 ring-border" />
+              <span className="text-foreground">{tab.label}</span>
+              <Tabs.Indicator className="rounded-full bg-background py-3 ring-1 ring-border" />
             </Tabs.Trigger>
           ))}
         </Tabs.List>
@@ -183,11 +191,11 @@ export function DisabledTabsExample() {
               key={tab.id}
               id={tab.id}
               disabled={i === 2}
-              className="flex-1"
+              className="flex-1 py-2 text-foreground"
             >
               <Tabs.Separator />
-              {tab.label}
-              <Tabs.Indicator className="rounded-full bg-background shadow-sm ring-1 ring-border" />
+              <span className="text-foreground">{tab.label}</span>
+              <Tabs.Indicator className="rounded-full bg-background py-3 ring-1 ring-border" />
             </Tabs.Trigger>
           ))}
         </Tabs.List>
@@ -217,7 +225,7 @@ export function UnderlineTabsExample() {
               className="h-10 rounded-none px-3 text-muted-foreground data-[state=active]:text-foreground"
             >
               {tab.label}
-              <Tabs.Indicator className="-bottom-px top-auto h-0.5 rounded-none bg-foreground shadow-none ring-0" />
+              <Tabs.Indicator className="!inset-x-0 !top-auto !-bottom-px !z-10 h-0.5 rounded-none bg-foreground shadow-none ring-0" />
             </Tabs.Trigger>
           ))}
         </Tabs.List>
