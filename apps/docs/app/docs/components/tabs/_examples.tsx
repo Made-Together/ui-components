@@ -210,6 +210,116 @@ export function DisabledTabsExample() {
   );
 }
 
+export function AutoplayTabsExample() {
+  return (
+    <Tabs.Root
+      defaultValue="account"
+      autoplay
+      autoplayDelay={2500}
+      className="w-full max-w-xl"
+    >
+      <Tabs.Container>
+        <Tabs.List
+          aria-label="Autoplay tabs"
+          className="rounded-full bg-secondary p-1"
+        >
+          {settingsTabs.map((tab) => (
+            <Tabs.Trigger
+              key={tab.id}
+              id={tab.id}
+              className="flex-1 py-2 text-foreground"
+            >
+              <Tabs.Separator />
+              <span className="text-foreground">{tab.label}</span>
+              <Tabs.Indicator className="rounded-full bg-background py-3 ring-1 ring-border" />
+              <Tabs.Progress className="inset-x-2 bottom-1 h-0.5 rounded-full bg-foreground/60" />
+            </Tabs.Trigger>
+          ))}
+        </Tabs.List>
+      </Tabs.Container>
+      {settingsTabs.map((tab) => (
+        <Tabs.Content key={tab.id} id={tab.id} className="px-1 py-4">
+          <h3 className="mb-1 font-semibold text-foreground">{tab.title}</h3>
+          <p className="text-sm text-muted-foreground">{tab.body}</p>
+        </Tabs.Content>
+      ))}
+    </Tabs.Root>
+  );
+}
+
+export function AutoplayUnderlineTabsExample() {
+  return (
+    <Tabs.Root
+      defaultValue="account"
+      autoplay
+      autoplayDelay={3000}
+      className="w-full max-w-xl"
+    >
+      <Tabs.Container>
+        <Tabs.List
+          aria-label="Autoplay underline tabs"
+          className="gap-2 border-b border-border bg-transparent p-0 pb-0!"
+        >
+          {settingsTabs.map((tab) => (
+            <Tabs.Trigger
+              key={tab.id}
+              id={tab.id}
+              className="h-10 rounded-none px-3 text-muted-foreground data-[state=active]:text-foreground"
+            >
+              {tab.label}
+              <Tabs.Indicator className="inset-x-0! top-auto! -bottom-px! z-10! h-0.5 rounded-none bg-foreground/30 shadow-none ring-0" />
+              <Tabs.Progress className="inset-x-0 top-auto -bottom-px z-20 h-0.5 rounded-none bg-foreground" />
+            </Tabs.Trigger>
+          ))}
+        </Tabs.List>
+      </Tabs.Container>
+      {settingsTabs.map((tab) => (
+        <Tabs.Content key={tab.id} id={tab.id} className="px-1 py-4">
+          <h3 className="mb-1 font-semibold text-foreground">{tab.title}</h3>
+          <p className="text-sm text-muted-foreground">{tab.body}</p>
+        </Tabs.Content>
+      ))}
+    </Tabs.Root>
+  );
+}
+
+export function VerticalAutoplayUnderlineTabsExample() {
+  return (
+    <Tabs.Root
+      orientation="vertical"
+      defaultValue="account"
+      autoplay
+      autoplayDelay={3000}
+      className="w-full max-w-xl"
+    >
+      <Tabs.Container>
+        <Tabs.List
+          aria-label="Vertical autoplay underline tabs"
+          className="w-44 gap-1 border-l border-border bg-transparent p-0 pl-0!"
+        >
+          {settingsTabs.map((tab) => (
+            <Tabs.Trigger
+              key={tab.id}
+              id={tab.id}
+              className="h-10 w-full justify-start rounded-none px-4 text-muted-foreground data-[state=active]:text-foreground"
+            >
+              {tab.label}
+              <Tabs.Indicator className="inset-y-0! right-auto! -left-px! z-10! h-full w-0.5 rounded-none bg-foreground/30 shadow-none ring-0" />
+              <Tabs.Progress className="inset-y-0 right-auto -left-px z-20 h-full w-0.5 rounded-none bg-foreground" />
+            </Tabs.Trigger>
+          ))}
+        </Tabs.List>
+      </Tabs.Container>
+      {settingsTabs.map((tab) => (
+        <Tabs.Content key={tab.id} id={tab.id} className="flex-1 px-4 py-2">
+          <h3 className="mb-1 font-semibold text-foreground">{tab.title}</h3>
+          <p className="text-sm text-muted-foreground">{tab.body}</p>
+        </Tabs.Content>
+      ))}
+    </Tabs.Root>
+  );
+}
+
 export function UnderlineTabsExample() {
   return (
     <Tabs.Root defaultValue="account" className="w-full max-w-xl">
