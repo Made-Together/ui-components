@@ -216,7 +216,7 @@ export function UnderlineTabsExample() {
       <Tabs.Container>
         <Tabs.List
           aria-label="Underline tabs"
-          className="gap-2 border-b border-border bg-transparent p-0"
+          className="gap-2 border-b border-border bg-transparent p-0 pb-0!"
         >
           {settingsTabs.map((tab) => (
             <Tabs.Trigger
@@ -225,7 +225,7 @@ export function UnderlineTabsExample() {
               className="h-10 rounded-none px-3 text-muted-foreground data-[state=active]:text-foreground"
             >
               {tab.label}
-              <Tabs.Indicator className="!inset-x-0 !top-auto !-bottom-px !z-10 h-0.5 rounded-none bg-foreground shadow-none ring-0" />
+              <Tabs.Indicator className="inset-x-0! top-auto! -bottom-px! z-10! h-0.5 rounded-none bg-foreground shadow-none ring-0" />
             </Tabs.Trigger>
           ))}
         </Tabs.List>
