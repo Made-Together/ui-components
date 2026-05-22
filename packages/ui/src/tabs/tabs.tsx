@@ -3,6 +3,7 @@
 import { type HTMLMotionProps, motion, useReducedMotion } from "motion/react";
 import type {
   ComponentPropsWithoutRef,
+  CSSProperties,
   KeyboardEvent,
   MouseEvent,
 } from "react";
@@ -31,6 +32,8 @@ interface TabsContextValue {
   orientation: Orientation;
   disabled: boolean;
   activationMode: "automatic" | "manual";
+  autoplay: boolean;
+  autoplayDelay: number;
   isSelected: (id: string) => boolean;
   setSelected: (id: string) => void;
   subscribe: (id: string, listener: () => void) => () => void;
@@ -110,6 +113,26 @@ interface TabsRootProps extends ComponentPropsWithoutRef<"div"> {
    * @default "automatic"
    */
   activationMode?: "automatic" | "manual";
+  /**
+   * Automatically advance the selected tab on a timer. Manual selection
+   * (click / keyboard / controlled value change) re-arms the timer from the
+   * new tab.
+   * @default false
+   */
+  autoplay?: boolean;
+  /**
+   * Time in milliseconds between automatic tab advances when `autoplay` is
+   * enabled. Also exposed to CSS via `--tabs-autoplay-duration` so
+   * `Tabs.Progress` (or custom CSS) can animate in lockstep.
+   * @default 2500
+   */
+  autoplayDelay?: number;
+  /**
+   * When autoplay reaches the last tab, wrap to the first. Ignored when
+   * `autoplay` is false.
+   * @default true
+   */
+  loop?: boolean;
 }
 
 const Root = forwardRef<HTMLDivElement, TabsRootProps>(function TabsRoot(
@@ -120,7 +143,11 @@ const Root = forwardRef<HTMLDivElement, TabsRootProps>(function TabsRoot(
     orientation = "horizontal",
     disabled = false,
     activationMode = "automatic",
+    autoplay = false,
+    autoplayDelay = 2500,
+    loop = true,
     className,
+    style,
     children,
     ...rest
   },
@@ -154,18 +181,85 @@ const Root = forwardRef<HTMLDivElement, TabsRootProps>(function TabsRoot(
 
   const isSelected = useCallback((id: string) => valueRef.current === id, []);
 
-  const applyValue = useCallback((next: string | null) => {
-    const prev = valueRef.current;
-    if (prev === next) return;
-    valueRef.current = next;
-    const affected: Array<string | null> = [prev, next];
-    for (const key of affected) {
-      if (!key) continue;
-      const set = listenersRef.current.get(key);
-      if (!set) continue;
-      for (const listener of set) listener();
+  // Refs that mirror autoplay-related props so `scheduleAutoplay` can stay
+  // stable and read latest values without re-binding callbacks per render.
+  const autoplayRef = useRef(autoplay);
+  const autoplayDelayRef = useRef(autoplayDelay);
+  const loopRef = useRef(loop);
+  useIsoLayoutEffect(() => {
+    autoplayRef.current = autoplay;
+    autoplayDelayRef.current = autoplayDelay;
+    loopRef.current = loop;
+  }, [autoplay, autoplayDelay, loop]);
+
+  const triggersRef = useRef(new Map<string, HTMLButtonElement>());
+  const orderRef = useRef<string[]>([]);
+  const autoplayTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Populated by an effect once `setSelected` is defined further down.
+  // `scheduleAutoplay` only reads `.current` inside a deferred setTimeout, so
+  // the value is always present by the time the timer fires.
+  const setSelectedRef = useRef<((id: string) => void) | null>(null);
+
+  const getEnabledOrder = useCallback(() => {
+    const map = triggersRef.current;
+    return orderRef.current
+      .map((id) => ({ id, node: map.get(id) }))
+      .filter(
+        (entry): entry is { id: string; node: HTMLButtonElement } =>
+          !!entry.node && !entry.node.disabled,
+      );
+  }, []);
+
+  const clearAutoplayTimer = useCallback(() => {
+    if (autoplayTimerRef.current !== null) {
+      clearTimeout(autoplayTimerRef.current);
+      autoplayTimerRef.current = null;
     }
   }, []);
+
+  const scheduleAutoplay = useCallback(() => {
+    clearAutoplayTimer();
+    if (!autoplayRef.current) return;
+    const ordered = getEnabledOrder();
+    if (ordered.length === 0) return;
+    const current = valueRef.current;
+    const idx = ordered.findIndex((entry) => entry.id === current);
+    const atEnd = idx === ordered.length - 1;
+    let nextId: string | null;
+    if (idx === -1) {
+      nextId = ordered[0]?.id ?? null;
+    } else if (atEnd) {
+      nextId = loopRef.current ? (ordered[0]?.id ?? null) : null;
+    } else {
+      nextId = ordered[idx + 1]?.id ?? null;
+    }
+    if (!nextId) return;
+    autoplayTimerRef.current = setTimeout(() => {
+      autoplayTimerRef.current = null;
+      // Re-route through setSelected so controlled callers receive
+      // onValueChange and uncontrolled state advances normally.
+      setSelectedRef.current?.(nextId);
+    }, autoplayDelayRef.current);
+  }, [clearAutoplayTimer, getEnabledOrder]);
+
+  const applyValue = useCallback(
+    (next: string | null) => {
+      const prev = valueRef.current;
+      if (prev === next) return;
+      valueRef.current = next;
+      const affected: Array<string | null> = [prev, next];
+      for (const key of affected) {
+        if (!key) continue;
+        const set = listenersRef.current.get(key);
+        if (!set) continue;
+        for (const listener of set) listener();
+      }
+      // Every selection change — autoplay tick, click, keyboard, or
+      // controlled prop update — re-arms the timer from the new tab.
+      scheduleAutoplay();
+    },
+    [scheduleAutoplay],
+  );
 
   const onValueChangeRef = useRef(onValueChange);
   useIsoLayoutEffect(() => {
@@ -183,14 +277,24 @@ const Root = forwardRef<HTMLDivElement, TabsRootProps>(function TabsRoot(
     },
     [applyValue, isControlled],
   );
+  useIsoLayoutEffect(() => {
+    setSelectedRef.current = setSelected;
+  }, [setSelected]);
 
   useIsoLayoutEffect(() => {
     if (!isControlled) return;
     applyValue(controlledValue ?? null);
   }, [controlledValue, isControlled, applyValue]);
 
-  const triggersRef = useRef(new Map<string, HTMLButtonElement>());
-  const orderRef = useRef<string[]>([]);
+  // Start / stop autoplay when its prop toggles or its delay changes.
+  useIsoLayoutEffect(() => {
+    if (autoplay) {
+      scheduleAutoplay();
+    } else {
+      clearAutoplayTimer();
+    }
+    return clearAutoplayTimer;
+  }, [autoplay, autoplayDelay, loop, scheduleAutoplay, clearAutoplayTimer]);
 
   const registerTab = useCallback(
     (id: string, node: HTMLButtonElement | null) => {
@@ -210,13 +314,7 @@ const Root = forwardRef<HTMLDivElement, TabsRootProps>(function TabsRoot(
 
   const focusTab = useCallback(
     (fromId: string, direction: "next" | "prev" | "first" | "last") => {
-      const map = triggersRef.current;
-      const ordered = orderRef.current
-        .map((id) => ({ id, node: map.get(id) }))
-        .filter(
-          (entry): entry is { id: string; node: HTMLButtonElement } =>
-            !!entry.node && !entry.node.disabled,
-        );
+      const ordered = getEnabledOrder();
       if (ordered.length === 0) return;
       if (direction === "first") {
         ordered[0]?.node.focus();
@@ -232,7 +330,7 @@ const Root = forwardRef<HTMLDivElement, TabsRootProps>(function TabsRoot(
       const nextIdx = (idx + delta + ordered.length) % ordered.length;
       ordered[nextIdx]?.node.focus();
     },
-    [],
+    [getEnabledOrder],
   );
 
   const ctx = useMemo<TabsContextValue>(
@@ -241,6 +339,8 @@ const Root = forwardRef<HTMLDivElement, TabsRootProps>(function TabsRoot(
       orientation,
       disabled,
       activationMode,
+      autoplay,
+      autoplayDelay,
       isSelected,
       setSelected,
       subscribe,
@@ -252,12 +352,26 @@ const Root = forwardRef<HTMLDivElement, TabsRootProps>(function TabsRoot(
       orientation,
       disabled,
       activationMode,
+      autoplay,
+      autoplayDelay,
       isSelected,
       setSelected,
       subscribe,
       registerTab,
       focusTab,
     ],
+  );
+
+  const rootStyle = useMemo(
+    () => ({
+      ...(style ?? {}),
+      ...(autoplay
+        ? ({
+            "--tabs-autoplay-duration": `${autoplayDelay}ms`,
+          } as CSSProperties)
+        : null),
+    }),
+    [style, autoplay, autoplayDelay],
   );
 
   return (
@@ -267,7 +381,9 @@ const Root = forwardRef<HTMLDivElement, TabsRootProps>(function TabsRoot(
         ref={ref}
         data-slot="tabs-root"
         data-orientation={orientation}
+        data-autoplay={autoplay ? "" : undefined}
         className={cn(className)}
+        style={rootStyle}
         {...rest}
       >
         {children}
@@ -335,9 +451,21 @@ const TABS_BEHAVIORAL_CSS = `
   height: 1px;
   width: 90%;
 }
+@keyframes bt-tabs-progress {
+  from { transform: scaleX(0); }
+  to   { transform: scaleX(1); }
+}
+[data-slot="tabs-progress"] {
+  transform-origin: left center;
+  animation: bt-tabs-progress var(--tabs-autoplay-duration, 2500ms) linear forwards;
+}
 @media (prefers-reduced-motion: reduce) {
   [data-slot="tabs-separator"] {
     transition: none;
+  }
+  [data-slot="tabs-progress"] {
+    animation: none;
+    transform: scaleX(1);
   }
 }
 `;
@@ -544,6 +672,32 @@ const Indicator = forwardRef<HTMLSpanElement, TabsIndicatorProps>(
   },
 );
 
+type TabsProgressProps = ComponentPropsWithoutRef<"span">;
+
+const Progress = forwardRef<HTMLSpanElement, TabsProgressProps>(
+  function TabsProgress({ className, ...rest }, ref) {
+    const root = useTabs("Tabs.Progress");
+    const item = useTabItem("Tabs.Progress");
+    // Only the active trigger renders progress. When selection moves, this
+    // element unmounts and the new one mounts under the new trigger — the
+    // CSS animation restarts from scaleX(0) naturally. Duration is driven by
+    // the `--tabs-autoplay-duration` custom property set on Tabs.Root.
+    if (!(item.selected && root.autoplay)) return null;
+    return (
+      <span
+        ref={ref}
+        aria-hidden="true"
+        data-slot="tabs-progress"
+        className={cn(
+          "pointer-events-none absolute inset-x-0 bottom-0 h-0.5 rounded-full bg-neutral-900/40",
+          className,
+        )}
+        {...rest}
+      />
+    );
+  },
+);
+
 type TabsSeparatorProps = ComponentPropsWithoutRef<"span">;
 
 const Separator = forwardRef<HTMLSpanElement, TabsSeparatorProps>(
@@ -649,6 +803,14 @@ type TabsComposition = {
    */
   Indicator: typeof Indicator;
   /**
+   * CSS-only autoplay progress indicator. Rendered only inside the currently
+   * selected `Tabs.Trigger` when `Tabs.Root` has `autoplay` enabled. The
+   * animation duration is driven by the `--tabs-autoplay-duration` custom
+   * property emitted by `Tabs.Root`, so progress stays in sync with the
+   * autoplay timer without any per-frame React state.
+   */
+  Progress: typeof Progress;
+  /**
    * Decorative divider between adjacent triggers. Fades out on the selected
    * tab so the indicator can take its place.
    */
@@ -665,6 +827,7 @@ export const Tabs: TabsComposition = {
   List,
   Trigger,
   Indicator,
+  Progress,
   Separator,
   Content,
 };
@@ -675,6 +838,7 @@ export type {
   TabsContentProps,
   TabsIndicatorProps,
   TabsListProps,
+  TabsProgressProps,
   TabsRootProps,
   TabsSeparatorProps,
   TabsTriggerProps,
