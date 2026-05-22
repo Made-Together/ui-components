@@ -9,10 +9,18 @@
     "url": "git+https://github.com/Made-Together/ui-components.git",
     "directory": "packages/ui"
   },
-  "homepage": "https://github.com/Made-Together/ui-components#readme",
+  "homepage": "https://ui.bytogether.agency",
   "bugs": {
     "url": "https://github.com/Made-Together/ui-components/issues"
   },
+  "keywords": [
+    "react",
+    "components",
+    "ui",
+    "tailwind",
+    "motion",
+    "nextjs"
+  ],
   "publishConfig": {
     "access": "public",
     "provenance": true
