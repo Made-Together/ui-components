@@ -18,8 +18,8 @@ This Turborepo includes the following packages/apps:
 
 - `docs`: a [Next.js](https://nextjs.org/) app
 - `web`: another [Next.js](https://nextjs.org/) app
-- `@made-together/ui`: a stub React component library shared by both `web` and `docs` applications
-- `@made-together/typescript-config`: `tsconfig.json`s used throughout the monorepo
+- `@togetheragency/ui`: a stub React component library shared by both `web` and `docs` applications
+- `@togetheragency/typescript-config`: `tsconfig.json`s used throughout the monorepo
 
 Each package/app is 100% [TypeScript](https://www.typescriptlang.org/).
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { ScrollStack } from "@made-together/ui/scroll-stack";
+import { ScrollStack } from "@togetheragency/ui/scroll-stack";
 
 const cards = [
   {

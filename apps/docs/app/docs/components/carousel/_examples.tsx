@@ -1,6 +1,6 @@
 "use client";
 
-import { Carousel } from "@made-together/ui/carousel";
+import { Carousel } from "@togetheragency/ui/carousel";
 
 const slides = Array.from({ length: 5 }, (_, i) => i + 1);
 

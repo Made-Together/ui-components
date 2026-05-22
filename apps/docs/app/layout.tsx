@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "@made-together/ui Documentation",
+  title: "@togetheragency/ui Documentation",
   description: "A collection of components for your Next.js application.",
 };
 

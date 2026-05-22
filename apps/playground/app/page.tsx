@@ -1,11 +1,11 @@
 "use client";
 
-import { Accordion } from "@made-together/ui/accordion";
-import { Ticker } from "@made-together/ui/ticker";
-import { Carousel } from "@made-together/ui/carousel";
-import { Marquee } from "@made-together/ui/marquee";
-import { Swappable } from "@made-together/ui/swappable";
-import { Tabs } from "@made-together/ui/tabs";
+import { Accordion } from "@togetheragency/ui/accordion";
+import { Ticker } from "@togetheragency/ui/ticker";
+import { Carousel } from "@togetheragency/ui/carousel";
+import { Marquee } from "@togetheragency/ui/marquee";
+import { Swappable } from "@togetheragency/ui/swappable";
+import { Tabs } from "@togetheragency/ui/tabs";
 import { useState } from "react";
 
 const slides = [
@@ -58,7 +58,7 @@ export default function Home() {
     <main className="mx-auto flex min-h-screen max-w-5xl flex-col gap-16 px-6 py-16 my-20 pb-20">
       <header className="flex flex-col gap-2">
         <span className="text-xs font-medium uppercase tracking-[0.2em] text-neutral-500">
-          @made-together/ui
+          @togetheragency/ui
         </span>
         <h1 className="text-3xl font-semibold tracking-tight">
           Component playground

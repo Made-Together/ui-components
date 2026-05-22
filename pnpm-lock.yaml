@@ -26,7 +26,7 @@ importers:
 
   apps/docs:
     dependencies:
-      '@made-together/ui':
+      '@togetheragency/ui':
         specifier: workspace:*
         version: link:../../packages/ui
       '@tailwindcss/postcss':
@@ -63,7 +63,7 @@ importers:
       '@biomejs/biome':
         specifier: ^2.4.15
         version: 2.4.15
-      '@made-together/typescript-config':
+      '@togetheragency/typescript-config':
         specifier: workspace:*
         version: link:../../packages/typescript-config
       '@types/node':
@@ -81,7 +81,7 @@ importers:
 
   apps/playground:
     dependencies:
-      '@made-together/ui':
+      '@togetheragency/ui':
         specifier: workspace:*
         version: link:../../packages/ui
       '@tailwindcss/postcss':
@@ -106,7 +106,7 @@ importers:
       '@biomejs/biome':
         specifier: ^2.4.15
         version: 2.4.15
-      '@made-together/typescript-config':
+      '@togetheragency/typescript-config':
         specifier: workspace:*
         version: link:../../packages/typescript-config
       '@types/node':
@@ -157,7 +157,7 @@ importers:
       '@biomejs/biome':
         specifier: ^2.4.15
         version: 2.4.15
-      '@made-together/typescript-config':
+      '@togetheragency/typescript-config':
         specifier: workspace:*
         version: link:../typescript-config
       '@testing-library/jest-dom':

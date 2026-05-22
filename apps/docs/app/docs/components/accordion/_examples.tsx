@@ -1,6 +1,6 @@
 "use client";
 
-import { Accordion } from "@made-together/ui/accordion";
+import { Accordion } from "@togetheragency/ui/accordion";
 import { useState } from "react";
 
 const faqItems = [

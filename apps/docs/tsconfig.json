@@ -1,5 +1,5 @@
 {
-  "extends": "@made-together/typescript-config/nextjs.json",
+  "extends": "@togetheragency/typescript-config/nextjs.json",
   "compilerOptions": {
     "plugins": [
       {

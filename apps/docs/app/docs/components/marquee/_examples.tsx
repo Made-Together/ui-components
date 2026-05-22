@@ -1,6 +1,6 @@
 "use client";
 
-import { Marquee } from "@made-together/ui/marquee";
+import { Marquee } from "@togetheragency/ui/marquee";
 import { Logos } from "../swappable/_logos";
 
 const words = [

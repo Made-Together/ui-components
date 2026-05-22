@@ -28,7 +28,7 @@ export default function Home() {
         </p>
         <div className="flex flex-col md:flex-row md:justify-center gap-2">
           <CopyInstallCommand
-            command="pnpm add @made-together/ui"
+            command="pnpm add @togetheragency/ui"
             className="max-[340px]:hidden"
           />
           <Link

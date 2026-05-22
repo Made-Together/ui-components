@@ -7,7 +7,7 @@
 - Updated dependencies [e98eb22]
 - Updated dependencies [810ae6a]
 - Updated dependencies [ceb0b69]
-  - @made-together/ui@0.2.0
+  - @togetheragency/ui@0.2.0
 
 ## 0.1.1
 

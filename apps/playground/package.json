@@ -11,7 +11,7 @@
     "check-types": "next typegen && tsc --noEmit"
   },
   "dependencies": {
-    "@made-together/ui": "workspace:*",
+    "@togetheragency/ui": "workspace:*",
     "@tailwindcss/postcss": "^4.3.0",
     "next": "16.2.0",
     "postcss": "^8.5.14",
@@ -21,7 +21,7 @@
   },
   "devDependencies": {
     "@biomejs/biome": "^2.4.15",
-    "@made-together/typescript-config": "workspace:*",
+    "@togetheragency/typescript-config": "workspace:*",
     "@types/node": "^22.15.3",
     "@types/react": "19.2.2",
     "@types/react-dom": "19.2.2",

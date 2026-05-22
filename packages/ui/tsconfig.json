@@ -1,5 +1,5 @@
 {
-  "extends": "@made-together/typescript-config/react-library.json",
+  "extends": "@togetheragency/typescript-config/react-library.json",
   "compilerOptions": {
     "outDir": "dist",
     "strictNullChecks": true

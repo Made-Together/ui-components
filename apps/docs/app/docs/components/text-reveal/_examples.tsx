@@ -1,6 +1,6 @@
 "use client";
 
-import { TextReveal } from "@made-together/ui/text-reveal";
+import { TextReveal } from "@togetheragency/ui/text-reveal";
 import { useTransform } from "motion/react";
 import { useId, useState } from "react";
 
