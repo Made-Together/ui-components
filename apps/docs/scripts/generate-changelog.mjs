@@ -133,7 +133,7 @@ function annotateVersionHeadings(md) {
   return md.replace(/^##\s+(\S+)[ \t]*$/gm, (line, version) => {
     const date = getVersionDate(version);
     if (!date) return line;
-    return `## ${version}\n\n<p className="text-base text-muted-foreground -mb-3">\n  Released: ${formatDate(date)}\n</p>`;
+    return `## ${version}\n\n<span className="text-base text-muted-foreground -mb-3">\n  Released: ${formatDate(date)}\n</span>`;
   });
 }
 
