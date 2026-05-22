@@ -1,5 +1,15 @@
 # @repo/ui
 
+## 0.3.0
+
+### Minor Changes
+
+- 9f1ef67: Expanded <Tabs /> component functionality. It now supports autoplay functionality along with loop, delay timer and progress tracking.
+
+### Patch Changes
+
+- 08bf72e: Expanded inline styling for vertical progress tracking on the <Tabs /> component. Enhanced documentation and examples to showcase new features.
+
 ## 0.2.1
 
 ### Patch Changes
