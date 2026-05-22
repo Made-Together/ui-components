@@ -18,7 +18,7 @@
 # Components
 - [x] Add side mouse scroll listeners on carousel
 - [x] Fix marquee speed prop aint working
-- [ ] Add autoplay / timer / progress tracking on Tabs component
+- [x] Add autoplay / timer / progress tracking on Tabs component
 - [ ] On NumberFlow, implement continuous plugin default, add animateInView functionality
 - [ ] More tests..?
 
@@ -31,5 +31,7 @@
 
 # Other
 - [x] Setup deployment on docs on Vercel
-- [ ] Setup npm release via CI
+- [x] Setup npm release via CI
 - [ ] Implement skills for agents
+- [ ] Add an MIT license
+- [ ] Add a CONTRIBUTING.md file
