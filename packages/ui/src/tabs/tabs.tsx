@@ -455,9 +455,17 @@ const TABS_BEHAVIORAL_CSS = `
   from { transform: scaleX(0); }
   to   { transform: scaleX(1); }
 }
+@keyframes bt-tabs-progress-y {
+  from { transform: scaleY(0); }
+  to   { transform: scaleY(1); }
+}
 [data-slot="tabs-progress"] {
   transform-origin: left center;
   animation: bt-tabs-progress var(--tabs-autoplay-duration, 2500ms) linear forwards;
+}
+[data-slot="tabs-list"][data-orientation="vertical"] [data-slot="tabs-progress"] {
+  transform-origin: center top;
+  animation-name: bt-tabs-progress-y;
 }
 @media (prefers-reduced-motion: reduce) {
   [data-slot="tabs-separator"] {
@@ -465,7 +473,7 @@ const TABS_BEHAVIORAL_CSS = `
   }
   [data-slot="tabs-progress"] {
     animation: none;
-    transform: scaleX(1);
+    transform: none;
   }
 }
 `;
