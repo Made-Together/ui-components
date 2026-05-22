@@ -1,6 +1,7 @@
 "use client";
 
 import { Tabs } from "@togetheragency/ui/tabs";
+import { AnimatePresence, motion } from "motion/react";
 import { useState } from "react";
 
 const settingsTabs = [
@@ -316,6 +317,68 @@ export function VerticalAutoplayUnderlineTabsExample() {
           <p className="text-sm text-muted-foreground">{tab.body}</p>
         </Tabs.Content>
       ))}
+    </Tabs.Root>
+  );
+}
+
+export function AnimatedContentTabsExample() {
+  const [value, setValue] = useState("account");
+  const active =
+    settingsTabs.find((tab) => tab.id === value) ?? settingsTabs[0];
+  return (
+    <Tabs.Root
+      value={value}
+      onValueChange={setValue}
+      className="w-full max-w-xl"
+    >
+      <Tabs.Container>
+        <Tabs.List
+          aria-label="Animated content tabs"
+          className="rounded-full bg-secondary p-1"
+        >
+          {settingsTabs.map((tab) => (
+            <Tabs.Trigger
+              key={tab.id}
+              id={tab.id}
+              className="flex-1 py-2 text-foreground"
+            >
+              <Tabs.Separator />
+              <span className="text-foreground">{tab.label}</span>
+              <Tabs.Indicator
+                transition={{ type: "spring", stiffness: 520, damping: 38 }}
+                className="rounded-full bg-background py-3 ring-0! shadow-none!"
+              />
+            </Tabs.Trigger>
+          ))}
+        </Tabs.List>
+      </Tabs.Container>
+      {/* `forceMount` keeps Tabs.Content rendered across selection changes so
+          the AnimatePresence inside stays alive and can play exit on the old
+          panel before mounting the new one. The `hidden` attribute that
+          Tabs.Content briefly sets on the same-tick re-render is overridden
+          via CSS so the exit animation can actually paint. */}
+      <Tabs.Content
+        id={active?.id ?? ""}
+        forceMount
+        className="relative overflow-hidden px-1 py-4 [[hidden]]:block!"
+      >
+        <AnimatePresence initial={false} mode="wait">
+          <motion.div
+            key={active?.id ?? ""}
+            initial={{ opacity: 0, filter: "blur(8px)" }}
+            animate={{ opacity: 1, filter: "blur(0px)" }}
+            exit={{ opacity: 0, filter: "blur(8px)" }}
+            transition={{ duration: 0.25, ease: "easeOut" }}
+          >
+            <h3 className="mb-1 font-semibold text-foreground">
+              {active?.title ?? ""}
+            </h3>
+            <p className="text-sm text-muted-foreground">
+              {active?.body ?? ""}
+            </p>
+          </motion.div>
+        </AnimatePresence>
+      </Tabs.Content>
     </Tabs.Root>
   );
 }
