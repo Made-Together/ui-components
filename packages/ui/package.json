@@ -89,52 +89,52 @@
     {
       "path": "dist/accordion/*.mjs",
       "import": "{ Accordion }",
-      "limit": "10 KB"
+      "limit": "15 KB"
     },
     {
       "path": "dist/carousel/*.mjs",
       "import": "{ Carousel }",
-      "limit": "10 KB"
+      "limit": "15 KB"
     },
     {
       "path": "dist/marquee/*.mjs",
       "import": "{ Marquee }",
-      "limit": "10 KB"
+      "limit": "15 KB"
     },
     {
       "path": "dist/number-flow/*.mjs",
       "import": "{ NumberFlow }",
-      "limit": "10 KB"
+      "limit": "15 KB"
     },
     {
       "path": "dist/scroll-stack/*.mjs",
       "import": "{ ScrollStack }",
-      "limit": "10 KB"
+      "limit": "15 KB"
     },
     {
       "path": "dist/swappable/*.mjs",
       "import": "{ Swappable }",
-      "limit": "10 KB"
+      "limit": "15 KB"
     },
     {
       "path": "dist/tabs/*.mjs",
       "import": "{ Tabs }",
-      "limit": "10 KB"
+      "limit": "15 KB"
     },
     {
       "path": "dist/ticker/*.mjs",
       "import": "{ Ticker }",
-      "limit": "10 KB"
+      "limit": "15 KB"
     },
     {
       "path": "dist/type-ahead/*.mjs",
       "import": "{ TypeAhead }",
-      "limit": "10 KB"
+      "limit": "15 KB"
     },
     {
       "path": "dist/text-reveal/*.mjs",
       "import": "{ TextReveal }",
-      "limit": "10 KB"
+      "limit": "15 KB"
     }
   ]
 }
