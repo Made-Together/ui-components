@@ -35,15 +35,32 @@
     }
   },
   "scripts": {
-    "build": "tsdown",
+    "build": "tsdown && size-limit",
     "dev": "tsdown --watch",
     "lint": "biome check .",
     "check-types": "tsc --noEmit",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "size": "size-limit"
+  },
+  "dependencies": {
+    "@number-flow/react": "^0.6.0",
+    "clsx": "^2.1.1",
+    "embla-carousel-autoplay": "^8.6.0",
+    "embla-carousel-react": "^8.6.0",
+    "tailwind-merge": "^3.6.0"
+  },
+  "peerDependencies": {
+    "@types/react": "*",
+    "@types/react-dom": "*",
+    "motion": "^12",
+    "react": "^17.0 || ^18.0 || ^19.0",
+    "react-dom": "^17.0 || ^18.0 || ^19.0",
+    "tailwindcss": "^4.0.0"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.4.15",
+    "@size-limit/preset-small-lib": "^12.1.0",
     "@togetheragency/typescript-config": "workspace:*",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",
@@ -54,18 +71,11 @@
     "@vitejs/plugin-react": "^6.0.1",
     "embla-carousel": "^8.6.0",
     "jsdom": "^29.1.1",
+    "size-limit": "^12.1.0",
     "tsdown": "^0.22.0",
     "typescript": "^6.0.0",
     "unrun": "^0.3.0",
     "vitest": "^4.1.6"
-  },
-  "peerDependencies": {
-    "@types/react": "*",
-    "@types/react-dom": "*",
-    "motion": "^12",
-    "react": "^17.0 || ^18.0 || ^19.0",
-    "react-dom": "^17.0 || ^18.0 || ^19.0",
-    "tailwindcss": "^4.0.0"
   },
   "peerDependenciesMeta": {
     "@types/react": {
@@ -75,11 +85,56 @@
       "optional": true
     }
   },
-  "dependencies": {
-    "@number-flow/react": "^0.6.0",
-    "clsx": "^2.1.1",
-    "embla-carousel-autoplay": "^8.6.0",
-    "embla-carousel-react": "^8.6.0",
-    "tailwind-merge": "^3.6.0"
-  }
+  "size-limit": [
+    {
+      "path": "dist/accordion/*.mjs",
+      "import": "{ Accordion }",
+      "limit": "10 KB"
+    },
+    {
+      "path": "dist/carousel/*.mjs",
+      "import": "{ Carousel }",
+      "limit": "10 KB"
+    },
+    {
+      "path": "dist/marquee/*.mjs",
+      "import": "{ Marquee }",
+      "limit": "10 KB"
+    },
+    {
+      "path": "dist/number-flow/*.mjs",
+      "import": "{ NumberFlow }",
+      "limit": "10 KB"
+    },
+    {
+      "path": "dist/scroll-stack/*.mjs",
+      "import": "{ ScrollStack }",
+      "limit": "10 KB"
+    },
+    {
+      "path": "dist/swappable/*.mjs",
+      "import": "{ Swappable }",
+      "limit": "10 KB"
+    },
+    {
+      "path": "dist/tabs/*.mjs",
+      "import": "{ Tabs }",
+      "limit": "10 KB"
+    },
+    {
+      "path": "dist/ticker/*.mjs",
+      "import": "{ Ticker }",
+      "limit": "10 KB"
+    },
+    {
+      "path": "dist/type-ahead/*.mjs",
+      "import": "{ TypeAhead }",
+      "limit": "10 KB"
+    },
+    {
+      "path": "dist/text-reveal/*.mjs",
+      "import": "{ TextReveal }",
+      "limit": "10 KB"
+    }
+  ]
 }
