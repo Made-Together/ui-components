@@ -33,5 +33,5 @@
 - [x] Setup deployment on docs on Vercel
 - [x] Setup npm release via CI
 - [ ] Implement skills for agents
-- [ ] Add an MIT license
+- [x] Add an MIT license
 - [ ] Add a CONTRIBUTING.md file
