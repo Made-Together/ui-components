@@ -6,7 +6,7 @@ const meta: MetaRecord = {
     title: "Documentation",
     theme: {
       collapsed: true,
-    }
+    },
   },
 };
 

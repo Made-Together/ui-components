@@ -178,8 +178,7 @@ export const Root = forwardRef<HTMLDivElement, MarqueeRootProps>(
         const rootSize = vertical ? root.clientHeight : root.clientWidth;
         const copySize = vertical ? copy.offsetHeight : copy.offsetWidth;
         if (!rootSize || !copySize) return;
-        const gap =
-          Number.parseFloat(getComputedStyle(track).gap || "0") || 0;
+        const gap = Number.parseFloat(getComputedStyle(track).gap || "0") || 0;
         // Fixed pixel shift = one copy + one gap. Setting it on the track means
         // adding more copies later doesn't change the animation distance, so
         // the loop reset stays perfectly seamless.
