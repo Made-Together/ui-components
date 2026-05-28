@@ -22,7 +22,7 @@ import {
 A Spotify-style ticker for long text. The component measures both its
 container and its content; when the text overflows, it scrolls
 back-and-forth at a configurable speed with gradient fade masks on the
-edges. When it fits, the component does nothing — no animation, no mask,
+edges. When it fits, the component does nothing; no animation, no mask,
 no layout cost.
 
 <ComponentShowcase preview={<BasicTickerExample />}>
@@ -60,7 +60,7 @@ export function NewsTicker() {
 import { Ticker } from "@togetheragency/ui/ticker";
 ```
 
-The component is exported as a compound object — both sub-components are
+The component is exported as a compound object; both sub-components are
 properties of `Ticker`:
 
 ```tsx
