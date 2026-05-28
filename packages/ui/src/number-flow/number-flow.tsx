@@ -1,6 +1,7 @@
 "use client";
 
 import NumberFlowPrimitive, {
+  continuous,
   type NumberFlowElement,
   NumberFlowGroup,
   type NumberFlowProps as PrimitiveNumberFlowProps,
@@ -19,7 +20,7 @@ type NumberFlowRootProps = PrimitiveNumberFlowProps;
 const Root: ForwardRefExoticComponent<
   NumberFlowRootProps & RefAttributes<NumberFlowElement>
 > = forwardRef<NumberFlowElement, NumberFlowRootProps>(function NumberFlowRoot(
-  { className, ...rest },
+  { className, plugins, ...rest },
   ref,
 ) {
   return (
@@ -27,6 +28,7 @@ const Root: ForwardRefExoticComponent<
       ref={ref}
       data-slot="number-flow-root"
       className={cn(className)}
+      plugins={plugins ?? [continuous]}
       {...rest}
     />
   );
