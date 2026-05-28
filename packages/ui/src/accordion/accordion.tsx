@@ -29,6 +29,13 @@ type AccordionType = "single" | "multiple";
 type SingleValue = string | null;
 type MultipleValue = string[];
 
+const normalizeValue = (
+  raw: SingleValue | MultipleValue | undefined,
+): MultipleValue => {
+  if (raw === undefined || raw === null) return [];
+  return Array.isArray(raw) ? raw : [raw];
+};
+
 interface AccordionContextValue {
   type: AccordionType;
   collapsible: boolean;
@@ -122,18 +129,11 @@ const Root = forwardRef<HTMLUListElement, AccordionRootProps>(
     const isMultiple = type === "multiple";
     const isControlled = controlledValue !== undefined;
 
-    const normalize = (
-      raw: SingleValue | MultipleValue | undefined,
-    ): MultipleValue => {
-      if (raw === undefined || raw === null) return [];
-      return Array.isArray(raw) ? raw : [raw];
-    };
-
     // Open state lives in a ref + per-key listener map, so toggling does NOT
     // re-render Root. Each Item subscribes only to its own key via
     // useSyncExternalStore, so siblings don't re-render either.
     const valueRef = useRef<MultipleValue>(
-      normalize(isControlled ? controlledValue : defaultValue),
+      normalizeValue(isControlled ? controlledValue : defaultValue),
     );
     const listenersRef = useRef(new Map<string, Set<() => void>>());
 
@@ -227,7 +227,7 @@ const Root = forwardRef<HTMLUListElement, AccordionRootProps>(
     // Sync controlled `value` into the ref and notify affected items.
     useIsoLayoutEffect(() => {
       if (!isControlled) return;
-      applyValue(normalize(controlledValue));
+      applyValue(normalizeValue(controlledValue));
     }, [controlledValue, isControlled, applyValue]);
 
     const triggersRef = useRef(new Map<string, HTMLButtonElement>());
@@ -386,11 +386,17 @@ const Item = forwardRef<HTMLLIElement, AccordionItemProps>(
   ) {
     const root = useAccordion("Accordion.Item");
     const reactId = useId();
+    // Depend on the stable callbacks themselves, not the context object — its
+    // identity changes whenever Root's `disabled`/`collapsible` props change.
+    const { subscribe: rootSubscribe, isOpen: rootIsOpen } = root;
     const subscribe = useCallback(
-      (listener: () => void) => root.subscribe(value, listener),
-      [root, value],
+      (listener: () => void) => rootSubscribe(value, listener),
+      [rootSubscribe, value],
     );
-    const getSnapshot = useCallback(() => root.isOpen(value), [root, value]);
+    const getSnapshot = useCallback(
+      () => rootIsOpen(value),
+      [rootIsOpen, value],
+    );
     const open = useSyncExternalStore(subscribe, getSnapshot, getSnapshot);
     const isDisabled = disabled || root.disabled;
 
@@ -460,20 +466,30 @@ const Trigger = forwardRef<HTMLButtonElement, AccordionTriggerProps>(
     const root = useAccordion("Accordion.Trigger");
     const item = useAccordionItem("Accordion.Trigger");
     const isDisabled = disabled || item.disabled;
+    // Pull stable callbacks off the context so they don't re-bind whenever
+    // Root's context identity changes (e.g. parent toggles `disabled`).
+    // Re-binding `setRef` would cause React to call setRef(null)→setRef(node),
+    // which unregisters and re-pushes this trigger in `orderRef` — scrambling
+    // Arrow/Home/End focus order.
+    const {
+      registerTrigger,
+      toggle: rootToggle,
+      focusTrigger: rootFocusTrigger,
+    } = root;
 
     const setRef = useCallback(
       (node: HTMLButtonElement | null) => {
-        root.registerTrigger(item.value, node);
+        registerTrigger(item.value, node);
         if (typeof forwardedRef === "function") forwardedRef(node);
         else if (forwardedRef) forwardedRef.current = node;
       },
-      [forwardedRef, item.value, root],
+      [forwardedRef, item.value, registerTrigger],
     );
 
     const handleClick = (event: MouseEvent<HTMLButtonElement>) => {
       onClick?.(event);
       if (event.defaultPrevented || isDisabled) return;
-      root.toggle(item.value);
+      rootToggle(item.value);
     };
 
     const handleKeyDown = (event: KeyboardEvent<HTMLButtonElement>) => {
@@ -482,19 +498,19 @@ const Trigger = forwardRef<HTMLButtonElement, AccordionTriggerProps>(
       switch (event.key) {
         case "ArrowDown":
           event.preventDefault();
-          root.focusTrigger(item.value, "next");
+          rootFocusTrigger(item.value, "next");
           break;
         case "ArrowUp":
           event.preventDefault();
-          root.focusTrigger(item.value, "prev");
+          rootFocusTrigger(item.value, "prev");
           break;
         case "Home":
           event.preventDefault();
-          root.focusTrigger(item.value, "first");
+          rootFocusTrigger(item.value, "first");
           break;
         case "End":
           event.preventDefault();
-          root.focusTrigger(item.value, "last");
+          rootFocusTrigger(item.value, "last");
           break;
         default:
           break;
