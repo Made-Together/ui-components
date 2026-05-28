@@ -70,7 +70,7 @@ Each component also ships with a focused [skills](https://ui.bytogether.agency/d
 
 ## Contributing
 
-Contributions are welcome! Please open an issue or submit a PR. See the [CONTRIBUTING](CONTRIBUTING) file for more details.
+Contributions are welcome! Please open an issue or submit a PR. See the [CONTRIBUTING](CONTRIBUTING.md) file for more details.
 
 ## License
 
