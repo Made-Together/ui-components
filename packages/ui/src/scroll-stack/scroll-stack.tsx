@@ -1,15 +1,17 @@
 "use client";
 
 import {
+  domAnimation,
   type HTMLMotionProps,
+  LazyMotion,
   type MotionValue,
-  motion,
   type SpringOptions,
   useReducedMotion,
   useScroll,
   useSpring,
   useTransform,
 } from "motion/react";
+import * as m from "motion/react-m";
 import type { ComponentPropsWithoutRef, RefObject } from "react";
 import {
   createContext,
@@ -209,14 +211,16 @@ const Root = forwardRef<HTMLDivElement, ScrollStackRootProps>(
 
     return (
       <ScrollStackContext.Provider value={ctx}>
-        <div
-          ref={ref}
-          data-slot="scroll-stack-root"
-          className={cn(className)}
-          {...rest}
-        >
-          {children}
-        </div>
+        <LazyMotion features={domAnimation} strict>
+          <div
+            ref={ref}
+            data-slot="scroll-stack-root"
+            className={cn(className)}
+            {...rest}
+          >
+            {children}
+          </div>
+        </LazyMotion>
       </ScrollStackContext.Provider>
     );
   },
@@ -332,7 +336,7 @@ const Item = forwardRef<HTMLDivElement, ScrollStackItemProps>(
     );
 
     return (
-      <motion.div
+      <m.div
         ref={setRef}
         data-slot="scroll-stack-item"
         data-index={index}
@@ -349,7 +353,7 @@ const Item = forwardRef<HTMLDivElement, ScrollStackItemProps>(
         {...rest}
       >
         {children}
-      </motion.div>
+      </m.div>
     );
   },
 );

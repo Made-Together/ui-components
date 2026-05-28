@@ -1,6 +1,7 @@
 "use client";
 
-import { type HTMLMotionProps, motion, useReducedMotion } from "motion/react";
+import { domAnimation, type HTMLMotionProps, LazyMotion } from "motion/react";
+import * as m from "motion/react-m";
 import type {
   ComponentPropsWithoutRef,
   CSSProperties,
@@ -649,33 +650,32 @@ const Indicator = forwardRef<HTMLSpanElement, TabsIndicatorProps>(
   function TabsIndicator({ className, transition, ...rest }, ref) {
     const root = useTabs("Tabs.Indicator");
     const item = useTabItem("Tabs.Indicator");
-    const reduceMotion = useReducedMotion();
     // Only the selected tab renders an indicator. Motion's shared `layoutId`
     // ties every Indicator in this Root together: when selection moves, the
     // previous one unmounts and the new one mounts under the same layoutId,
     // so motion animates position+size from old to new for a smooth slide.
     if (!item.selected) return null;
     return (
-      <motion.span
-        ref={ref}
-        layoutId={`tabs-indicator-${root.scope}`}
-        aria-hidden="true"
-        data-slot="tabs-indicator"
-        transition={
-          reduceMotion
-            ? { duration: 0 }
-            : (transition ?? {
-                type: "spring",
-                stiffness: 380,
-                damping: 32,
-              })
-        }
-        className={cn(
-          "rounded-3xl bg-white shadow-sm ring-1 ring-black/5",
-          className,
-        )}
-        {...rest}
-      />
+      <LazyMotion features={domAnimation} strict>
+        <m.span
+          ref={ref}
+          layoutId={`tabs-indicator-${root.scope}`}
+          aria-hidden="true"
+          data-slot="tabs-indicator"
+          transition={
+            transition ?? {
+              type: "spring",
+              stiffness: 380,
+              damping: 32,
+            }
+          }
+          className={cn(
+            "rounded-3xl bg-white shadow-sm ring-1 ring-black/5",
+            className,
+          )}
+          {...rest}
+        />
+      </LazyMotion>
     );
   },
 );
