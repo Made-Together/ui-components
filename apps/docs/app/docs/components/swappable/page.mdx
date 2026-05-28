@@ -18,7 +18,7 @@ import {
 # Swappable
 
 A headless rotating grid. Hand it an array of items and a grid shape (`rows` ×
-`cols`) — it renders the first `rows × cols` items, then, while
+`cols`); it renders the first `rows × cols` items, then, while
 `items.length > gridSize`, periodically swaps a random visible cell with a
 random off-screen item. Uniqueness is preserved: the same item is never
 visible twice.
@@ -60,7 +60,7 @@ export function LogoWall() {
 import { Swappable } from "@togetheragency/ui/swappable";
 ```
 
-The component is exported as a compound object — every sub-component is a
+The component is exported as a compound object; every sub-component is a
 property of `Swappable`:
 
 ```tsx
@@ -71,7 +71,7 @@ Swappable.Item;
 
 ## Composition
 
-Swappable is three parts that work together — `Root` owns state and the
+Swappable is three parts that work together; `Root` owns state and the
 rotation timer, `Grid` renders the visible cells via a render prop, and `Item`
 is the animated cell wrapper:
 
@@ -113,7 +113,7 @@ is the animated cell wrapper:
 
 ### Basic usage
 
-The default behavior — a single row, responsive column count, rotation every
+The default behavior; a single row, responsive column count, rotation every
 2–5 seconds, and a scale-and-fade transition.
 
 ```tsx
@@ -137,7 +137,7 @@ The default behavior — a single row, responsive column count, rotation every
 Pass `rows` to get a 2D grid. The total cell count is `rows × resolvedCols`
 where `resolvedCols` is chosen from the `cols` map for the current viewport.
 `pauseOnHover` freezes the rotation timer while the grid is hovered or
-focused — useful for letting users actually read what's on screen.
+focused; useful for letting users actually read what's on screen.
 
 <ComponentShowcase preview={<MultiRowSwappableExample />}>
 
@@ -163,7 +163,7 @@ focused — useful for letting users actually read what's on screen.
 
 ### Fast rotation
 
-`rotationInterval` accepts a `{ min, max }` range in milliseconds — each tick
+`rotationInterval` accepts a `{ min, max }` range in milliseconds; each tick
 picks a random delay inside that range.
 
 <ComponentShowcase preview={<FastRotationSwappableExample />}>

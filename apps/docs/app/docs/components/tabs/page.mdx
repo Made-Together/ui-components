@@ -24,7 +24,7 @@ import {
 
 A headless, accessible tabs primitive. Renders semantic
 `role="tablist" / "tab" / "tabpanel"` markup with the full WAI-ARIA tabs
-pattern wired up — `aria-selected`, `aria-controls`, `aria-labelledby`,
+pattern wired up; `aria-selected`, `aria-controls`, `aria-labelledby`,
 roving `tabIndex`, and orientation-aware arrow-key navigation. The optional
 `Tabs.Indicator` rides on motion's shared `layoutId`, so the active marker
 slides smoothly between triggers when selection changes.
@@ -77,7 +77,7 @@ export function BasicTabs() {
 import { Tabs } from "@togetheragency/ui/tabs";
 ```
 
-The component is exported as a compound object — every sub-component is a
+The component is exported as a compound object; every sub-component is a
 property of `Tabs`:
 
 ```tsx
