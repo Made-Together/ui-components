@@ -1,157 +1,77 @@
-# Turborepo starter
+&nbsp;
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="./assets/together-ui-light.svg">
+    <source media="(prefers-color-scheme: light)" srcset="./assets/together-ui-dark.svg">
+    <img alt="@togetheragency/ui" src="./assets/together-ui-light.svg" width="180">
+  </picture>
+</p>
+<h3 align="center">Headless React primitives for modern websites</h3>
+<p align="center">
+  A collection library of re-usable, minimally styled, headless React components
+</p>
 
-This Turborepo starter is maintained by the Turborepo core team.
+<p align="center">
+  <a href="https://ui.bytogether.agency/docs/getting-started/">Getting started</a> |
+  <a href="https://ui.bytogether.agency/docs/components">Components</a> |
+  <a href="https://ui.bytogether.agency/docs/skills">Skills</a> |
+  <a href="https://github.com/Made-Together/ui-components/issues/new/choose">Issues</a> |
+  <a href="https://ui.bytogether.agency/docs/changelog">Changelog</a>
+</p>
 
-## Using this example
+<div align="center">
 
-Run the following command:
+[![NPM Version](https://img.shields.io/npm/v/%40togetheragency%2Fui.svg?style=plastic&color=blue)](https://www.npmjs.com/package/@togetheragency/ui)
+[![NPM downloads](https://img.shields.io/npm/dm/%40togetheragency%2Fui.svg?style=plastic&color=222222)](https://www.npmjs.com/package/@togetheragency/ui)
+[![CI](https://img.shields.io/github/actions/workflow/status/made-together/ui-components/release.yml?style=plastic&color=eeeeee)](https://github.com/Made-Together/ui-components/actions/workflows/release.yml)
 
-```sh
-npx create-turbo@latest
-```
+[![React](https://img.shields.io/badge/React-%2320232a.svg?logo=react&logoColor=%2361DAFB&style=plastic)](#)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind%20CSS-%23222222.svg?logo=tailwind-css&logoColor=white&style=plastic)](#)
 
-## What's inside?
+</div>
 
-This Turborepo includes the following packages/apps:
+<hr/>
 
-### Apps and Packages
+## Installation
 
-- `docs`: a [Next.js](https://nextjs.org/) app
-- `web`: another [Next.js](https://nextjs.org/) app
-- `@togetheragency/ui`: a stub React component library shared by both `web` and `docs` applications
-- `@togetheragency/typescript-config`: `tsconfig.json`s used throughout the monorepo
-
-Each package/app is 100% [TypeScript](https://www.typescriptlang.org/).
-
-### Utilities
-
-This Turborepo has some additional tools already setup for you:
-
-- [TypeScript](https://www.typescriptlang.org/) for static type checking
-- [Biome](https://biomejs.dev/) for linting and formatting (root `biome.json`, `pnpm lint` / `pnpm format` / `pnpm check`)
-
-### Build
-
-To build all apps and packages, run the following command:
-
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended):
-
-```sh
-cd my-turborepo
-turbo build
-```
-
-Without global `turbo`, use your package manager:
+Install `@togetheragency/ui` with your package manager of choice:
 
 ```sh
-cd my-turborepo
-npx turbo build
-pnpm dlx turbo build
-pnpm exec turbo build
+pnpm add @togetheragency/ui
 ```
 
-You can build a specific package by using a [filter](https://turborepo.dev/docs/crafting-your-repository/running-tasks#using-filters):
-
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed:
+The library declares `react`, `motion`, and `tailwindcss` as peer dependencies. Make sure they're installed in your project:
 
 ```sh
-turbo build --filter=docs
+pnpm add react react-dom motion tailwindcss
 ```
 
-Without global `turbo`:
+Full setup instructions, including Tailwind v4 configuration, are available in the [installation guide](https://ui.bytogether.agency/docs/installation).
 
-```sh
-npx turbo build --filter=docs
-pnpm exec turbo build --filter=docs
-pnpm exec turbo build --filter=docs
+## Usage
+
+Components are exported per-name and imported from their subpath. No build step is involved, so your bundler transpiles the source alongside the rest of your app and tree-shaking works as expected.
+
+```tsx
+import { Carousel } from "@togetheragency/ui/carousel";
+import { Marquee } from "@togetheragency/ui/marquee";
+import { Tabs } from "@togetheragency/ui/tabs";
 ```
 
-### Develop
+Every component is headless by default. It owns behavior, state, and accessibility, and leaves the look and feel up to you. Defaults (when any exist) are minimal and overridable via `className`, `style`, slots, or render props.
 
-To develop all apps and packages, run the following command:
+For per-component APIs, examples, and recipes, head to the [official documentation](https://ui.bytogether.agency/docs/getting-started).
 
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended):
+## Components
 
-```sh
-cd my-turborepo
-turbo dev
-```
+The full list of available components, along with live examples and API references, lives at [ui.bytogether.agency/docs/components](https://ui.bytogether.agency/docs/components).
 
-Without global `turbo`, use your package manager:
+Each component also ships with a focused [skills](https://ui.bytogether.agency/docs/skills) entry that you can feed to Claude Code, Cursor, or any other agentic tool to scaffold and customize components without guessing at the API.
 
-```sh
-cd my-turborepo
-npx turbo dev
-pnpm exec turbo dev
-pnpm exec turbo dev
-```
+## Contributing
 
-You can develop a specific package by using a [filter](https://turborepo.dev/docs/crafting-your-repository/running-tasks#using-filters):
+Contributions are welcome! Please open an issue or submit a PR. See the [CONTRIBUTING](CONTRIBUTING) file for more details.
 
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed:
+## License
 
-```sh
-turbo dev --filter=web
-```
-
-Without global `turbo`:
-
-```sh
-npx turbo dev --filter=web
-pnpm exec turbo dev --filter=web
-pnpm exec turbo dev --filter=web
-```
-
-### Remote Caching
-
-> [!TIP]
-> Vercel Remote Cache is free for all plans. Get started today at [vercel.com](https://vercel.com/signup?utm_source=remote-cache-sdk&utm_campaign=free_remote_cache).
-
-Turborepo can use a technique known as [Remote Caching](https://turborepo.dev/docs/core-concepts/remote-caching) to share cache artifacts across machines, enabling you to share build caches with your team and CI/CD pipelines.
-
-By default, Turborepo will cache locally. To enable Remote Caching you will need an account with Vercel. If you don't have an account you can [create one](https://vercel.com/signup?utm_source=turborepo-examples), then enter the following commands:
-
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended):
-
-```sh
-cd my-turborepo
-turbo login
-```
-
-Without global `turbo`, use your package manager:
-
-```sh
-cd my-turborepo
-npx turbo login
-pnpm exec turbo login
-pnpm exec turbo login
-```
-
-This will authenticate the Turborepo CLI with your [Vercel account](https://vercel.com/docs/concepts/personal-accounts/overview).
-
-Next, you can link your Turborepo to your Remote Cache by running the following command from the root of your Turborepo:
-
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed:
-
-```sh
-turbo link
-```
-
-Without global `turbo`:
-
-```sh
-npx turbo link
-pnpm exec turbo link
-pnpm exec turbo link
-```
-
-## Useful Links
-
-Learn more about the power of Turborepo:
-
-- [Tasks](https://turborepo.dev/docs/crafting-your-repository/running-tasks)
-- [Caching](https://turborepo.dev/docs/crafting-your-repository/caching)
-- [Remote Caching](https://turborepo.dev/docs/core-concepts/remote-caching)
-- [Filtering](https://turborepo.dev/docs/crafting-your-repository/running-tasks#using-filters)
-- [Configuration Options](https://turborepo.dev/docs/reference/configuration)
-- [CLI Usage](https://turborepo.dev/docs/reference/command-line-reference)
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for more details.
