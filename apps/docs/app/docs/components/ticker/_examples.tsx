@@ -141,8 +141,8 @@ export function FadesTickerExample() {
           startDelay={1500}
         >
           <Ticker.Content>
-            This text has a wide fade mask on the edges creating a more
-            dramatic gradient effect
+            This text has a wide fade mask on the edges creating a more dramatic
+            gradient effect
           </Ticker.Content>
         </Ticker.Root>
       </div>

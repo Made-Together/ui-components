@@ -21,14 +21,14 @@ import {
 
 A headless, accessible disclosure primitive. Renders semantic
 `ul > li > h3 > button` markup with the full WAI-ARIA accordion pattern wired
-up — `aria-expanded`, `aria-controls`, panel `region`, and Arrow / Home / End
+up; `aria-expanded`, `aria-controls`, panel `region`, and Arrow / Home / End
 keyboard navigation between triggers. Open state is exposed via `data-state`
 on every part so you can drive transitions purely from CSS.
 
 <ComponentShowcase preview={<BasicAccordionExample />}>
 
 ```tsx
-import { Accordion } from "@made-together/ui/accordion";
+import { Accordion } from "@togetheragency/ui/accordion";
 
 const faqItems = [
   { value: "headless", title: "Lorem ipsum dolor sit amet?", content: "…" },
@@ -68,10 +68,10 @@ export function BasicAccordion() {
 ## Import
 
 ```tsx
-import { Accordion } from "@made-together/ui/accordion";
+import { Accordion } from "@togetheragency/ui/accordion";
 ```
 
-The component is exported as a compound object — every sub-component is a
+The component is exported as a compound object; every sub-component is a
 property of `Accordion`:
 
 ```tsx
@@ -128,7 +128,7 @@ sibling of `Heading`:
 
 <Callout type="info">
   Open state lives in a ref + per-key listener map inside `Accordion.Root`.
-  Toggling an item only re-renders the affected `Accordion.Item` — sibling
+  Toggling an item only re-renders the affected `Accordion.Item`; sibling
   items and the root itself don't re-render. This keeps large FAQs fast even
   with rich content inside each panel.
 </Callout>
@@ -138,7 +138,7 @@ sibling of `Heading`:
 ### Basic usage
 
 A single accordion where one panel is open at a time. `defaultValue` puts
-the component in uncontrolled mode — perfect when you don't need to read or
+the component in uncontrolled mode; perfect when you don't need to read or
 override the open state from outside.
 
 ```tsx
@@ -495,5 +495,5 @@ import type {
   AccordionRootProps,
   AccordionTriggerProps,
   AccordionType, // "single" | "multiple"
-} from "@made-together/ui/accordion";
+} from "@togetheragency/ui/accordion";
 ```

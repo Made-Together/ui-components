@@ -36,11 +36,11 @@ jobs:
       - name: Build
         run: pnpm build
 
-      - name: Test
-        run: pnpm test
-
       - name: Type-check
         run: pnpm check-types
+
+      - name: Test
+        run: pnpm test
 
       - name: Changeset status
         run: pnpm exec changeset status --since=origin/main

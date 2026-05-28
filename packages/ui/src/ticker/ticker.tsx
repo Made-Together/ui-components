@@ -113,18 +113,22 @@ const Root = forwardRef<HTMLDivElement, TickerRootProps>(function TickerRoot(
     const rightFadeStart = 100 - fadePercent + progress * fadePercent;
     const gradient = `linear-gradient(to right, transparent 0%, black ${leftFadeEnd}%, black ${rightFadeStart}%, transparent 100%)`;
     container.style.maskImage = gradient;
-    (container.style as CSSStyleDeclaration & {
-      webkitMaskImage: string;
-    }).webkitMaskImage = gradient;
+    (
+      container.style as CSSStyleDeclaration & {
+        webkitMaskImage: string;
+      }
+    ).webkitMaskImage = gradient;
   }, []);
 
   const clearMask = useCallback(() => {
     const container = containerRef.current;
     if (!container) return;
     container.style.maskImage = "";
-    (container.style as CSSStyleDeclaration & {
-      webkitMaskImage: string;
-    }).webkitMaskImage = "";
+    (
+      container.style as CSSStyleDeclaration & {
+        webkitMaskImage: string;
+      }
+    ).webkitMaskImage = "";
   }, []);
 
   const stopAnimation = useCallback(() => {

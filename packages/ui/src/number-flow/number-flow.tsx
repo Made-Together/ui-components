@@ -5,7 +5,11 @@ import NumberFlowPrimitive, {
   NumberFlowGroup,
   type NumberFlowProps as PrimitiveNumberFlowProps,
 } from "@number-flow/react";
-import type { ForwardRefExoticComponent, ReactNode, RefAttributes } from "react";
+import type {
+  ForwardRefExoticComponent,
+  ReactNode,
+  RefAttributes,
+} from "react";
 import { forwardRef } from "react";
 
 import { cn } from "../../lib/utils.js";
@@ -14,18 +18,19 @@ type NumberFlowRootProps = PrimitiveNumberFlowProps;
 
 const Root: ForwardRefExoticComponent<
   NumberFlowRootProps & RefAttributes<NumberFlowElement>
-> = forwardRef<NumberFlowElement, NumberFlowRootProps>(
-  function NumberFlowRoot({ className, ...rest }, ref) {
-    return (
-      <NumberFlowPrimitive
-        ref={ref}
-        data-slot="number-flow-root"
-        className={cn(className)}
-        {...rest}
-      />
-    );
-  },
-);
+> = forwardRef<NumberFlowElement, NumberFlowRootProps>(function NumberFlowRoot(
+  { className, ...rest },
+  ref,
+) {
+  return (
+    <NumberFlowPrimitive
+      ref={ref}
+      data-slot="number-flow-root"
+      className={cn(className)}
+      {...rest}
+    />
+  );
+});
 
 interface NumberFlowGroupProps {
   children?: ReactNode;

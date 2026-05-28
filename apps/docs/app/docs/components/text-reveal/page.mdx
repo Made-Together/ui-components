@@ -19,19 +19,19 @@ import {
 
 # TextReveal
 
-A word-by-word reveal primitive. By default the reveal is scroll-driven —
+A word-by-word reveal primitive. By default the reveal is scroll-driven;
 the words animate in as the section moves through the viewport. Pass
 `progress` and the component flips into a fully controlled mode where you
 own the value (perfect for sliders, programmatic playback, hero entrances,
 or anything that shouldn't depend on scroll).
 
-The component owns the per-word splitting and motion plumbing — you own
+The component owns the per-word splitting and motion plumbing; you own
 the typography, the layout, and the per-word transform.
 
 <ComponentShowcase preview={<InteractiveTextRevealExample />}>
 
 ```tsx
-import { TextReveal } from "@made-together/ui/text-reveal";
+import { TextReveal } from "@togetheragency/ui/text-reveal";
 import { useState } from "react";
 
 export function InteractiveTextReveal() {
@@ -61,10 +61,10 @@ export function InteractiveTextReveal() {
 ## Import
 
 ```tsx
-import { TextReveal } from "@made-together/ui/text-reveal";
+import { TextReveal } from "@togetheragency/ui/text-reveal";
 ```
 
-The component is exported as a compound object — every sub-component is a
+The component is exported as a compound object; every sub-component is a
 property of `TextReveal`:
 
 ```tsx
@@ -76,7 +76,7 @@ TextReveal.Word;
 ## Composition
 
 `TextReveal.Root` is the orchestrator. In its **default scroll mode** give
-it a tall height — the height determines how much scroll distance the
+it a tall height; the height determines how much scroll distance the
 reveal occupies — and place a `sticky` child inside to pin the words while
 the user scrolls past:
 
@@ -90,8 +90,8 @@ the user scrolls past:
 </TextReveal.Root>
 ```
 
-In **controlled mode** the layout is up to you — the Root is just a
-container that propagates `progress` to descendants via context. No height
+In **controlled mode** the layout is up to you; the Root is just a
+container that propagates `progress` to descendants via context; no height
 or sticky wrapper required.
 
 - **`TextReveal.Root`** wires up `motion`'s `useScroll` against itself
@@ -101,14 +101,14 @@ or sticky wrapper required.
 - **`TextReveal.Text`** accepts a plain string, splits it on whitespace,
   and renders each word through `TextReveal.Word`. Use the `transform`
   prop to customise the reveal.
-- **`TextReveal.Word`** is the lower-level primitive — one animated word
+- **`TextReveal.Word`** is the lower-level primitive; one animated word
   that reads its slice of the root progress. Compose words manually when
   you need arbitrary surrounding markup (links, highlights, mixed
   elements).
 
 <Callout type="info">
   In scroll mode the reveal is driven by the root's intersection with the
-  viewport — not by any manual offset on `TextReveal.Text`. Place the text
+  viewport; not by any manual offset on `TextReveal.Text`. Place the text
   wherever you like inside the root (sticky, centered, in a grid cell) and
   the timing tracks the surrounding scroll container.
 </Callout>
@@ -369,7 +369,7 @@ Data attributes:
 ### Transform signature
 
 ```ts
-import type { TextRevealTransform } from "@made-together/ui/text-reveal";
+import type { TextRevealTransform } from "@togetheragency/ui/text-reveal";
 
 const fade: TextRevealTransform = (p) => ({ opacity: p });
 
@@ -391,5 +391,5 @@ import type {
   TextRevealTextProps,
   TextRevealTransform,
   TextRevealWordProps,
-} from "@made-together/ui/text-reveal";
+} from "@togetheragency/ui/text-reveal";
 ```

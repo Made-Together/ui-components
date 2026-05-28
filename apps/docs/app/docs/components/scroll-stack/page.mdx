@@ -18,14 +18,14 @@ import {
 # ScrollStack
 
 A headless layered-stack primitive. Every `ScrollStack.Item` is a sticky card
-sharing the Viewport as its positioning ancestor — as you scroll, each card
+sharing the Viewport as its positioning ancestor; as you scroll, each card
 pins on top of the previous one and the earlier cards scale down, producing
 the familiar stacked-cards transition.
 
 <ComponentShowcase preview={<BasicScrollStackExample />}>
 
 ```tsx
-import { ScrollStack } from "@made-together/ui/scroll-stack";
+import { ScrollStack } from "@togetheragency/ui/scroll-stack";
 
 export function StackedCards() {
   return (
@@ -49,10 +49,10 @@ export function StackedCards() {
 ## Import
 
 ```tsx
-import { ScrollStack } from "@made-together/ui/scroll-stack";
+import { ScrollStack } from "@togetheragency/ui/scroll-stack";
 ```
 
-The component is exported as a compound object — every sub-component is a
+The component is exported as a compound object; every sub-component is a
 property of `ScrollStack`:
 
 ```tsx
@@ -64,7 +64,7 @@ ScrollStack.Item;
 ## Composition
 
 ScrollStack has three parts: `Root → Viewport → Item`. Items must be direct
-children of `Viewport` — they all need to share the same sticky-positioning
+children of `Viewport`; they all need to share the same sticky-positioning
 ancestor so that they can pin on top of one another instead of each card
 disappearing as it leaves its own parent.
 
@@ -330,5 +330,5 @@ import type {
   ScrollStackItemProps,
   ScrollStackRootProps,
   ScrollStackViewportProps,
-} from "@made-together/ui/scroll-stack";
+} from "@togetheragency/ui/scroll-stack";
 ```

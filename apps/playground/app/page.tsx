@@ -1,11 +1,11 @@
 "use client";
 
 import { Accordion } from "@togetheragency/ui/accordion";
-import { Ticker } from "@togetheragency/ui/ticker";
 import { Carousel } from "@togetheragency/ui/carousel";
 import { Marquee } from "@togetheragency/ui/marquee";
 import { Swappable } from "@togetheragency/ui/swappable";
 import { Tabs } from "@togetheragency/ui/tabs";
+import { Ticker } from "@togetheragency/ui/ticker";
 import { useState } from "react";
 
 const slides = [

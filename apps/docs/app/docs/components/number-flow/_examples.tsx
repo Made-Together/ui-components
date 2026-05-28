@@ -74,9 +74,7 @@ export function GroupNumberFlowExample() {
   const delta = deltas[idx] ?? 0;
 
   return (
-    <div
-      className={`${showcaseClassName} flex-col gap-2 text-4xl`}
-    >
+    <div className={`${showcaseClassName} flex-col gap-2 text-4xl`}>
       <NumberFlow.Group>
         <NumberFlow.Root
           value={price}

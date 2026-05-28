@@ -22,12 +22,12 @@ import {
 A headless, composable carousel built on top of
 [Embla Carousel](https://www.embla-carousel.com). Ships drag-to-scroll, snap
 points, autoplay, looping, multi-slide layouts, and keyboard-accessible
-navigation — with every visual choice left to you.
+navigation; with every visual choice left to you.
 
 <ComponentShowcase preview={<BasicCarouselExample />}>
 
 ```tsx
-import { Carousel } from "@made-together/ui/carousel";
+import { Carousel } from "@togetheragency/ui/carousel";
 
 function SimpleSlide({ index }: { index: number }) {
   return (
@@ -89,10 +89,10 @@ export function BasicCarousel() {
 ## Import
 
 ```tsx
-import { Carousel, useCarousel } from "@made-together/ui/carousel";
+import { Carousel, useCarousel } from "@togetheragency/ui/carousel";
 ```
 
-The component is exported as a compound object — every sub-component is a
+The component is exported as a compound object; every sub-component is a
 property of `Carousel`:
 
 ```tsx
@@ -112,7 +112,7 @@ nearest `Carousel.Root` and is intended for custom controls or telemetry.
 ## Composition
 
 Carousel follows a strict, composable structure. The minimum viable carousel is
-three nested parts — `Root → Viewport → Container → Slide`:
+three nested parts; `Root → Viewport → Container → Slide`:
 
 ```tsx
 <Carousel.Root>
@@ -604,5 +604,5 @@ import type {
   CarouselPlugins, // EmblaPluginType[]
   CarouselRootProps,
   CarouselSlideProps,
-} from "@made-together/ui/carousel";
+} from "@togetheragency/ui/carousel";
 ```
