@@ -1,5 +1,12 @@
 # @repo/ui
 
+## 0.3.1
+
+### Patch Changes
+
+- 0b7da99: Added internal component documentation along with links to main documentation website.
+- 0b7da99: Improved internal package documentation.
+
 ## 0.3.0
 
 ### Minor Changes
