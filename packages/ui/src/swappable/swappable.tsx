@@ -2,11 +2,13 @@
 
 import {
   AnimatePresence,
+  domAnimation,
   type HTMLMotionProps,
-  motion,
+  LazyMotion,
   type Transition,
   useReducedMotion,
 } from "motion/react";
+import * as m from "motion/react-m";
 import type {
   ComponentPropsWithoutRef,
   ReactElement,
@@ -404,16 +406,18 @@ const RootImpl = forwardRef<HTMLDivElement, SwappableRootProps<unknown>>(
 
     return (
       <SwappableContext.Provider value={ctx}>
-        <div
-          ref={ref}
-          data-slot="swappable-root"
-          data-swappable-instance={scope}
-          className={cn(className)}
-          {...rest}
-        >
-          <style>{SWAPPABLE_BEHAVIORAL_CSS}</style>
-          {children}
-        </div>
+        <LazyMotion features={domAnimation} strict>
+          <div
+            ref={ref}
+            data-slot="swappable-root"
+            data-swappable-instance={scope}
+            className={cn(className)}
+            {...rest}
+          >
+            <style>{SWAPPABLE_BEHAVIORAL_CSS}</style>
+            {children}
+          </div>
+        </LazyMotion>
       </SwappableContext.Provider>
     );
   },
@@ -523,7 +527,7 @@ const Item = forwardRef<HTMLDivElement, SwappableItemProps>(
   ) {
     const ctx = useSwappable("Swappable.Item");
     return (
-      <motion.div
+      <m.div
         ref={ref}
         data-slot="swappable-item"
         initial={initial ?? ctx.initial}
@@ -534,7 +538,7 @@ const Item = forwardRef<HTMLDivElement, SwappableItemProps>(
         {...rest}
       >
         {children}
-      </motion.div>
+      </m.div>
     );
   },
 );
