@@ -1,6 +1,6 @@
 ---
 description:
-  Install @made-together/ui into your React project. Requires React, motion,
+  Install @togetheragency/ui into your React project. Requires React, motion,
   and Tailwind CSS as peer dependencies.
 ---
 
@@ -8,35 +8,35 @@ import { Callout, Cards, Tabs } from "nextra/components";
 
 # Installation
 
-`@made-together/ui` is distributed on npm. Add it to your React project with
+`@togetheragency/ui` is distributed on npm. Add it to your React project with
 your package manager of choice.
 
 <Tabs items={["pnpm", "npm", "yarn", "bun"]}>
   <Tabs.Tab>
     ```sh
-    pnpm add @made-together/ui
+    pnpm add @togetheragency/ui
     ```
   </Tabs.Tab>
   <Tabs.Tab>
     ```sh
-    npm install @made-together/ui
+    npm install @togetheragency/ui
     ```
   </Tabs.Tab>
   <Tabs.Tab>
     ```sh
-    yarn add @made-together/ui
+    yarn add @togetheragency/ui
     ```
   </Tabs.Tab>
   <Tabs.Tab>
     ```sh
-    bun add @made-together/ui
+    bun add @togetheragency/ui
     ```
   </Tabs.Tab>
 </Tabs>
 
 ## Peer dependencies
 
-`@made-together/ui` ships components as raw source and relies on your app to
+`@togetheragency/ui` ships components as raw source and relies on your app to
 provide the runtime. Make sure the following are installed:
 
 ```sh
@@ -64,16 +64,16 @@ defaults. If you haven't set Tailwind up yet, follow the
 Components are exported per-name. Import them directly from their subpath:
 
 ```tsx
-import { Carousel } from "@made-together/ui/carousel";
-import { Marquee } from "@made-together/ui/marquee";
-import { Tabs } from "@made-together/ui/tabs";
+import { Carousel } from "@togetheragency/ui/carousel";
+import { Marquee } from "@togetheragency/ui/marquee";
+import { Tabs } from "@togetheragency/ui/tabs";
 ```
 
 Subpath imports keep your bundle tree-shakeable — you only pay for what you
 use.
 
 <Callout type="info">
-  **React only components** `@made-together/ui` is plug-and-play for React
+  **React only components** `@togetheragency/ui` is plug-and-play for React
   apps only. Many components rely on hooks, refs, and browser APIs, so they
   ship with the `"use client"` directive. In a React Server Components setup
   (Next.js App Router, etc.), import them from a client component or accept

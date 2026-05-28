@@ -26,7 +26,7 @@ currencies, percentages, compact notations, and locales work out of the box.
 <ComponentShowcase preview={<BasicNumberFlowExample />}>
 
 ```tsx
-import { NumberFlow } from "@made-together/ui/number-flow";
+import { NumberFlow } from "@togetheragency/ui/number-flow";
 
 export function Counter({ value }: { value: number }) {
   return <NumberFlow.Root value={value} />;
@@ -38,7 +38,7 @@ export function Counter({ value }: { value: number }) {
 ## Import
 
 ```tsx
-import { NumberFlow } from "@made-together/ui/number-flow";
+import { NumberFlow } from "@togetheragency/ui/number-flow";
 ```
 
 The component is exported as a compound object:
@@ -55,7 +55,7 @@ import {
   useCanAnimate,
   useIsSupported,
   usePrefersReducedMotion,
-} from "@made-together/ui/number-flow";
+} from "@togetheragency/ui/number-flow";
 ```
 
 ## Composition
@@ -134,7 +134,7 @@ feel. It has no effect when `trend` is `0`.
 <ComponentShowcase preview={<ContinuousNumberFlowExample />}>
 
 ```tsx
-import { NumberFlow } from "@made-together/ui/number-flow";
+import { NumberFlow } from "@togetheragency/ui/number-flow";
 import { continuous } from "@number-flow/react";
 
 <NumberFlow.Root value={value} plugins={[continuous]} />;
@@ -253,7 +253,7 @@ import {
   useCanAnimate,
   useIsSupported,
   usePrefersReducedMotion,
-} from "@made-together/ui/number-flow";
+} from "@togetheragency/ui/number-flow";
 ```
 
 - `useCanAnimate({ respectMotionPreference? })` — `true` when the browser
@@ -281,5 +281,5 @@ Inherited from `@number-flow/react`:
 import type {
   NumberFlowGroupProps,
   NumberFlowRootProps,
-} from "@made-together/ui/number-flow";
+} from "@togetheragency/ui/number-flow";
 ```
