@@ -34,4 +34,4 @@
 - [x] Setup npm release via CI
 - [ ] Implement skills for agents
 - [x] Add an MIT license
-- [ ] Add a CONTRIBUTING.md file
+- [x] Add a CONTRIBUTING.md file
