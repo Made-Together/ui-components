@@ -2,7 +2,7 @@ import type { SVGProps } from "react";
 
 interface Props extends SVGProps<SVGSVGElement> {}
 
-function Logo({ style, className,...props }: Props) {
+function Logo({ style, className, ...props }: Props) {
   return (
     <svg
       className={className}

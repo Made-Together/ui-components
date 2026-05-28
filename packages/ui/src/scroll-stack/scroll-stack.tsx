@@ -257,10 +257,7 @@ const Viewport = forwardRef<HTMLDivElement, ScrollStackViewportProps>(
 type ScrollStackItemProps = HTMLMotionProps<"div">;
 
 const Item = forwardRef<HTMLDivElement, ScrollStackItemProps>(
-  function ScrollStackItem(
-    { className, children, style, ...rest },
-    ref,
-  ) {
+  function ScrollStackItem({ className, children, style, ...rest }, ref) {
     const root = useScrollStack("ScrollStack.Item");
     const id = useId();
     const itemRef = useRef<HTMLDivElement | null>(null);
