@@ -104,7 +104,7 @@ Before pushing, run the standard checks. CI will run these as well, so it's fast
 
 ```sh
 pnpm check        # Biome lint + format check
-pnpm format       # auto-fix formatting
+pnpm format       # auto-fix formatting, via Biome
 pnpm check-types  # tsc --noEmit across all workspaces
 ```
 
