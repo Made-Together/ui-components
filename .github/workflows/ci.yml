@@ -33,14 +33,14 @@ jobs:
       - name: Lint
         run: pnpm lint
 
-      - name: Type-check
-        run: pnpm check-types
+      - name: Build
+        run: pnpm build
 
       - name: Test
         run: pnpm test
 
-      - name: Build
-        run: pnpm build
+      - name: Type-check
+        run: pnpm check-types
 
       - name: Changeset status
         run: pnpm exec changeset status --since=origin/main
