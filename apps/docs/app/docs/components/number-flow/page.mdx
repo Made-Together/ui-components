@@ -8,6 +8,7 @@ description:
 import { Callout } from "nextra/components";
 import { ComponentShowcase } from "../../../components/component-showcase";
 import {
+  AnimateInViewNumberFlowExample,
   BasicNumberFlowExample,
   CompactNumberFlowExample,
   ContinuousNumberFlowExample,
@@ -125,22 +126,63 @@ you want movement without implying a positive or negative change.
 
 </ComponentShowcase>
 
-### Continuous plugin
+### Continuous plugin (default)
 
-The `continuous` plugin (re-exported from `@number-flow/react`) makes digit
-transitions pass through every intermediate value, producing a slot-machine
+The `continuous` plugin is applied by default, so digit transitions pass
+through every intermediate value out of the box — producing a slot-machine
 feel. It has no effect when `trend` is `0`.
+
+To opt out, pass an empty `plugins` array. To extend, pass your own list
+(re-import `continuous` if you still want it):
 
 <ComponentShowcase preview={<ContinuousNumberFlowExample />}>
 
 ```tsx
-import { NumberFlow } from "@togetheragency/ui/number-flow";
-import { continuous } from "@number-flow/react";
+import { continuous, NumberFlow } from "@togetheragency/ui/number-flow";
 
-<NumberFlow.Root value={value} plugins={[continuous]} />;
+// Default — continuous is applied automatically.
+<NumberFlow.Root value={value} />
+
+// Opt out.
+<NumberFlow.Root value={value} plugins={[]} />
+
+// Explicit (equivalent to the default).
+<NumberFlow.Root value={value} plugins={[continuous]} />
 ```
 
 </ComponentShowcase>
+
+### Animate when scrolled into view
+
+Set `animateInView` to defer the animation until the element enters the
+viewport. The component renders `0` until it intersects, then animates to
+`value`. Pass `true` for sensible defaults or an options object to customize
+the `IntersectionObserver` and react to entries.
+
+<ComponentShowcase preview={<AnimateInViewNumberFlowExample />}>
+
+```tsx
+// Shorthand — defaults to `once: true`, observes the viewport.
+<NumberFlow.Root value={1_234_567} animateInView />
+
+// Full options.
+<NumberFlow.Root
+  value={1_234_567}
+  animateInView={{
+    enabled: true,
+    once: true,
+    root: scrollContainer,
+    rootMargin: "0px",
+    threshold: 0.5,
+    onIntersect: (entry) => console.log("in view", entry),
+  }}
+/>
+```
+
+</ComponentShowcase>
+
+When enabled, `NumberFlow.Root` exposes the observed state via the
+`data-in-view` attribute, which you can target from CSS.
 
 ### Synchronized group
 
@@ -202,7 +244,8 @@ Renders the animated number. Forwards its ref to the underlying
 | `opacityTiming`           | `EffectTiming`                                                                | library default                      | Timing for character fade-in / fade-out.                                                                                                             |
 | `digits`                  | `Record<number, { max?: number }>`                                            | —                                    | Per-position digit configuration (e.g. cap a digit at `5` for the tens place of a clock). Not reactive — set once.                                  |
 | `respectMotionPreference` | `boolean`                                                                     | `true`                               | Honor `prefers-reduced-motion: reduce`.                                                                                                              |
-| `plugins`                 | `Plugin[]`                                                                    | —                                    | Plugins from `@number-flow/react`. Currently only `continuous`.                                                                                      |
+| `plugins`                 | `Plugin[]`                                                                    | `[continuous]`                       | Plugins from `@number-flow/react`. `continuous` is applied by default; pass `[]` to opt out or your own list to override.                            |
+| `animateInView`           | `boolean \| AnimateInViewOptions`                                             | `false`                              | When enabled, displays `0` until the element scrolls into view, then animates to `value`. See [Animate when scrolled into view](#animate-when-scrolled-into-view). |
 | `willChange`              | `boolean`                                                                     | `false`                              | Apply `will-change` hints to internals. Useful for high-frequency updates; costs memory.                                                              |
 | `nonce`                   | `string`                                                                      | —                                    | CSP nonce forwarded to NumberFlow's inline `<style>` blocks during SSR/hydration.                                                                    |
 | `onAnimationsStart`       | `(e: CustomEvent<undefined>) => void`                                         | —                                    | Fires when an update animation begins. Distinct from the DOM `onAnimationStart`.                                                                     |
@@ -210,7 +253,19 @@ Renders the animated number. Forwards its ref to the underlying
 | `className`               | `string`                                                                      | —                                    | Merged via `cn` onto the underlying custom element.                                                                                                  |
 | `...rest`                 | `React.HTMLAttributes<NumberFlowElement>`                                     | —                                    | Forwarded to the underlying custom element.                                                                                                          |
 
-Data attributes: `data-slot="number-flow-root"`.
+Data attributes: `data-slot="number-flow-root"`, plus `data-in-view`
+(`"true" | "false"`) when `animateInView` is enabled.
+
+#### `AnimateInViewOptions`
+
+| Option        | Type                                            | Default  | Description                                                                                |
+| ------------- | ----------------------------------------------- | -------- | ------------------------------------------------------------------------------------------ |
+| `enabled`     | `boolean`                                       | —        | Toggles the behavior. Required when passing the options form.                              |
+| `once`        | `boolean`                                       | `true`   | Disconnect after the first intersection. Set `false` to re-animate every time it re-enters. |
+| `onIntersect` | `(entry: IntersectionObserverEntry) => void`    | —        | Fires on each intersection. Stable across renders — inline callbacks are fine.             |
+| `root`        | `Element \| Document \| null`                   | viewport | `IntersectionObserver` root. Use to scope to a scroll container.                            |
+| `rootMargin`  | `string`                                        | `"0px"`  | `IntersectionObserver` rootMargin.                                                          |
+| `threshold`   | `number \| number[]`                            | `0`      | `IntersectionObserver` threshold.                                                           |
 
 ### NumberFlow.Group
 
@@ -279,6 +334,7 @@ Inherited from `@number-flow/react`:
 
 ```ts
 import type {
+  AnimateInViewOptions,
   NumberFlowGroupProps,
   NumberFlowRootProps,
 } from "@togetheragency/ui/number-flow";
