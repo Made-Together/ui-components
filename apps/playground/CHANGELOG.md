@@ -1,5 +1,12 @@
 # playground
 
+## 0.1.6
+
+### Patch Changes
+
+- Updated dependencies
+  - @togetheragency/ui@0.3.2
+
 ## 0.1.5
 
 ### Patch Changes

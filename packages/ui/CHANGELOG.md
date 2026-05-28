@@ -1,5 +1,11 @@
 # @repo/ui
 
+## 0.3.2
+
+### Patch Changes
+
+- Improved bundle size by using `<LazyMotion />`. Refactored inner component functionalities for better performance.
+
 ## 0.3.1
 
 ### Patch Changes
