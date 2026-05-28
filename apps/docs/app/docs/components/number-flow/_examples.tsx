@@ -1,6 +1,6 @@
 "use client";
 
-import { continuous, NumberFlow } from "@togetheragency/ui/number-flow";
+import { NumberFlow } from "@togetheragency/ui/number-flow";
 import { useEffect, useState } from "react";
 
 function useTicker(values: readonly number[], intervalMs = 2000) {
@@ -60,8 +60,51 @@ export function TrendNumberFlowExample() {
 export function ContinuousNumberFlowExample() {
   const value = useTicker([120, 480, 32, 999]);
   return (
-    <div className={showcaseClassName}>
-      <NumberFlow.Root value={value} plugins={[continuous]} />
+    <div className={`${showcaseClassName} gap-8`}>
+      <NumberFlow.Root value={value} />
+      <NumberFlow.Root value={value} plugins={[]} />
+    </div>
+  );
+}
+
+export function AnimateInViewNumberFlowExample() {
+  const [scroller, setScroller] = useState<HTMLDivElement | null>(null);
+  const [key, setKey] = useState(0);
+
+  return (
+    <div className="flex flex-col items-stretch gap-3">
+      <div className="flex items-center justify-between text-sm text-muted-foreground">
+        <span>Scroll the panel to trigger the animation.</span>
+        <button
+          type="button"
+          onClick={() => setKey((k) => k + 1)}
+          className="rounded-md border border-border px-3 py-1 text-foreground hover:bg-muted"
+        >
+          Replay
+        </button>
+      </div>
+      <div
+        ref={setScroller}
+        className="h-64 overflow-y-auto rounded-2xl border border-border bg-background"
+      >
+        <div className="flex h-64 items-center justify-center text-sm text-muted-foreground">
+          ↓ Keep scrolling ↓
+        </div>
+        <div className="flex h-64 items-center justify-center text-5xl font-semibold tabular-nums">
+          <NumberFlow.Root
+            key={key}
+            value={1_234_567}
+            animateInView={{
+              enabled: true,
+              root: scroller,
+              threshold: 0.5,
+            }}
+          />
+        </div>
+        <div className="flex h-64 items-center justify-center text-sm text-muted-foreground">
+          ↑ Scroll back up ↑
+        </div>
+      </div>
     </div>
   );
 }
