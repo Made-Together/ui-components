@@ -7,7 +7,7 @@ const meta: MetaRecord = {
   components: {
     title: "Components",
     theme: {
-      collapsed: true,
+      collapsed: false,
     },
   },
   changelog: "Changelog",
