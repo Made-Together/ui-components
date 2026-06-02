@@ -1,8 +1,140 @@
 ---
 description:
-  Give your AI assistant deep knowledge of @together/ui components, patterns, and best practices.
+  Give your AI assistant deep knowledge of @togetheragency/ui components,
+  composition patterns, and motion conventions.
 ---
+
+import { Tabs } from "nextra/components";
 
 # Skills
 
-Give your AI assistant deep knowledge of @together/ui components, patterns, and best practices.
+Skills give AI assistants like Claude Code project-aware context about
+`@togetheragency/ui`. Once installed, your assistant knows how to import,
+compose, and customize every component in this library using the correct
+APIs, `data-*` hooks, and motion conventions — not generic React patterns it
+inferred from training data.
+
+For example, you can ask your AI assistant to:
+
+- _"Add an FAQ section with six questions."_
+- _"Build a logo marquee that pauses on hover."_
+- _"Create a hero with text reveal on scroll inside a stacked card layout."_
+- _"Wire up animated stats with NumberFlow for our pricing page."_
+- _"Add a tabbed feature section with autoplay and a progress indicator."_
+
+The skill loads the library's principles (headless first, motion-only, override
+via `className` and `data-*`) and routes the assistant to a per-component rule
+file before it writes any non-trivial usage — so you get correct composition
+on the first try.
+
+---
+
+## Install
+
+The skill lives in this repository under `skills/togetheragency-ui/`. Drop it
+into the location your AI assistant reads skills from.
+
+<Tabs items={["pnpm", "npm", "yarn", "bun"]}>
+  <Tabs.Tab>
+    ```sh
+    pnpm dlx skills add togetheragency-ui
+    ```
+  </Tabs.Tab>
+  <Tabs.Tab>
+    ```sh
+    npx skills add togetheragency-ui
+    ```
+  </Tabs.Tab>
+  <Tabs.Tab>
+    ```sh
+    yarn dlx skills add togetheragency-ui
+    ```
+  </Tabs.Tab>
+  <Tabs.Tab>
+    ```sh
+    bunx --bun skills add togetheragency-ui
+    ```
+  </Tabs.Tab>
+</Tabs>
+
+This installs the togetheragency-ui skill into your project. Once installed, your AI assistant automatically loads it when working with @togetheragency/ui components.
+
+Learn more about skills at [skills.sh](https://skills.sh).
+
+---
+
+## What's included
+
+The skill provides your AI assistant with the following knowledge:
+
+### Library principles
+
+The non-negotiables: headless by default, Tailwind-only when styling, `motion`
+as the only animation library, `prefers-reduced-motion` respected, semantic
+HTML and ARIA preserved, controlled and uncontrolled usage supported,
+`forwardRef` everywhere, and `className` merged so consumer classes always
+win.
+
+### Composition patterns
+
+The shared idioms used across every component:
+
+- Compound components with a strict child tree (`Accordion.Root` → `Item` →
+  `Trigger` / `Panel`, etc.)
+- Controlled vs uncontrolled state APIs
+- `data-state`, `data-orientation`, `data-slot`, `data-phase` styling hooks
+- CSS custom properties as the public knobs (`--duration`, `--gap`,
+  `--tabs-autoplay-duration`, `--number-flow-mask-height`, …)
+- Render-prop and slot patterns for per-state customization
+- Sizing requirements for `Carousel.Viewport`, `ScrollStack.Viewport`,
+  `TextReveal.Root`, and vertical `Marquee.Root`
+
+### Per-component rule files
+
+A deep guide for each primitive — full prop surface, exact child tree,
+`data-*` attributes, CSS variable knobs, common pitfalls, and copy-paste
+examples:
+
+- [`rules/accordion.md`](https://github.com/made-together/ui-components/blob/main/skills/togetheragency-ui/rules/accordion.md)
+- [`rules/carousel.md`](https://github.com/made-together/ui-components/blob/main/skills/togetheragency-ui/rules/carousel.md)
+- [`rules/marquee.md`](https://github.com/made-together/ui-components/blob/main/skills/togetheragency-ui/rules/marquee.md)
+- [`rules/tabs.md`](https://github.com/made-together/ui-components/blob/main/skills/togetheragency-ui/rules/tabs.md)
+- [`rules/scroll-stack.md`](https://github.com/made-together/ui-components/blob/main/skills/togetheragency-ui/rules/scroll-stack.md)
+- [`rules/text-reveal.md`](https://github.com/made-together/ui-components/blob/main/skills/togetheragency-ui/rules/text-reveal.md)
+- [`rules/ticker.md`](https://github.com/made-together/ui-components/blob/main/skills/togetheragency-ui/rules/ticker.md)
+- [`rules/type-ahead.md`](https://github.com/made-together/ui-components/blob/main/skills/togetheragency-ui/rules/type-ahead.md)
+- [`rules/number-flow.md`](https://github.com/made-together/ui-components/blob/main/skills/togetheragency-ui/rules/number-flow.md)
+- [`rules/swappable.md`](https://github.com/made-together/ui-components/blob/main/skills/togetheragency-ui/rules/swappable.md)
+
+### Component selection guidance
+
+A decision table that maps user intent to the right primitive — and explicit
+disambiguation between similar components (Marquee vs Ticker, Marquee vs
+Swappable, Carousel vs Tabs, ScrollStack vs TextReveal) so the assistant
+doesn't pick the wrong tool when two could superficially fit.
+
+---
+
+## How it works
+
+1. **Activation** — Your agent loads the skill when the user's request
+   matches the trigger description (FAQs, carousels, marquees, scroll-driven
+   reveals, animated counters, etc.) or when `@togetheragency/ui` is named
+   explicitly.
+2. **Principles first** — The agent reads `SKILL.md` to internalize the
+   library's non-negotiables (headless, motion-only, override via
+   `className` / `data-*`) before writing any code.
+3. **Rule file lookup** — Before non-trivial usage of any component, the
+   agent reads the matching `rules/<component>.md` to get the exact child
+   tree, prop surface, `data-*` hooks, and CSS variable knobs.
+4. **Correct composition** — Output uses the documented subpath imports
+   (`@togetheragency/ui/<component>`), namespaced compound parts
+   (`Accordion.Root`, `Carousel.Slide`), and styles state via
+   `data-[state=…]` rather than internal class names.
+
+## Learn more
+
+- [Installation](/docs/installation) — Adding the package to your project
+- [Components](/docs/components) — Browse the full component reference
+- [GitHub repository](https://github.com/made-together/ui-components) — Source
+  and skill files

@@ -1,0 +1,78 @@
+---
+description:
+  Browse every component in @togetheragency/ui — headless, accessible,
+  motion-aware React primitives shipped as raw source.
+asIndexPage: true
+---
+
+# Components
+
+`@togetheragency/ui` is a collection of headless, accessible, motion-aware
+React primitives. Components ship as raw `.tsx` source — your app transpiles
+them directly, with no build step in between. Defaults are minimal and
+everything is override-friendly via `className`, `data-*` hooks, CSS custom
+properties, and render-prop slots.
+
+Every component is imported from its own subpath:
+
+```tsx
+import { Accordion } from "@togetheragency/ui/accordion";
+```
+
+## All components
+
+| Component                                | Use it for                                                                |
+| ---------------------------------------- | ------------------------------------------------------------------------- |
+| [Accordion](/docs/components/accordion)         | FAQs, disclosures, collapsible sections — WAI-ARIA accordion pattern.     |
+| [Carousel](/docs/components/carousel)           | Drag/swipe/snap content sliders, galleries, testimonial sliders.          |
+| [Marquee](/docs/components/marquee)             | Infinite scrolling rows or columns of logos, badges, or chips.            |
+| [NumberFlow](/docs/components/number-flow)      | Animated numeric counters, currency, percent, compact notation.           |
+| [ScrollStack](/docs/components/scroll-stack)    | Sticky pinned card stacks, layered scroll-driven hero sections.           |
+| [Swappable](/docs/components/swappable)         | Randomly rotating logo grids, portfolio swap, partner showcases.          |
+| [Tabs](/docs/components/tabs)                   | Segmented controls and content tabs with optional autoplay and progress.  |
+| [TextReveal](/docs/components/text-reveal)      | Word-by-word reveal on scroll or programmatic progress.                   |
+| [Ticker](/docs/components/ticker)               | Single overflowing line of text that scrolls back-and-forth with fades.   |
+| [TypeAhead](/docs/components/type-ahead)        | Typewriter effects and cycling animated phrases inline.                   |
+
+## Distinguishing similar components
+
+- **Marquee vs Ticker** — Marquee is a one-direction infinite loop of *many
+  items*. Ticker is a back-and-forth scroll of *one string* that only runs
+  when it overflows its container.
+- **Marquee vs Swappable** — Marquee scrolls items past a fixed window.
+  Swappable keeps items in place and randomly swaps a few of them.
+- **Carousel vs Tabs** — Carousel is for drag/swipe/snap content navigation.
+  Tabs is for discrete labelled sections with full keyboard semantics.
+- **ScrollStack vs TextReveal** — ScrollStack pins cards as you scroll.
+  TextReveal reveals words. They compose well together (TextReveal inside a
+  `ScrollStack.Item`).
+
+## Shared conventions
+
+Every component follows the same idioms — learn them once and the whole
+library becomes predictable:
+
+- **Compound parts.** Each component exports a `Root` plus a strict tree of
+  child parts (`Accordion.Root` → `Item` → `Trigger` / `Panel`). Always
+  namespace them; don't destructure.
+- **Controlled and uncontrolled.** Where state applies (`Accordion`, `Tabs`,
+  `TextReveal`), pass `defaultValue` or `value` + `onValueChange`.
+- **`data-*` styling hooks.** State is exposed through `data-state`,
+  `data-orientation`, `data-slot`, `data-phase`, `data-disabled`. Drive
+  transitions from these rather than internal class names.
+- **CSS variables as public knobs.** Tune behavior with arbitrary Tailwind
+  values — `[--duration:20s]`, `[--gap:2rem]`,
+  `[--tabs-autoplay-duration:6s]`, `[--number-flow-mask-height:1em]`.
+- **`forwardRef` + native props.** Every composite extends the underlying
+  element's props — pass `onClick`, `aria-*`, `style`, `id`, `data-*` and
+  they forward to the rendered DOM element.
+- **`motion` only.** All animations use `motion ^12`. Reduced-motion is
+  respected automatically.
+
+## Learn more
+
+- [Installation](/docs/installation) — Add the package and peer dependencies.
+- [Skills](/docs/skills) — Give your AI assistant deep knowledge of this
+  library.
+- [GitHub repository](https://github.com/made-together/ui-components) — Source
+  and issue tracker.
