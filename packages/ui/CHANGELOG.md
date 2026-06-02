@@ -1,5 +1,12 @@
 # @repo/ui
 
+## 0.3.3
+
+### Patch Changes
+
+- 0c80b29: Updated default behaviour of <NumberFlow /> component; it now uses 'continuous' plugin by default. It also now accepts a new prop called 'animateInView' which allows you to animate the number when it is in view.
+- 2ed2169: Added SKILLS.md guidelines for the repo; included rules for all components.
+
 ## 0.3.2
 
 ### Patch Changes
