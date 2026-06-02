@@ -1,5 +1,13 @@
 # docs
 
+## 0.1.7
+
+### Patch Changes
+
+- Updated dependencies [0c80b29]
+- Updated dependencies [2ed2169]
+  - @togetheragency/ui@0.3.3
+
 ## 0.1.6
 
 ### Patch Changes
