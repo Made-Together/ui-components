@@ -56,7 +56,7 @@ export default async function RootLayout({
           // banner={banner}
           navbar={navbar}
           pageMap={await getPageMap()}
-          sidebar={{ autoCollapse: true }}
+          sidebar={{ autoCollapse: true, defaultMenuCollapseLevel: 3 }}
           docsRepositoryBase="https://github.com/made-together/ui-components/tree/main/apps/docs"
           // ... Additional layout options
         >
