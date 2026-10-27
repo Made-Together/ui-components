@@ -69,10 +69,10 @@
   "devDependencies": {
     "@biomejs/biome": "^2.4.15",
     "@size-limit/preset-small-lib": "^12.1.0",
-    "@togetheragency/typescript-config": "workspace:*",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",
     "@testing-library/user-event": "^14.6.1",
+    "@togetheragency/typescript-config": "workspace:*",
     "@types/node": "^22.15.3",
     "@types/react": "19.2.2",
     "@types/react-dom": "19.2.2",
@@ -83,6 +83,7 @@
     "tsdown": "^0.22.0",
     "typescript": "^6.0.0",
     "unrun": "^0.3.0",
+    "vite": "^8.1.6",
     "vitest": "^4.1.6"
   },
   "size-limit": [
