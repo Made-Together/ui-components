@@ -9,3 +9,7 @@ updates:
     directory: "/" # Location of package manifests
     schedule:
       interval: "weekly"
+    ignore:
+      # v2 requires @changesets/cli v3; bump together with the CLI.
+      - dependency-name: "changesets/action"
+        update-types: ["version-update:semver-major"]

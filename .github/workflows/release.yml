@@ -50,7 +50,7 @@ jobs:
 
       - name: Create release PR or publish to npm
         id: changesets
-        uses: changesets/action@v2
+        uses: changesets/action@v1
         with:
           publish: pnpm release
           commit: "chore: version packages"
