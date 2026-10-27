@@ -8,7 +8,7 @@
     "dev": "next dev --port 3001",
     "prebuild": "pnpm generate:changelog",
     "build": "next build",
-    "postbuild": "pagefind --site .next/server/app --output-path public/_pagefind",
+    "postbuild": "node ./scripts/build-search-index.mjs",
     "generate:changelog": "node ./scripts/generate-changelog.mjs",
     "start": "next start",
     "lint": "biome check .",
