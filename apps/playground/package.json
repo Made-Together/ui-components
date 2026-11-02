@@ -13,7 +13,7 @@
   "dependencies": {
     "@togetheragency/ui": "workspace:*",
     "@tailwindcss/postcss": "^4.3.0",
-    "next": "16.2.0",
+    "next": "^16.4.1",
     "postcss": "^8.5.14",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
